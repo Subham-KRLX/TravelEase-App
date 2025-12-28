@@ -1,11 +1,11 @@
-import { 
-  View, 
-  Text, 
-  ScrollView, 
-  StyleSheet, 
-  Image, 
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Image,
   TouchableOpacity,
-  Dimensions 
+  Dimensions
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -90,38 +90,46 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Hero Section */}
-        <View style={styles.hero}>
-          <Image
-            source={{ uri: 'https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg?auto=compress&cs=tinysrgb&w=1600' }}
-            style={styles.heroImage}
-          />
-          <View style={styles.heroOverlay} />
-          <View style={styles.heroContent}>
-            <Text style={styles.heroTitle}>
-              Your Journey Begins with{'\n'}
-              <Text style={styles.heroHighlight}>TravelEase</Text>
-            </Text>
-            <Text style={styles.heroSubtitle}>
-              Discover amazing destinations, book flights and hotels with ease
-            </Text>
+      {/* Hero Section - Modern Design */}
+      <View style={styles.heroContainer}>
+        <Image
+          source={{ uri: 'https://images.unsplash.com/photo-1488085061387-422e29b40080?w=1600' }}
+          style={styles.heroImage}
+        />
+        <View style={[styles.heroOverlay, { backgroundColor: theme.isDarkMode ? 'rgba(12, 10, 9, 0.7)' : 'rgba(251, 191, 36, 0.4)' }]} />
+        <View style={styles.heroContent}>
+          <View style={styles.heroBadge}>
+            <Ionicons name="checkmark-circle" size={16} color={theme.primary} />
+            <Text style={[styles.heroBadgeText, { color: theme.primary }]}>#1 Travel App in India</Text>
           </View>
+          <Text style={styles.heroTitle}>
+            Explore the{'\n'}
+            <Text style={[styles.heroHighlight, { color: theme.primary }]}>World 🌍</Text>
+          </Text>
+          <Text style={[styles.heroSubtitle, { color: theme.isDarkMode ? '#fafaf9' : '#78350f' }]}>
+            Book smarter, travel better with exclusive deals
+          </Text>
+          <TouchableOpacity style={[styles.heroButton, { backgroundColor: theme.primary }]} onPress={() => navigation.navigate('SearchResults')}>
+            <Text style={styles.heroButtonText}>Start Exploring</Text>
+            <Ionicons name="arrow-forward-circle" size={20} color="#fff" />
+          </TouchableOpacity>
         </View>
+      </View>
 
       {/* Search Bar */}
       <SearchBar />
 
-      {/* Features Section */}
+      {/* Features Section - Floating Cards */}
       <View style={styles.section}>
         <View style={styles.featuresGrid}>
           {features.map((feature, index) => (
-            <View key={index} style={[styles.featureCard, { backgroundColor: theme.backgroundSecondary }]}>
-              <View style={styles.featureIcon}>
-                <Ionicons name={feature.icon} size={32} color={theme.primary} />
+            <TouchableOpacity key={index} style={[styles.featureCard, { backgroundColor: theme.card, borderColor: theme.primary, shadowColor: theme.primary }]} activeOpacity={0.8}>
+              <View style={[styles.featureIconContainer, { backgroundColor: theme.primary + '20' }]}>
+                <Ionicons name={feature.icon} size={28} color={theme.primary} />
               </View>
               <Text style={[styles.featureTitle, { color: theme.text }]}>{feature.title}</Text>
               <Text style={[styles.featureDescription, { color: theme.textSecondary }]}>{feature.description}</Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       </View>
@@ -134,7 +142,7 @@ export default function HomeScreen() {
             Everything you need for your perfect trip
           </Text>
         </View>
-        
+
         <View style={styles.servicesGrid}>
           {services.map((service, index) => (
             <TouchableOpacity
@@ -161,7 +169,7 @@ export default function HomeScreen() {
             Explore the world's most amazing places
           </Text>
         </View>
-        
+
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.destinationsScroll}>
           {destinations.map(destination => (
             <TouchableOpacity
@@ -197,13 +205,13 @@ export default function HomeScreen() {
           Join millions of travelers who trust TravelEase for their journeys
         </Text>
         <View style={styles.ctaButtons}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.ctaButton}
             onPress={() => navigation.navigate('SearchResults')}
           >
             <Text style={styles.ctaButtonText}>Start Planning</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.ctaButtonSecondary}
             onPress={() => navigation.navigate('SignUp')}
           >
@@ -220,8 +228,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  hero: {
-    height: 300,
+  heroContainer: {
+    height: 380,
     position: 'relative',
   },
   heroImage: {
@@ -240,23 +248,62 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
+  },
+  heroBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginBottom: 20,
+  },
+  heroBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   heroTitle: {
-    fontSize: 28,
+    fontSize: 42,
     fontWeight: 'bold',
     color: '#fff',
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 10,
   },
   heroHighlight: {
-    color: '#60a5fa',
+    fontSize: 48,
   },
   heroSubtitle: {
-    fontSize: 16,
+    fontSize: 17,
     color: '#fff',
     textAlign: 'center',
-    opacity: 0.9,
+    opacity: 0.95,
+    marginBottom: 28,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 5,
+  },
+  heroButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 30,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  heroButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   section: {
     paddingVertical: 24,
@@ -279,21 +326,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    marginTop: -60,
   },
   featureCard: {
     width: '48%',
-    backgroundColor: '#f8fafc',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 20,
+    marginBottom: 16,
     alignItems: 'center',
+    borderWidth: 2,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
   },
-  featureIcon: {
-    marginBottom: 12,
+  featureIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 14,
   },
   featureTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#1e293b',
     marginBottom: 8,
     textAlign: 'center',
@@ -302,6 +361,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#64748b',
     textAlign: 'center',
+    lineHeight: 18,
   },
   servicesGrid: {
     gap: 12,

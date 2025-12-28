@@ -12,117 +12,123 @@ export const useTheme = () => {
 };
 
 export const lightTheme = {
-  // Background colors
-  background: '#ffffff',
-  backgroundSecondary: '#f8fafc',
-  backgroundTertiary: '#f1f5f9',
-  backgroundGradient: ['#ffffff', '#f8fafc'],
+  // TROPICAL BEACH THEME - Bright, sunny, vacation vibes
+  background: '#fffbeb',
+  backgroundSecondary: '#fef3c7',
+  backgroundTertiary: '#fde68a',
+  backgroundGradient: ['#fef3c7', '#fed7aa', '#fecaca'],
 
-  // Text colors
-  text: '#0f172a',
-  textSecondary: '#475569',
-  textTertiary: '#94a3b8',
+  // Text colors - Warm and inviting
+  text: '#78350f',
+  textSecondary: '#92400e',
+  textTertiary: '#d97706',
 
-  // Primary colors & gradients
-  primary: '#2563eb',
-  primaryDark: '#1e40af',
-  primaryLight: '#dbeafe',
-  primaryGradient: ['#3b82f6', '#2563eb'],
+  // Primary - Tropical sunset
+  primary: '#f59e0b',
+  primaryDark: '#d97706',
+  primaryLight: '#fbbf24',
+  primaryGradient: ['#fbbf24', '#f97316', '#ec4899'],
 
-  // Accent colors
-  accent: '#8b5cf6',
-  accentGradient: ['#a78bfa', '#8b5cf6'],
+  // Accent - Ocean breeze
+  accent: '#06b6d4',
+  accentGradient: ['#22d3ee', '#06b6d4', '#0284c7'],
 
-  // Status colors
+  // Status colors - Tropical
   success: '#10b981',
-  successGradient: ['#34d399', '#10b981'],
+  successGradient: ['#34d399', '#10b981', '#059669'],
   warning: '#f59e0b',
-  warningGradient: ['#fbbf24', '#f59e0b'],
-  danger: '#ef4444',
-  dangerGradient: ['#f87171', '#ef4444'],
+  warningGradient: ['#fbbf24', '#f59e0b', '#d97706'],
+  danger: '#dc2626',
+  dangerGradient: ['#ef4444', '#dc2626', '#b91c1c'],
 
-  // Border colors
-  border: '#e2e8f0',
-  borderLight: '#f1f5f9',
-  borderDark: '#cbd5e1',
+  // Borders - Warm gold
+  border: '#fed7aa',
+  borderLight: '#fef3c7',
+  borderDark: '#fbbf24',
 
-  // Card colors
+  // Cards - Sunny
   card: '#ffffff',
-  cardSecondary: '#fafbfc',
-  cardShadow: 'rgba(0, 0, 0, 0.08)',
-  cardShadowLarge: 'rgba(0, 0, 0, 0.12)',
+  cardSecondary: '#fffbeb',
+  cardShadow: 'rgba(251, 191, 36, 0.3)',
+  cardShadowLarge: 'rgba(251, 191, 36, 0.5)',
 
-  // Header
-  headerBackground: '#1e40af',
-  headerGradient: ['#2563eb', '#1e40af'],
+  // Header - Sunset gradient
+  headerBackground: '#f97316',
+  headerGradient: ['#fbbf24', '#f97316', '#ec4899'],
   headerText: '#ffffff',
 
-  // Special gradients
-  heroGradient: ['#3b82f6', '#1e40af', '#1e3a8a'],
-  featureGradient: ['#f8fafc', '#ffffff'],
+  // Special - Beach paradise
+  heroGradient: ['#fbbf24', '#f97316', '#ec4899', '#a855f7'],
+  featureGradient: ['#fef3c7', '#fed7aa', '#fbbf24'],
+
+  // Icons - Filled style for light mode
+  iconStyle: 'default', // use default filled icons
 
   // Other
-  overlay: 'rgba(0, 0, 0, 0.5)',
-  overlayLight: 'rgba(0, 0, 0, 0.3)',
-  gold: '#f59e0b',
-  shimmer: '#e2e8f0',
+  overlay: 'rgba(251, 146, 60, 0.6)',
+  overlayLight: 'rgba(251, 146, 60, 0.3)',
+  gold: '#fbbf24',
+  shimmer: '#fde68a',
 };
 
 export const darkTheme = {
-  // Background colors
-  background: '#0f172a',
-  backgroundSecondary: '#1e293b',
-  backgroundTertiary: '#334155',
-  backgroundGradient: ['#0f172a', '#1e293b'],
+  // MIDNIGHT GALAXY THEME - Deep space, neon stars
+  background: '#0c0a09',
+  backgroundSecondary: '#1c1917',
+  backgroundTertiary: '#292524',
+  backgroundGradient: ['#0c0a09', '#1c1917', '#292524'],
 
-  // Text colors
-  text: '#f1f5f9',
-  textSecondary: '#cbd5e1',
-  textTertiary: '#94a3b8',
+  // Text colors - Neon glow
+  text: '#fafaf9',
+  textSecondary: '#e7e5e4',
+  textTertiary: '#a8a29e',
 
-  // Primary colors & gradients
-  primary: '#3b82f6',
-  primaryDark: '#2563eb',
-  primaryLight: '#1e3a8a',
-  primaryGradient: ['#60a5fa', '#3b82f6'],
+  // Primary - Electric purple
+  primary: '#a855f7',
+  primaryDark: '#9333ea',
+  primaryLight: '#c084fc',
+  primaryGradient: ['#a855f7', '#ec4899', '#f43f5e'],
 
-  // Accent colors
-  accent: '#a78bfa',
-  accentGradient: ['#c4b5fd', '#a78bfa'],
+  // Accent - Neon cyan
+  accent: '#22d3ee',
+  accentGradient: ['#67e8f9', '#22d3ee', '#06b6d4'],
 
-  // Status colors
-  success: '#22c55e',
-  successGradient: ['#4ade80', '#22c55e'],
-  warning: '#fbbf24',
-  warningGradient: ['#fcd34d', '#fbbf24'],
+  // Status - Neon signs
+  success: '#4ade80',
+  successGradient: ['#86efac', '#4ade80', '#22c55e'],
+  warning: '#fde047',
+  warningGradient: ['#fef08a', '#fde047', '#facc15'],
   danger: '#f87171',
-  dangerGradient: ['#fca5a5', '#f87171'],
+  dangerGradient: ['#fca5a5', '#f87171', '#ef4444'],
 
-  // Border colors
-  border: '#334155',
-  borderLight: '#1e293b',
-  borderDark: '#475569',
+  // Borders - Glowing
+  border: '#44403c',
+  borderLight: '#57534e',
+  borderDark: '#292524',
 
-  // Card colors
-  card: '#1e293b',
-  cardSecondary: '#334155',
-  cardShadow: 'rgba(0, 0, 0, 0.4)',
-  cardShadowLarge: 'rgba(0, 0, 0, 0.6)',
+  // Cards - Floating in space
+  card: '#1c1917',
+  cardSecondary: '#292524',
+  cardShadow: 'rgba(168, 85, 247, 0.4)',
+  cardShadowLarge: 'rgba(168, 85, 247, 0.6)',
 
-  // Header
-  headerBackground: '#1e293b',
-  headerGradient: ['#334155', '#1e293b'],
-  headerText: '#f1f5f9',
+  // Header - Galaxy gradient
+  headerBackground: '#1c1917',
+  headerGradient: ['#a855f7', '#ec4899', '#f43f5e'],
+  headerText: '#fafaf9',
 
-  // Special gradients
-  heroGradient: ['#1e293b', '#0f172a', '#020617'],
-  featureGradient: ['#1e293b', '#334155'],
+  // Special - Cosmic
+  heroGradient: ['#a855f7', '#ec4899', '#f43f5e', '#fb923c'],
+  featureGradient: ['#1c1917', '#292524', '#44403c'],
+
+  // Icons - Outline style for dark mode
+  iconStyle: 'outline', // use outline icons for dark mode
 
   // Other
-  overlay: 'rgba(0, 0, 0, 0.7)',
-  overlayLight: 'rgba(0, 0, 0, 0.5)',
-  gold: '#fbbf24',
-  shimmer: '#475569',
+  overlay: 'rgba(168, 85, 247, 0.7)',
+  overlayLight: 'rgba(168, 85, 247, 0.5)',
+  gold: '#fde047',
+  shimmer: '#c084fc',
 };
 
 export const ThemeProvider = ({ children }) => {
