@@ -31,10 +31,10 @@ export default function SearchResultsScreen() {
       try {
         if (searchType === 'flights') {
           const params = {
-            origin: route.params?.from,
-            destination: route.params?.to,
-            departureDate: route.params?.departDate,
-            returnDate: route.params?.returnDate,
+            origin: route.params?.from?.trim?.() || '',
+            destination: route.params?.to?.trim?.() || '',
+            departureDate: route.params?.departDate?.trim?.() || '',
+            returnDate: route.params?.returnDate?.trim?.() || '',
             passengers: route.params?.passengers,
             class: 'economy' // Default for now
           };
@@ -48,9 +48,9 @@ export default function SearchResultsScreen() {
           }
         } else if (searchType === 'hotels') {
           const params = {
-            city: route.params?.location,
-            checkIn: route.params?.checkIn,
-            checkOut: route.params?.checkOut,
+            city: route.params?.location?.trim?.() || '',
+            checkIn: route.params?.checkIn?.trim?.() || '',
+            checkOut: route.params?.checkOut?.trim?.() || '',
             guests: route.params?.guests
           };
 
@@ -178,10 +178,10 @@ export default function SearchResultsScreen() {
           <Ionicons name="add-circle" size={20} color={theme.primary} />
           <Text style={[styles.addButtonText, { color: theme.primary }]}>Add to Cart</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.detailsButton, { backgroundColor: theme.primary }]}>
-          <Text style={styles.detailsButtonText}>View Details</Text>
-          <Ionicons name="arrow-forward" size={16} color="#fff" />
-        </TouchableOpacity>
+          <TouchableOpacity style={[styles.detailsButton, { backgroundColor: theme.primary }]}>
+            <Text style={styles.detailsButtonText}>View Details</Text>
+            <Ionicons name="arrow-forward" size={16} color="#fff" />
+          </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -228,7 +228,10 @@ export default function SearchResultsScreen() {
             <Ionicons name="add-circle" size={20} color={theme.primary} />
             <Text style={[styles.addButtonText, { color: theme.primary }]}>Add to Cart</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.detailsButton, { backgroundColor: theme.primary }]}>
+          <TouchableOpacity 
+            style={[styles.detailsButton, { backgroundColor: theme.primary }]}
+            onPress={() => navigation.navigate('HotelDetails', { id: hotel.id })}
+          >
             <Text style={styles.detailsButtonText}>View Details</Text>
             <Ionicons name="arrow-forward" size={16} color="#fff" />
           </TouchableOpacity>
@@ -312,23 +315,44 @@ export default function SearchResultsScreen() {
     );
   }
 
+  if (results.length === 0) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={[styles.header, { backgroundColor: theme.backgroundSecondary, borderBottomColor: theme.border }]}>
+          <Text style={[styles.title, { color: theme.text }]}>
+            No {searchType} found
+          </Text>
+        </View>
+        <View style={styles.emptyContainer}>
+          <Ionicons name="search" size={64} color={theme.textSecondary} />
+          <Text style={[styles.emptyText, { color: theme.textSecondary }]}>No results found for your search</Text>
+          <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>Try adjusting your filters</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={[styles.header, { backgroundColor: theme.backgroundSecondary, borderBottomColor: theme.border }]}>
         <Text style={[styles.title, { color: theme.text }]}>
           {results.length} {searchType} found
         </Text>
       </View>
 
-      <View style={styles.results}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.results}
+        showsVerticalScrollIndicator={true}
+      >
         {results.map(result => {
           if (result.type === 'flight') return renderFlightCard(result);
           if (result.type === 'hotel') return renderHotelCard(result);
           if (result.type === 'package') return renderPackageCard(result);
           return null;
         })}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -336,6 +360,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
+  },
+  scrollView: {
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -360,7 +387,25 @@ const styles = StyleSheet.create({
     color: '#1e293b',
   },
   results: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  emptySubtext: {
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
   },
   card: {
     backgroundColor: '#fff',
