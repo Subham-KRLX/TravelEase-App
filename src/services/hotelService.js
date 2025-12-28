@@ -4,16 +4,23 @@ const hotelService = {
     // Search hotels
     searchHotels: async (params) => {
         try {
+            console.log('Searching hotels with params:', params);
             const response = await api.get('/hotels/search', { params });
+            console.log('Raw response:', response.data);
+            
+            const hotels = response.data.data.hotels;
+            console.log('Extracted hotels count:', hotels?.length || 0);
+            
             return {
                 success: true,
-                hotels: response.data.data.hotels,
+                hotels: hotels || [],
                 results: response.data.results
             };
         } catch (error) {
+            console.error('Hotel service error:', error);
             return {
                 success: false,
-                error: error.response?.data?.message || 'Hotel search failed'
+                error: error.response?.data?.message || error.message || 'Hotel search failed'
             };
         }
     },

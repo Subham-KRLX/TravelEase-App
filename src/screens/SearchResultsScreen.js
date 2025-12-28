@@ -51,14 +51,18 @@ export default function SearchResultsScreen() {
             city: route.params?.location?.trim?.() || '',
             checkIn: route.params?.checkIn?.trim?.() || '',
             checkOut: route.params?.checkOut?.trim?.() || '',
-            guests: route.params?.guests
+            guests: route.params?.guests || '1'
           };
 
+          console.log('Hotel search params:', params);
           const response = await hotelService.searchHotels(params);
-          if (response.success) {
+          console.log('Hotel search response:', response);
+          
+          if (response.success && response.hotels) {
+            console.log('Hotels found:', response.hotels.length);
             setResults(processHotelResults(response.hotels));
           } else {
-            console.error('Hotel search failed:', response.error);
+            console.error('Hotel search failed:', response.error || 'No hotels in response');
             setResults([]);
           }
         } else {
