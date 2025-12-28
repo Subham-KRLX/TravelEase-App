@@ -71,6 +71,9 @@ export default function SearchResultsScreen() {
         }
       } catch (error) {
         console.error('Search error:', error);
+        console.error('Error stack:', error.stack);
+        console.error('Error message:', error.message);
+        setResults([]);
       } finally {
         setLoading(false);
       }
@@ -80,33 +83,57 @@ export default function SearchResultsScreen() {
   }, [searchType, route.params]);
 
   const processFlightResults = (flights) => {
-    return flights.map(flight => ({
-      id: flight._id,
-      type: 'flight',
-      airline: flight.airline.name,
-      from: `${flight.origin.city} (${flight.origin.airportCode})`,
-      to: `${flight.destination.city} (${flight.destination.airportCode})`,
-      departTime: flight.departure.time,
-      arriveTime: flight.arrival.time,
-      duration: flight.duration,
-      price: flight.price.economy,
-      stops: flight.stops === 0 ? 'Non-stop' : `${flight.stops} Stop(s)`,
-      availableSeats: flight.availableSeats.economy
-    }));
+    if (!Array.isArray(flights)) {
+      console.error('Flights is not an array:', flights);
+      return [];
+    }
+    
+    return flights.map(flight => {
+      try {
+        return {
+          id: flight._id,
+          type: 'flight',
+          airline: flight.airline?.name || 'Unknown Airline',
+          from: `${flight.origin?.city || 'Unknown'} (${flight.origin?.airportCode || 'N/A'})`,
+          to: `${flight.destination?.city || 'Unknown'} (${flight.destination?.airportCode || 'N/A'})`,
+          departTime: flight.departure?.time || 'N/A',
+          arriveTime: flight.arrival?.time || 'N/A',
+          duration: flight.duration || 'N/A',
+          price: flight.price?.economy || 0,
+          stops: flight.stops === 0 ? 'Non-stop' : `${flight.stops} Stop(s)`,
+          availableSeats: flight.availableSeats?.economy || 0
+        };
+      } catch (error) {
+        console.error('Error processing flight:', error, flight);
+        return null;
+      }
+    }).filter(f => f !== null);
   };
 
   const processHotelResults = (hotels) => {
-    return hotels.map(hotel => ({
-      id: hotel._id,
-      type: 'hotel',
-      name: hotel.name,
-      location: `${hotel.location.city}, ${hotel.location.country}`,
-      rating: hotel.rating.average,
-      reviews: hotel.rating.count,
-      price: hotel.pricePerNight,
-      image: hotel.images.length > 0 ? hotel.images[0].url : 'https://via.placeholder.com/800x600',
-      description: hotel.description
-    }));
+    if (!Array.isArray(hotels)) {
+      console.error('Hotels is not an array:', hotels);
+      return [];
+    }
+    
+    return hotels.map(hotel => {
+      try {
+        return {
+          id: hotel._id,
+          type: 'hotel',
+          name: hotel.name || 'Unknown Hotel',
+          location: `${hotel.location?.city || 'Unknown'}, ${hotel.location?.country || 'Unknown'}`,
+          rating: hotel.rating?.average || 0,
+          reviews: hotel.rating?.count || 0,
+          price: hotel.pricePerNight || 0,
+          image: hotel.images?.length > 0 ? hotel.images[0].url : 'https://via.placeholder.com/800x600',
+          description: hotel.description || 'No description available'
+        };
+      } catch (error) {
+        console.error('Error processing hotel:', error, hotel);
+        return null;
+      }
+    }).filter(h => h !== null);
   };
 
   const generateMockResults = (type) => {
