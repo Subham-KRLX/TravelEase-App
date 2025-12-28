@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      // Mock login - In real app, you'll make an API call
+      // Mock login - In real app you'll make an API call
       const mockUser = {
         id: 1,
         email: email,

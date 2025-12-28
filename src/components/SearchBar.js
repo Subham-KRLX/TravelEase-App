@@ -1,12 +1,5 @@
 import { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView
-} from 'react-native';
+import {View,Text,TextInput,TouchableOpacity,StyleSheet,ScrollView} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
@@ -68,6 +61,7 @@ export default function SearchBar({ type = 'flights' }) {
             placeholderTextColor={theme.textTertiary}
             value={searchData.to}
             onChangeText={(value) => handleInputChange('to', value)}
+
           />
         </View>
       </View>
