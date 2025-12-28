@@ -43,23 +43,21 @@ cd backend
 npm install
 
 # Configure Environment Variables
-# Create a .env file based on .env.example
 cp .env.example .env
-# Edit .env and add your MongoDB URI and other secrets
+# Edit .env and add your MongoDB URI and Stripe keys
 
-# Seed Database (Optional but recommended for testing)
+# Seed Database (Optional)
 npm run seed
 
 # Start the Server
 npm run dev
-# Server will run on http://localhost:5000
 \`\`\`
 
 ### 2. Frontend Setup
 The frontend is the mobile application user interface.
 
 \`\`\`bash
-# Navigate to the root directory (if not already there)
+# Navigate to the root directory
 cd ..
 
 # Install dependencies
@@ -69,11 +67,11 @@ npm install
 npx expo start
 \`\`\`
 
-### 3. Running the App
-1.  Ensure the backend server is running on port 5000.
-2.  Scan the QR code shown in the terminal with the **Expo Go** app on your phone (Android/iOS).
-3.  **Note for Android Emulator:** The app is configured to connect to `10.0.2.2:5000` to access localhost.
-4.  **Note for Physical Device:** Ensure your phone and computer are on the same Wi-Fi network. You may need to update the `API_URL` in `src/config/api.js` to your computer's local IP address (e.g., `http://192.168.1.5:5000/api`).
+### 3. Application Configuration
+1.  Ensure the backend server is running.
+2.  Verify your `.env` configuration matches your development environment.
+3.  Update the API endpoint in `src/config/api.js` to point to your server's address (IP address or hosted URL).
+4.  Run the app using Expo Go on your device or emulator.
 
 ## 📂 Project Structure
 
