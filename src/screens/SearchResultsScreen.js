@@ -6,7 +6,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  ActivityIndicator
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -209,10 +210,13 @@ export default function SearchResultsScreen() {
           <Ionicons name="add-circle" size={20} color={theme.primary} />
           <Text style={[styles.addButtonText, { color: theme.primary }]}>Add to Cart</Text>
         </TouchableOpacity>
-          <TouchableOpacity style={[styles.detailsButton, { backgroundColor: theme.primary }]}>
-            <Text style={styles.detailsButtonText}>View Details</Text>
-            <Ionicons name="arrow-forward" size={16} color="#fff" />
-          </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.detailsButton, { backgroundColor: theme.primary }]}
+          onPress={() => navigation.navigate('FlightDetails', { id: flight.id })}
+        >
+          <Text style={styles.detailsButtonText}>View Details</Text>
+          <Ionicons name="arrow-forward" size={16} color="#fff" />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -328,7 +332,14 @@ export default function SearchResultsScreen() {
             <Ionicons name="add-circle" size={20} color={theme.primary} />
             <Text style={[styles.addButtonText, { color: theme.primary }]}>Add to Cart</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.detailsButton, { backgroundColor: theme.primary }]}>
+          <TouchableOpacity 
+            style={[styles.detailsButton, { backgroundColor: theme.primary }]}
+            onPress={() => {
+              console.log('Package details pressed for:', pkg.id);
+              // Package details screen would be implemented similarly to hotels/flights
+              Alert.alert('Package Details', 'Package details screen coming soon!');
+            }}
+          >
             <Text style={styles.detailsButtonText}>View Details</Text>
             <Ionicons name="arrow-forward" size={16} color="#fff" />
           </TouchableOpacity>
@@ -420,6 +431,7 @@ const styles = StyleSheet.create({
   results: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+    paddingBottom: 20,
   },
   emptyContainer: {
     flex: 1,
