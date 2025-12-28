@@ -11,24 +11,44 @@ const airlines = [
 ];
 
 const indianCities = [
-    { city: 'Mumbai', airport: 'Chhatrapati Shivaji Maharaj International Airport', code: 'BOM', terminal: 'T2' },
-    { city: 'Delhi', airport: 'Indira Gandhi International Airport', code: 'DEL', terminal: 'T3' },
-    { city: 'Bangalore', airport: 'Kempegowda International Airport', code: 'BLR', terminal: 'T1' },
-    { city: 'Hyderabad', airport: 'Rajiv Gandhi International Airport', code: 'HYD', terminal: 'T1' },
-    { city: 'Chennai', airport: 'Chennai International Airport', code: 'MAA', terminal: 'T1' },
-    { city: 'Kolkata', airport: 'Netaji Subhas Chandra Bose International Airport', code: 'CCU', terminal: 'T2' },
-    { city: 'Pune', airport: 'Pune Airport', code: 'PNQ', terminal: 'T1' },
-    { city: 'Ahmedabad', airport: 'Sardar Vallabhbhai Patel International Airport', code: 'AMD', terminal: 'T1' },
-    { city: 'Goa', airport: 'Dabolim Airport', code: 'GOI', terminal: 'T1' },
-    { city: 'Jaipur', airport: 'Jaipur International Airport', code: 'JAI', terminal: 'T1' }
+    { city: 'Mumbai', airport: 'Chhatrapati Shivaji Maharaj International Airport', airportCode: 'BOM', terminal: 'T2' },
+    { city: 'Delhi', airport: 'Indira Gandhi International Airport', airportCode: 'DEL', terminal: 'T3' },
+    { city: 'Bangalore', airport: 'Kempegowda International Airport', airportCode: 'BLR', terminal: 'T1' },
+    { city: 'Hyderabad', airport: 'Rajiv Gandhi International Airport', airportCode: 'HYD', terminal: 'T1' },
+    { city: 'Chennai', airport: 'Chennai International Airport', airportCode: 'MAA', terminal: 'T1' },
+    { city: 'Kolkata', airport: 'Netaji Subhas Chandra Bose International Airport', airportCode: 'CCU', terminal: 'T2' },
+    { city: 'Pune', airport: 'Pune Airport', airportCode: 'PNQ', terminal: 'T1' },
+    { city: 'Ahmedabad', airport: 'Sardar Vallabhbhai Patel International Airport', airportCode: 'AMD', terminal: 'T1' },
+    { city: 'Goa', airport: 'Dabolim Airport', airportCode: 'GOI', terminal: 'T1' },
+    { city: 'Jaipur', airport: 'Jaipur International Airport', airportCode: 'JAI', terminal: 'T1' },
+    { city: 'Jodhpur', airport: 'Jodhpur Airport', airportCode: 'JDH', terminal: 'T1' },
+    { city: 'Ajmer', airport: 'Kishangarh Airport', airportCode: 'KGB', terminal: 'T1' },
+    { city: 'Indore', airport: 'Devi Ahilya Bai Holkar Airport', airportCode: 'IDR', terminal: 'T1' },
+    { city: 'Lucknow', airport: 'Amausi Airport', airportCode: 'LKO', terminal: 'T1' },
+    { city: 'Kochi', airport: 'Kochi International Airport', airportCode: 'COK', terminal: 'T1' },
+    { city: 'Visakhapatnam', airport: 'Visakhapatnam Airport', airportCode: 'VTZ', terminal: 'T1' },
+    { city: 'Vijayawada', airport: 'Vijayawada Airport', airportCode: 'VGA', terminal: 'T1' },
+    { city: 'Srinagar', airport: 'Srinagar International Airport', airportCode: 'SXR', terminal: 'T1' },
+    { city: 'Bhopal', airport: 'Raja Bhoj Airport', airportCode: 'BHO', terminal: 'T1' },
+    { city: 'Nagpur', airport: 'Dr. Babasaheb Ambedkar International Airport', airportCode: 'NAG', terminal: 'T1' },
+    { city: 'Chandigarh', airport: 'Chandigarh International Airport', airportCode: 'IXC', terminal: 'T1' },
+    { city: 'Ludhiana', airport: 'Ludhiana Airport', airportCode: 'LDH', terminal: 'T1' },
+    { city: 'Udaipur', airport: 'Udaipur Airport', airportCode: 'UDR', terminal: 'T1' },
+    { city: 'Shimla', airport: 'Shimla Airport', airportCode: 'SLV', terminal: 'T1' },
+    { city: 'Thiruvananthapuram', airport: 'Trivandrum International Airport', airportCode: 'TRV', terminal: 'T1' },
+    { city: 'Coimbatore', airport: 'Coimbatore International Airport', airportCode: 'CJB', terminal: 'T1' },
+    { city: 'Vadodara', airport: 'Vadodara Airport', airportCode: 'BDQ', terminal: 'T1' },
+    { city: 'Surat', airport: 'Surat Airport', airportCode: 'STV', terminal: 'T1' },
+    { city: 'Mangalore', airport: 'Mangaluru International Airport', airportCode: 'BLR', terminal: 'T1' },
+    { city: 'Amritsar', airport: 'Sri Guru Ramdas Ji International Airport', airportCode: 'ATQ', terminal: 'T1' }
 ];
 
 const internationalCities = [
-    { city: 'Dubai', airport: 'Dubai International Airport', code: 'DXB', terminal: 'T3' },
-    { city: 'Singapore', airport: 'Changi Airport', code: 'SIN', terminal: 'T3' },
-    { city: 'London', airport: 'Heathrow Airport', code: 'LHR', terminal: 'T5' },
-    { city: 'New York', airport: 'John F. Kennedy International Airport', code: 'JFK', terminal: 'T4' },
-    { city: 'Bangkok', airport: 'Suvarnabhumi Airport', code: 'BKK', terminal: 'T1' }
+    { city: 'Dubai', airport: 'Dubai International Airport', airportCode: 'DXB', terminal: 'T3' },
+    { city: 'Singapore', airport: 'Changi Airport', airportCode: 'SIN', terminal: 'T3' },
+    { city: 'London', airport: 'Heathrow Airport', airportCode: 'LHR', terminal: 'T5' },
+    { city: 'New York', airport: 'John F. Kennedy International Airport', airportCode: 'JFK', terminal: 'T4' },
+    { city: 'Bangkok', airport: 'Suvarnabhumi Airport', airportCode: 'BKK', terminal: 'T1' }
 ];
 
 const allCities = [...indianCities, ...internationalCities];
@@ -163,7 +183,7 @@ const generateFlights = () => {
         }
     }
 
-    return flights.slice(0, 500); // Limit to 500 flights to avoid overwhelming the DB
+    return flights.slice(0, 2000); // Increased from 500 to 2000 flights for better coverage
 };
 
 const seedFlights = async () => {

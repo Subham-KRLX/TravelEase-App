@@ -10,6 +10,26 @@ const cities = [
     { city: 'Pune', country: 'India', lat: 18.5204, lng: 73.8567 },
     { city: 'Goa', country: 'India', lat: 15.2993, lng: 74.1240 },
     { city: 'Jaipur', country: 'India', lat: 26.9124, lng: 75.7873 },
+    { city: 'Jodhpur', country: 'India', lat: 26.2389, lng: 73.0243 },
+    { city: 'Ajmer', country: 'India', lat: 26.4499, lng: 74.6399 },
+    { city: 'Indore', country: 'India', lat: 22.7196, lng: 75.8577 },
+    { city: 'Lucknow', country: 'India', lat: 26.8467, lng: 80.9462 },
+    { city: 'Kochi', country: 'India', lat: 9.9312, lng: 76.2673 },
+    { city: 'Visakhapatnam', country: 'India', lat: 17.6869, lng: 83.2185 },
+    { city: 'Vijayawada', country: 'India', lat: 16.5062, lng: 80.6480 },
+    { city: 'Srinagar', country: 'India', lat: 34.0837, lng: 74.7973 },
+    { city: 'Bhopal', country: 'India', lat: 23.1815, lng: 79.9864 },
+    { city: 'Nagpur', country: 'India', lat: 21.1458, lng: 79.0882 },
+    { city: 'Chandigarh', country: 'India', lat: 30.7333, lng: 76.7794 },
+    { city: 'Ludhiana', country: 'India', lat: 30.9010, lng: 75.8573 },
+    { city: 'Udaipur', country: 'India', lat: 24.5854, lng: 73.7125 },
+    { city: 'Shimla', country: 'India', lat: 31.7771, lng: 77.1025 },
+    { city: 'Thiruvananthapuram', country: 'India', lat: 8.5241, lng: 76.9366 },
+    { city: 'Coimbatore', country: 'India', lat: 11.0026, lng: 76.7153 },
+    { city: 'Vadodara', country: 'India', lat: 22.3072, lng: 73.1812 },
+    { city: 'Surat', country: 'India', lat: 21.1458, lng: 72.8479 },
+    { city: 'Mangalore', country: 'India', lat: 12.9352, lng: 74.8597 },
+    { city: 'Amritsar', country: 'India', lat: 31.6340, lng: 74.8711 },
     { city: 'Dubai', country: 'UAE', lat: 25.2048, lng: 55.2708 },
     { city: 'Singapore', country: 'Singapore', lat: 1.3521, lng: 103.8198 },
     { city: 'Bangkok', country: 'Thailand', lat: 13.7563, lng: 100.5018 }
@@ -42,6 +62,26 @@ const attractions = {
     Pune: ['Shaniwar Wada - 2km', 'Aga Khan Palace - 5km', 'Sinhagad Fort - 25km'],
     Goa: ['Baga Beach - 1km', 'Basilica of Bom Jesus - 3km', 'Fort Aguada - 4km'],
     Jaipur: ['Hawa Mahal - 1km', 'City Palace - 1.5km', 'Amber Fort - 10km'],
+    Jodhpur: ['Mehrangarh Fort - 2km', 'Jaswant Thada - 3km', 'Clock Tower - 1km'],
+    Ajmer: ['Ajmer Sharif Dargah - 1km', 'Ana Sagar Lake - 2km', 'Narayani Mata Temple - 3km'],
+    Indore: ['Rajwada Palace - 1km', 'Lal Bagh Palace - 2km', 'Sardar Bazar - 1.5km'],
+    Lucknow: ['Bara Imambara - 2km', 'Chota Imambara - 2.5km', 'Hazratgunj - 1km'],
+    Kochi: ['Fort Kochi - 1km', 'Chinese Fishing Nets - 2km', 'Paradesi Synagogue - 1.5km'],
+    Visakhapatnam: ['Visakha Museum - 2km', 'Kailasagiri - 5km', 'Ramakrishna Beach - 3km'],
+    Vijayawada: ['Kanaka Durga Temple - 1km', 'Undavalli Caves - 4km', 'Sri Ranganathaswamy Temple - 2km'],
+    Srinagar: ['Dal Lake - 1km', 'Mughal Gardens - 3km', 'Jama Masjid - 1.5km'],
+    Bhopal: ['Bhoj Wetland - 5km', 'Sanchi Stupa - 40km', 'Van Vihar National Park - 5km'],
+    Nagpur: ['Deekshabhoomi - 1km', 'Futala Lake - 2km', 'Ambazari Lake - 3km'],
+    Chandigarh: ['Rock Garden - 3km', 'Rose Garden - 2km', 'Capitol Complex - 5km'],
+    Ludhiana: ['Phillaur Fort - 5km', 'Gurudwara Sis Ganj - 2km', 'Lodhi Garden - 1km'],
+    Udaipur: ['City Palace - 1km', 'Lake Palace - 2km', 'Jagdish Temple - 1.5km'],
+    Shimla: ['Jakhoo Temple - 2km', 'Mall Road - 1km', 'Kali Bari Temple - 1.5km'],
+    Thiruvananthapuram: ['Padmanabhaswamy Temple - 1km', 'Napier Museum - 1.5km', 'Kanyakumari - 90km'],
+    Coimbatore: ['Nilgiris - 40km', 'Avinashi - 20km', 'Mahalingeshwara Temple - 2km'],
+    Vadodara: ['Lakshmi Vilas Palace - 2km', 'Baroda Museum - 2.5km', 'Kirti Mandir - 3km'],
+    Surat: ['Dumas Beach - 5km', 'Dutch Garden - 2km', 'Chintamani Jain Temple - 1km'],
+    Mangalore: ['Panambur Beach - 3km', 'Basilica of Our Lady of Rosary - 2km', 'Mangala Devi Temple - 4km'],
+    Amritsar: ['Golden Temple - 1km', 'Jallianwala Bagh - 2km', 'Partition Museum - 2.5km'],
     Dubai: ['Burj Khalifa - 2km', 'Dubai Mall - 1.5km', 'Palm Jumeirah - 5km'],
     Singapore: ['Marina Bay Sands - 1km', 'Gardens by the Bay - 2km', 'Sentosa - 5km'],
     Bangkok: ['Grand Palace - 2km', 'Wat Pho - 1.5km', 'Chatuchak Market - 10km']
@@ -59,8 +99,8 @@ const generateHotels = () => {
     const hotels = [];
 
     cities.forEach(city => {
-        // Generate 15-25 hotels per city
-        const hotelsInCity = Math.floor(Math.random() * 11) + 15;
+        // Generate 20-35 hotels per city (increased from 15-25)
+        const hotelsInCity = Math.floor(Math.random() * 16) + 20;
 
         for (let i = 0; i < hotelsInCity; i++) {
             const prefix = hotelNamePrefixes[Math.floor(Math.random() * hotelNamePrefixes.length)];

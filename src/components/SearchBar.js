@@ -6,6 +6,32 @@ import { useTheme } from '../context/ThemeContext';
 import flightService from '../services/flightService';
 import hotelService from '../services/hotelService';
 
+// Helper function to validate and convert string date to Date object
+const convertStringToDate = (dateString) => {
+  if (!dateString) return null;
+  if (dateString instanceof Date) return dateString;
+  
+  try {
+    const date = new Date(dateString);
+    // Ensure the date is valid
+    if (isNaN(date.getTime())) {
+      console.warn(`Invalid date string: ${dateString}`);
+      return null;
+    }
+    return date;
+  } catch (error) {
+    console.warn(`Error converting date: ${error.message}`);
+    return null;
+  }
+};
+
+// Helper function to convert Date object to ISO string (YYYY-MM-DD)
+const dateToString = (date) => {
+  if (!date) return '';
+  if (typeof date === 'string') return date;
+  return date.toISOString().split('T')[0];
+};
+
 export default function SearchBar({ type = 'flights' }) {
   const [searchType, setSearchType] = useState(type);
   const { theme } = useTheme();
@@ -91,30 +117,34 @@ export default function SearchBar({ type = 'flights' }) {
   };
 
   const handleSearch = () => {
+    // Keep only string dates for navigation (Date objects can't be serialized in navigation params)
+    const processedData = { ...searchData };
+
     navigation.navigate('SearchResults', {
       type: searchType,
-      ...searchData
+      ...processedData
+      // String dates are already in YYYY-MM-DD format in searchData
+      // Convert them to Date objects in the SearchResults screen if needed
     });
   };
 
   const renderSuggestions = () => {
-    if (!showSuggestions) return null;
+    if (!showSuggestions || suggestions.length === 0) return null;
 
     return (
       <View style={[styles.suggestionsContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
-        <FlatList
-          data={suggestions}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
+        <ScrollView scrollEnabled nestedScrollEnabled={false}>
+          {suggestions.map((item, index) => (
             <TouchableOpacity
+              key={index}
               style={[styles.suggestionItem, { borderBottomColor: theme.border }]}
               onPress={() => handleSuggestionSelect(item)}
             >
               <Ionicons name="location-outline" size={16} color={theme.textSecondary} />
               <Text style={[styles.suggestionText, { color: theme.text }]}>{item}</Text>
             </TouchableOpacity>
-          )}
-        />
+          ))}
+        </ScrollView>
       </View>
     );
   };
