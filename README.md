@@ -1,75 +1,96 @@
-# MAD_PROJECT
-1. Project Title:
-TravelEase app 
+# TravelEase - Full Stack Travel Booking App
 
-2. Your Name & Roll Number:
-Subham Sangwan – 2024-B-25092004
+**TravelEase** is a comprehensive, full-stack mobile application designed to simplify travel planning. It enables users to browse and book flights and hotels seamlessly, featuring a robust backend with real-time data persistence, secure authentication, and payment integration.
 
-3. Problem Statement:
-"TravelEase addresses the complexity and time-consuming nature of travel planning by providing a convenient and efficient mobile platform for booking flights, hotels, and travel packages. It aims to simplify travel experiences through an intuitive interface."
+## 🚀 Key Features
 
-4. Proposed Solution / Idea:
-"Users can browse flights and hotels, add bookings to a cart, and manage reservations with secure authentication and smooth navigation throughout the app. This solution aims to simplify the travel planning process and enhance user convenience and satisfaction."
+*   **Full-Stack Architecture:**  React Native (Expo) frontend connected to a dedicated Node.js/Express backend.
+*   **User Authentication:** Secure signup and login using JWT (JSON Web Tokens).
+*   **Real-Time Search:** 
+    *   **Flights:** Search by origin, destination, date, and passengers.
+    *   **Hotels:** Search by city, check-in/out dates, and guests.
+*   **Booking Management:** 
+    *   Add flights and hotels to cart.
+    *   View booking history and status.
+    *   Real-time seat/room availability tracking.
+*   **Payment Integration:** Secure checkout process powered by Stripe (Test Mode).
+*   **Interactive UI:** Modern, responsive design with smooth animations and intuitive navigation.
 
-5. Key Features:
+## 🛠️ Technology Stack
 
-Real-time flight and hotel search with dynamic filtering and sorting options
+*   **Frontend:** React Native, Expo, React Navigation, Axios
+*   **Backend:** Node.js, Express.js
+*   **Database:** MongoDB (using Mongoose ODM)
+*   **Authentication:** JWT, bcryptjs
+*   **Payments:** Stripe API
+*   **Data Seeding:** Custom scripts to generate realistic flight and hotel data
 
-Comprehensive booking management including add to cart, update, and removal of bookings
+## ⚙️ Setup & Installation
 
-User authentication with secure login, sign-up, and session persistence
+### Prerequisites
+*   Node.js (v14 or higher)
+*   MongoDB (local or Atlas connection string)
+*   Expo Go app on your mobile device (or Android/iOS emulator)
 
-Personalized travel recommendations based on user preferences and location
+### 1. Backend Setup
+The backend handles all API requests, database connections, and business logic.
 
-Offline access to booking history and saved searches
+\`\`\`bash
+# Navigate to backend directory
+cd backend
 
-Push notifications for booking confirmations, reminders, and special offers
+# Install dependencies
+npm install
 
-Interactive maps for hotel locations and nearby attractions
+# Configure Environment Variables
+# Create a .env file based on .env.example
+cp .env.example .env
+# Edit .env and add your MongoDB URI and other secrets
 
-Detailed flight and hotel information including amenities, pricing, and reviews
+# Seed Database (Optional but recommended for testing)
+npm run seed
 
-Secure payment integration with multiple payment options
+# Start the Server
+npm run dev
+# Server will run on http://localhost:5000
+\`\`\`
 
-User profile management including booking history and personal information updates
+### 2. Frontend Setup
+The frontend is the mobile application user interface.
 
-6. Target Users / Audience:
-"The target users for your travel booking app are frequent travelers, including solo travelers, families, and business professionals, who seek a convenient and personalized mobile platform for planning and managing their trips. The app also caters to tech-savvy millennials and Gen Z users who prefer seamless, on-the-go booking experiences."
+\`\`\`bash
+# Navigate to the root directory (if not already there)
+cd ..
 
-7. Technology Stack:
+# Install dependencies
+npm install
 
-Frontend (Mobile App): React Native, Expo
+# Start the Expo development server
+npx expo start
+\`\`\`
 
-The technology stack for your travel booking app includes:
+### 3. Running the App
+1.  Ensure the backend server is running on port 5000.
+2.  Scan the QR code shown in the terminal with the **Expo Go** app on your phone (Android/iOS).
+3.  **Note for Android Emulator:** The app is configured to connect to `10.0.2.2:5000` to access localhost.
+4.  **Note for Physical Device:** Ensure your phone and computer are on the same Wi-Fi network. You may need to update the `API_URL` in `src/config/api.js` to your computer's local IP address (e.g., `http://192.168.1.5:5000/api`).
 
-Frontend (Mobile App): React Native with Expo for cross-platform mobile development
+## 📂 Project Structure
 
-Backend: Node.js with Express.js for scalable server-side logic
+*   **`backend/`**: Contains server code, models, controllers, and routes.
+    *   `models/`: Mongoose schemas (User, Flight, Hotel, Booking).
+    *   `controllers/`: Business logic for APIs.
+    *   `routes/`: API endpoint definitions.
+    *   `seeders/`: Scripts to populate the database with mock data.
+*   **`src/`**: React Native frontend code.
+    *   `components/`: Reusable UI components (SearchBar, Header, etc.).
+    *   `screens/`: Application screens (Home, SearchResults, Checkout, etc.).
+    *   `services/`: API service layer for backend communication.
+    *   `context/`: Global state management (Auth, Cart, Theme).
+    *   `navigation/`: App navigation configuration.
 
-Database: Firebase or MongoDB for flexible, cloud-based data storage
+## 🤝 Contributing
+Contributions are welcome! Please fork the repository and submit a pull request for any enhancements or bug fixes.
 
-Maps & Location Services: Google Maps API and GPS tracking SDK for interactive maps and location tracking
-
-Push Notifications: Firebase Cloud Messaging (FCM) for real-time user alerts and updates
-
-8. Expected Outcome:
-"A fully functional mobile travel booking application that enables users to search and book flights and hotels easily, manage their bookings with personalized recommendations, and receive timely notifications. The app provides a seamless, efficient, and user-friendly experience for travel planning, ensuring enhanced convenience and satisfaction for frequent travelers."
-
-9. Timeline:
-
-Week 1–2: Research, UI/UX design, and API selection
-
-Week 3–4: Backend setup, GPS integration, and database design
-
-Week 5–6: Frontend development including live tracking and ETA features
-
-Week 7: Push notification integration and testing
-
-Week 8: Deployment and feedback collection
-
-10. Additional Notes:
-The system requires GPS-enabled devices installed on each shuttle to provide accurate, real-time location tracking. These devices enable features like live shuttle monitoring, ETA updates, and push notifications, ensuring effective and reliable shuttle service management
-
-Google Maps API costs need to be considered for scaling
-
-Could be extended in the future to include ticket booking or seat availability
+## 📄 License
+This project is open-source and available under the [MIT License](LICENSE).
