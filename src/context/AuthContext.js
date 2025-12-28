@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import authService from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -22,8 +23,12 @@ export const AuthProvider = ({ children }) => {
   const loadUser = async () => {
     try {
       const storedUser = await AsyncStorage.getItem('travelease_user');
-      if (storedUser) {
+      const token = await AsyncStorage.getItem('auth_token');
+
+      if (storedUser && token) {
         setUser(JSON.parse(storedUser));
+        // Optionally verify token validity with backend here
+        // authService.getCurrentUser().then(res => { if(!res.success) logout(); });
       }
     } catch (error) {
       console.error('Error loading user:', error);
@@ -34,44 +39,44 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      // Mock login - In real app you'll make an API call
-      const mockUser = {
-        id: 1,
-        email: email,
-        name: email.split('@')[0],
-        bookings: []
-      };
-      
-      setUser(mockUser);
-      await AsyncStorage.setItem('travelease_user', JSON.stringify(mockUser));
-      return { success: true };
+      setLoading(true);
+      const result = await authService.login({ email, password });
+
+      if (result.success) {
+        setUser(result.user);
+        return { success: true };
+      } else {
+        return { success: false, error: result.error };
+      }
     } catch (error) {
       return { success: false, error: 'Login failed' };
+    } finally {
+      setLoading(false);
     }
   };
 
   const signup = async (name, email, password) => {
     try {
-      // Mock signup - In real app, you'll make an API call
-      const mockUser = {
-        id: Date.now(),
-        email: email,
-        name: name,
-        bookings: []
-      };
-      
-      setUser(mockUser);
-      await AsyncStorage.setItem('travelease_user', JSON.stringify(mockUser));
-      return { success: true };
+      setLoading(true);
+      const result = await authService.signup({ name, email, password });
+
+      if (result.success) {
+        setUser(result.user);
+        return { success: true };
+      } else {
+        return { success: false, error: result.error };
+      }
     } catch (error) {
       return { success: false, error: 'Signup failed' };
+    } finally {
+      setLoading(false);
     }
   };
 
   const logout = async () => {
     try {
+      await authService.logout();
       setUser(null);
-      await AsyncStorage.removeItem('travelease_user');
     } catch (error) {
       console.error('Error logging out:', error);
     }

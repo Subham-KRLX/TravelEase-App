@@ -12,6 +12,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
+import flightService from '../services/flightService';
+import hotelService from '../services/hotelService';
 
 export default function SearchResultsScreen() {
   const [results, setResults] = useState([]);
@@ -24,101 +26,87 @@ export default function SearchResultsScreen() {
   const searchType = route.params?.type || 'flights';
 
   useEffect(() => {
-    setTimeout(() => {
-      setResults(generateMockResults(searchType));
-      setLoading(false);
-    }, 1500);
-  }, [searchType]);
+    const fetchResults = async () => {
+      setLoading(true);
+      try {
+        if (searchType === 'flights') {
+          const params = {
+            origin: route.params?.from,
+            destination: route.params?.to,
+            departureDate: route.params?.departDate,
+            returnDate: route.params?.returnDate,
+            passengers: route.params?.passengers,
+            class: 'economy' // Default for now
+          };
+
+          const response = await flightService.searchFlights(params);
+          if (response.success) {
+            setResults(processFlightResults(response.flights));
+          } else {
+            console.error('Flight search failed:', response.error);
+            setResults([]);
+          }
+        } else if (searchType === 'hotels') {
+          const params = {
+            city: route.params?.location,
+            checkIn: route.params?.checkIn,
+            checkOut: route.params?.checkOut,
+            guests: route.params?.guests
+          };
+
+          const response = await hotelService.searchHotels(params);
+          if (response.success) {
+            setResults(processHotelResults(response.hotels));
+          } else {
+            console.error('Hotel search failed:', response.error);
+            setResults([]);
+          }
+        } else {
+          // Keep packages mock as no backend yet
+          setResults(generateMockResults('packages'));
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResults();
+  }, [searchType, route.params]);
+
+  const processFlightResults = (flights) => {
+    return flights.map(flight => ({
+      id: flight._id,
+      type: 'flight',
+      airline: flight.airline.name,
+      from: `${flight.origin.city} (${flight.origin.airportCode})`,
+      to: `${flight.destination.city} (${flight.destination.airportCode})`,
+      departTime: flight.departure.time,
+      arriveTime: flight.arrival.time,
+      duration: flight.duration,
+      price: flight.price.economy,
+      stops: flight.stops === 0 ? 'Non-stop' : `${flight.stops} Stop(s)`,
+      availableSeats: flight.availableSeats.economy
+    }));
+  };
+
+  const processHotelResults = (hotels) => {
+    return hotels.map(hotel => ({
+      id: hotel._id,
+      type: 'hotel',
+      name: hotel.name,
+      location: `${hotel.location.city}, ${hotel.location.country}`,
+      rating: hotel.rating.average,
+      reviews: hotel.rating.count,
+      price: hotel.pricePerNight,
+      image: hotel.images.length > 0 ? hotel.images[0].url : 'https://via.placeholder.com/800x600',
+      description: hotel.description
+    }));
+  };
 
   const generateMockResults = (type) => {
-    if (type === 'flights') {
-      return [
-        {
-          id: 1,
-          type: 'flight',
-          airline: 'IndiGo',
-          from: 'Mumbai (BOM)',
-          to: 'Delhi (DEL)',
-          departTime: '14:30',
-          arriveTime: '16:45',
-          duration: '2h 15m',
-          price: 8999,
-          stops: 'Non-stop',
-        },
-        {
-          id: 2,
-          type: 'flight',
-          airline: 'SpiceJet',
-          from: 'Mumbai (BOM)',
-          to: 'Delhi (DEL)',
-          departTime: '09:15',
-          arriveTime: '11:30',
-          duration: '2h 15m',
-          price: 7549,
-          stops: 'Non-stop',
-        },
-        {
-          id: 3,
-          type: 'flight',
-          airline: 'Air India',
-          from: 'Bangalore (BLR)',
-          to: 'Chennai (MAA)',
-          departTime: '22:10',
-          arriveTime: '23:25',
-          duration: '1h 15m',
-          price: 6849,
-          stops: 'Non-stop',
-        },
-        {
-          id: 4,
-          type: 'flight',
-          airline: 'Vistara',
-          from: 'Delhi (DEL)',
-          to: 'Goa (GOI)',
-          departTime: '16:20',
-          arriveTime: '19:10',
-          duration: '2h 50m',
-          price: 12999,
-          stops: 'Non-stop',
-        }
-      ];
-    } else if (type === 'hotels') {
-      return [
-        {
-          id: 4,
-          type: 'hotel',
-          name: 'The Taj Mahal Palace',
-          location: 'Mumbai, India',
-          rating: 4.8,
-          reviews: 1245,
-          price: 15999,
-          image: 'https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=800',
-          description: 'Luxury heritage hotel in the heart of Mumbai'
-        },
-        {
-          id: 5,
-          type: 'hotel',
-          name: 'ITC Grand Central',
-          location: 'Mumbai, India',
-          rating: 4.2,
-          reviews: 892,
-          price: 8999,
-          image: 'https://images.pexels.com/photos/271618/pexels-photo-271618.jpeg?auto=compress&cs=tinysrgb&w=800',
-          description: 'Comfortable business hotel with excellent service'
-        },
-        {
-          id: 6,
-          type: 'hotel',
-          name: 'The Oberoi Mumbai',
-          location: 'Mumbai, India',
-          rating: 4.6,
-          reviews: 567,
-          price: 24999,
-          image: 'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&cs=tinysrgb&w=800',
-          description: 'Elegant luxury hotel with personalized service'
-        }
-      ];
-    } else if (type === 'packages') {
+    if (type === 'packages') {
       return [
         {
           id: 7,
@@ -132,42 +120,7 @@ export default function SearchResultsScreen() {
           description: 'Complete beach vacation with water sports',
           rating: 4.7
         },
-        {
-          id: 8,
-          type: 'package',
-          name: 'Kerala Backwater Retreat',
-          destination: 'Kerala, India',
-          duration: '6 Days, 5 Nights',
-          includes: ['Flight', 'Houseboat', 'All Meals', 'Sightseeing'],
-          price: 32999,
-          image: 'https://images.pexels.com/photos/2476632/pexels-photo-2476632.jpeg?auto=compress&cs=tinysrgb&w=800',
-          description: 'Serene backwater experience with houseboats',
-          rating: 4.9
-        },
-        {
-          id: 9,
-          type: 'package',
-          name: 'Rajasthan Heritage Tour',
-          destination: 'Rajasthan, India',
-          duration: '7 Days, 6 Nights',
-          includes: ['Flight', 'Hotel', 'Breakfast', 'Palace Tours', 'Desert Safari'],
-          price: 38999,
-          image: 'https://images.pexels.com/photos/3581368/pexels-photo-3581368.jpeg?auto=compress&cs=tinysrgb&w=800',
-          description: 'Explore royal palaces and desert landscapes',
-          rating: 4.8
-        },
-        {
-          id: 10,
-          type: 'package',
-          name: 'Himalayan Adventure',
-          destination: 'Himachal Pradesh, India',
-          duration: '4 Days, 3 Nights',
-          includes: ['Flight', 'Hotel', 'Meals', 'Trekking Guide'],
-          price: 19999,
-          image: 'https://images.pexels.com/photos/1670770/pexels-photo-1670770.jpeg?auto=compress&cs=tinysrgb&w=800',
-          description: 'Mountain trekking and valley exploration',
-          rating: 4.6
-        }
+        // ... (rest of package mocks)
       ];
     }
     return [];

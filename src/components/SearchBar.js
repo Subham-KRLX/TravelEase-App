@@ -1,31 +1,93 @@
-import { useState } from 'react';
-import {View,Text,TextInput,TouchableOpacity,StyleSheet,ScrollView} from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
+import flightService from '../services/flightService';
+import hotelService from '../services/hotelService';
 
 export default function SearchBar({ type = 'flights' }) {
   const [searchType, setSearchType] = useState(type);
   const { theme } = useTheme();
+
+  // Search state
   const [searchData, setSearchData] = useState({
     from: '',
     to: '',
-    departDate: '',
+    departDate: new Date().toISOString().split('T')[0],
     returnDate: '',
     passengers: '1',
     location: '',
-    checkIn: '',
+    checkIn: new Date().toISOString().split('T')[0],
     checkOut: '',
     guests: '1'
   });
 
+  // Suggestions state
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeField, setActiveField] = useState(null);
+  const [loading, setLoading] = useState(false);
+
   const navigation = useNavigation();
 
+  // Fetch suggestions when inputs change
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (!activeField || searchData[activeField].length < 2) {
+        setSuggestions([]);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        let results = [];
+
+        if (searchType === 'flights' && (activeField === 'from' || activeField === 'to')) {
+          // Use popular routes API for suggestions or filter local list in real app
+          // For now, simple mock filter or backend call if available
+          const response = await flightService.getPopularRoutes();
+          if (response.success) {
+            const cities = [...new Set(response.routes.map(r => r._id.origin).concat(response.routes.map(r => r._id.destination)))];
+            results = cities.filter(city => city.toLowerCase().includes(searchData[activeField].toLowerCase()));
+          }
+        } else if (searchType === 'hotels' && activeField === 'location') {
+          const response = await hotelService.getPopularDestinations();
+          if (response.success) {
+            results = response.destinations
+              .filter(d => d._id.toLowerCase().includes(searchData[activeField].toLowerCase()))
+              .map(d => d._id);
+          }
+        }
+
+        setSuggestions(results);
+        setShowSuggestions(results.length > 0);
+      } catch (error) {
+        console.log('Error fetching suggestions:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const timer = setTimeout(fetchSuggestions, 500);
+    return () => clearTimeout(timer);
+  }, [searchData.from, searchData.to, searchData.location, activeField]);
+
   const handleInputChange = (field, value) => {
+    setActiveField(field);
     setSearchData(prev => ({
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleSuggestionSelect = (value) => {
+    setSearchData(prev => ({
+      ...prev,
+      [activeField]: value
+    }));
+    setShowSuggestions(false);
+    setActiveField(null);
   };
 
   const handleSearch = () => {
@@ -35,35 +97,64 @@ export default function SearchBar({ type = 'flights' }) {
     });
   };
 
+  const renderSuggestions = () => {
+    if (!showSuggestions) return null;
+
+    return (
+      <View style={[styles.suggestionsContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
+        <FlatList
+          data={suggestions}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[styles.suggestionItem, { borderBottomColor: theme.border }]}
+              onPress={() => handleSuggestionSelect(item)}
+            >
+              <Ionicons name="location-outline" size={16} color={theme.textSecondary} />
+              <Text style={[styles.suggestionText, { color: theme.text }]}>{item}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
+    );
+  };
+
   const renderFlightSearch = () => (
     <>
-      <View style={[styles.searchField, { borderColor: theme.border, backgroundColor: theme.backgroundSecondary }]}>
-        <Ionicons name="location-outline" size={20} color={theme.textSecondary} />
-        <View style={styles.fieldContent}>
-          <Text style={[styles.label, { color: theme.textSecondary }]}>From</Text>
-          <TextInput
-            style={[styles.input, { color: theme.text }]}
-            placeholder="Mumbai, Delhi, Bangalore..."
-            placeholderTextColor={theme.textTertiary}
-            value={searchData.from}
-            onChangeText={(value) => handleInputChange('from', value)}
-          />
+      <View style={{ zIndex: 10 }}>
+        <View style={[styles.searchField, { borderColor: theme.border, backgroundColor: theme.backgroundSecondary }]}>
+          <Ionicons name="location-outline" size={20} color={theme.textSecondary} />
+          <View style={styles.fieldContent}>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>From</Text>
+            <TextInput
+              style={[styles.input, { color: theme.text }]}
+              placeholder="Mumbai, Delhi, Bangalore..."
+              placeholderTextColor={theme.textTertiary}
+              value={searchData.from}
+              onChangeText={(value) => handleInputChange('from', value)}
+              onFocus={() => setActiveField('from')}
+            />
+          </View>
         </View>
+        {activeField === 'from' && renderSuggestions()}
       </View>
 
-      <View style={[styles.searchField, { borderColor: theme.border, backgroundColor: theme.backgroundSecondary }]}>
-        <Ionicons name="location-outline" size={20} color={theme.textSecondary} />
-        <View style={styles.fieldContent}>
-          <Text style={[styles.label, { color: theme.textSecondary }]}>To</Text>
-          <TextInput
-            style={[styles.input, { color: theme.text }]}
-            placeholder="Delhi, Mumbai, Chennai..."
-            placeholderTextColor={theme.textTertiary}
-            value={searchData.to}
-            onChangeText={(value) => handleInputChange('to', value)}
-
-          />
+      <View style={{ zIndex: 9 }}>
+        <View style={[styles.searchField, { borderColor: theme.border, backgroundColor: theme.backgroundSecondary }]}>
+          <Ionicons name="location-outline" size={20} color={theme.textSecondary} />
+          <View style={styles.fieldContent}>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>To</Text>
+            <TextInput
+              style={[styles.input, { color: theme.text }]}
+              placeholder="Delhi, Mumbai, Chennai..."
+              placeholderTextColor={theme.textTertiary}
+              value={searchData.to}
+              onChangeText={(value) => handleInputChange('to', value)}
+              onFocus={() => setActiveField('to')}
+            />
+          </View>
         </View>
+        {activeField === 'to' && renderSuggestions()}
       </View>
 
       <View style={[styles.searchField, { borderColor: theme.border, backgroundColor: theme.backgroundSecondary }]}>
@@ -72,7 +163,7 @@ export default function SearchBar({ type = 'flights' }) {
           <Text style={[styles.label, { color: theme.textSecondary }]}>Departure Date</Text>
           <TextInput
             style={[styles.input, { color: theme.text }]}
-            placeholder="DD/MM/YYYY"
+            placeholder="YYYY-MM-DD"
             placeholderTextColor={theme.textTertiary}
             value={searchData.departDate}
             onChangeText={(value) => handleInputChange('departDate', value)}
@@ -86,7 +177,7 @@ export default function SearchBar({ type = 'flights' }) {
           <Text style={[styles.label, { color: theme.textSecondary }]}>Return Date</Text>
           <TextInput
             style={[styles.input, { color: theme.text }]}
-            placeholder="DD/MM/YYYY"
+            placeholder="YYYY-MM-DD"
             placeholderTextColor={theme.textTertiary}
             value={searchData.returnDate}
             onChangeText={(value) => handleInputChange('returnDate', value)}
@@ -113,18 +204,22 @@ export default function SearchBar({ type = 'flights' }) {
 
   const renderHotelSearch = () => (
     <>
-      <View style={[styles.searchField, { borderColor: theme.border, backgroundColor: theme.backgroundSecondary }]}>
-        <Ionicons name="location-outline" size={20} color={theme.textSecondary} />
-        <View style={styles.fieldContent}>
-          <Text style={[styles.label, { color: theme.textSecondary }]}>Destination</Text>
-          <TextInput
-            style={[styles.input, { color: theme.text }]}
-            placeholder="City, Hotel, or Location..."
-            placeholderTextColor={theme.textTertiary}
-            value={searchData.location}
-            onChangeText={(value) => handleInputChange('location', value)}
-          />
+      <View style={{ zIndex: 10 }}>
+        <View style={[styles.searchField, { borderColor: theme.border, backgroundColor: theme.backgroundSecondary }]}>
+          <Ionicons name="location-outline" size={20} color={theme.textSecondary} />
+          <View style={styles.fieldContent}>
+            <Text style={[styles.label, { color: theme.textSecondary }]}>Destination</Text>
+            <TextInput
+              style={[styles.input, { color: theme.text }]}
+              placeholder="City, Hotel, or Location..."
+              placeholderTextColor={theme.textTertiary}
+              value={searchData.location}
+              onChangeText={(value) => handleInputChange('location', value)}
+              onFocus={() => setActiveField('location')}
+            />
+          </View>
         </View>
+        {activeField === 'location' && renderSuggestions()}
       </View>
 
       <View style={[styles.searchField, { borderColor: theme.border, backgroundColor: theme.backgroundSecondary }]}>
@@ -133,7 +228,7 @@ export default function SearchBar({ type = 'flights' }) {
           <Text style={[styles.label, { color: theme.textSecondary }]}>Check-in</Text>
           <TextInput
             style={[styles.input, { color: theme.text }]}
-            placeholder="DD/MM/YYYY"
+            placeholder="YYYY-MM-DD"
             placeholderTextColor={theme.textTertiary}
             value={searchData.checkIn}
             onChangeText={(value) => handleInputChange('checkIn', value)}
@@ -147,7 +242,7 @@ export default function SearchBar({ type = 'flights' }) {
           <Text style={[styles.label, { color: theme.textSecondary }]}>Check-out</Text>
           <TextInput
             style={[styles.input, { color: theme.text }]}
-            placeholder="DD/MM/YYYY"
+            placeholder="YYYY-MM-DD"
             placeholderTextColor={theme.textTertiary}
             value={searchData.checkOut}
             onChangeText={(value) => handleInputChange('checkOut', value)}
@@ -173,7 +268,7 @@ export default function SearchBar({ type = 'flights' }) {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.card }]}>
+    <View style={[styles.container, { backgroundColor: theme.card, zIndex: 100 }]}>
       <View style={[styles.tabContainer, { backgroundColor: theme.backgroundTertiary }]}>
         <TouchableOpacity
           style={[styles.tab, searchType === 'flights' && { backgroundColor: theme.primary }]}
@@ -231,6 +326,7 @@ export default function SearchBar({ type = 'flights' }) {
         style={styles.searchForm}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
       >
         {searchType === 'flights' ? renderFlightSearch() : renderHotelSearch()}
       </ScrollView>
@@ -284,7 +380,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   searchForm: {
-    maxHeight: 300,
+    maxHeight: 400,
   },
   scrollContent: {
     paddingBottom: 8,
@@ -332,4 +428,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  suggestionsContainer: {
+    position: 'absolute',
+    top: 60,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    elevation: 5,
+    zIndex: 1000,
+    maxHeight: 200,
+  },
+  suggestionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+    gap: 10,
+  },
+  suggestionText: {
+    fontSize: 14,
+    color: '#334155',
+  }
 });
