@@ -1,9 +1,10 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Access the backend URL (for Android emulator use 10.0.2.2, for iOS use localhost)
-// In a real app, this would be in an environment variable
-const API_URL = 'http://localhost:5001/api';
+// API Configuration
+// In production (Vercel), EXPO_PUBLIC_API_URL will be set via environment variables
+// In development, it falls back to localhost
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5001/api';
 
 const api = axios.create({
     baseURL: API_URL,
