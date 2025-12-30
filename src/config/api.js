@@ -3,8 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // API Configuration
 // In production (Vercel), EXPO_PUBLIC_API_URL will be set via environment variables
-// In development, it falls back to localhost
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000/api';
+// In development, it falls back to the deployed backend
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://travelease-api-backend.onrender.com/api';
 
 const api = axios.create({
     baseURL: API_URL,
