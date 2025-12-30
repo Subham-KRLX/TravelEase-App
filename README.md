@@ -1,94 +1,49 @@
-# TravelEase - Full Stack Travel Booking App
+# TravelEase - Full Stack Travel Booking App ✈️🏨
 
-**TravelEase** is a comprehensive, full-stack mobile application designed to simplify travel planning. It enables users to browse and book flights and hotels seamlessly, featuring a robust backend with real-time data persistence, secure authentication, and payment integration.
+TravelEase is a comprehensive mobile application for seamless travel planning, enabling users to browse and book flights and hotels with real-time data and secure payments.
 
 ## 🚀 Key Features
 
-*   **Full-Stack Architecture:**  React Native (Expo) frontend connected to a dedicated Node.js/Express backend.
-*   **User Authentication:** Secure signup and login using JWT (JSON Web Tokens).
-*   **Real-Time Search:** 
-    *   **Flights:** Search by origin, destination, date, and passengers.
-    *   **Hotels:** Search by city, check-in/out dates, and guests.
-*   **Booking Management:** 
-    *   Add flights and hotels to cart.
-    *   View booking history and status.
-    *   Real-time seat/room availability tracking.
-*   **Payment Integration:** Secure checkout process powered by Stripe (Test Mode).
-*   **Interactive UI:** Modern, responsive design with smooth animations and intuitive navigation.
+- **Full-Stack Architecture**: React Native (Expo) frontend + Node.js/Express backend.
+- **Secure Authentication**: JWT-based signup and login.
+- **Real-Time Search**: Browsing for flights (origin, date) and hotels (city, dates).
+- **Booking Management**: Cart system, booking history, and live availability tracking.
+- **Integrated Payments**: Secure checkout powered by Stripe (Test Mode).
+- **Modern UI**: Responsive, animated interface using React Native.
 
-## 🛠️ Technology Stack
+## 🛠️ Tech Stack
 
-*   **Frontend:** React Native, Expo, React Navigation, Axios
-*   **Backend:** Node.js, Express.js
-*   **Database:** MongoDB (using Mongoose ODM)
-*   **Authentication:** JWT, bcryptjs
-*   **Payments:** Stripe API
-*   **Data Seeding:** Custom scripts to generate realistic flight and hotel data
+- **Frontend**: React Native, Expo, React Navigation, Axios
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB (Mongoose)
+- **Security**: JWT, bcryptjs
+- **Payments**: Stripe API
 
-## ⚙️ Setup & Installation
+## ⚙️ Quick Setup
 
-### Prerequisites
-*   Node.js (v14 or higher)
-*   MongoDB (local or Atlas connection string)
-*   Expo Go app on your mobile device (or Android/iOS emulator)
-
-### 1. Backend Setup
-The backend handles all API requests, database connections, and business logic.
-
-\`\`\`bash
-# Navigate to backend directory
+### 1. Backend
+```bash
 cd backend
-
-# Install dependencies
 npm install
-
-# Configure Environment Variables
-cp .env.example .env
-# Edit .env and add your MongoDB URI and Stripe keys
-
-# Seed Database (Optional)
-npm run seed
-
-# Start the Server
+cp .env.example .env  # Add your MongoDB URI & Stripe keys
+npm run seed          # Optional: Seed with mock data
 npm run dev
-\`\`\`
+```
 
-### 2. Frontend Setup
-The frontend is the mobile application user interface.
-
-\`\`\`bash
-# Navigate to the root directory
-cd ..
-
-# Install dependencies
+### 2. Frontend
+```bash
+# From root directory
 npm install
-
-# Start the Expo development server
 npx expo start
-\`\`\`
-
-### 3. Application Configuration
-1.  Ensure the backend server is running.
-2.  Verify your `.env` configuration matches your development environment.
-3.  Update the API endpoint in `src/config/api.js` to point to your server's address (IP address or hosted URL).
-4.  Run the app using Expo Go on your device or emulator.
+```
 
 ## 📂 Project Structure
 
-*   **`backend/`**: Contains server code, models, controllers, and routes.
-    *   `models/`: Mongoose schemas (User, Flight, Hotel, Booking).
-    *   `controllers/`: Business logic for APIs.
-    *   `routes/`: API endpoint definitions.
-    *   `seeders/`: Scripts to populate the database with mock data.
-*   **`src/`**: React Native frontend code.
-    *   `components/`: Reusable UI components (SearchBar, Header, etc.).
-    *   `screens/`: Application screens (Home, SearchResults, Checkout, etc.).
-    *   `services/`: API service layer for backend communication.
-    *   `context/`: Global state management (Auth, Cart, Theme).
-    *   `navigation/`: App navigation configuration.
+- **`backend/`**: API routes, controllers, and MongoDB models.
+- **`src/`**: React Native screens, components, and service integrations.
 
 ## 🤝 Contributing
-Contributions are welcome! Please fork the repository and submit a pull request for any enhancements or bug fixes.
+Contributions are welcome! Fork the repo and submit a PR.
 
 ## 📄 License
-This project is open-source and available under the [MIT License](LICENSE).
+MIT License
