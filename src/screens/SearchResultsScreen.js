@@ -19,6 +19,7 @@ import hotelService from '../services/hotelService';
 export default function SearchResultsScreen() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigation = useNavigation();
   const route = useRoute();
   const { addToCart } = useCart();
@@ -29,6 +30,7 @@ export default function SearchResultsScreen() {
   useEffect(() => {
     const fetchResults = async () => {
       setLoading(true);
+      setError(null);
       try {
         if (searchType === 'flights') {
           const params = {
@@ -45,6 +47,7 @@ export default function SearchResultsScreen() {
             setResults(processFlightResults(response.flights));
           } else {
             console.error('Flight search failed:', response.error);
+            setError(response.error);
             setResults([]);
           }
         } else if (searchType === 'hotels') {
@@ -58,12 +61,13 @@ export default function SearchResultsScreen() {
           console.log('Hotel search params:', params);
           const response = await hotelService.searchHotels(params);
           console.log('Hotel search response:', response);
-          
+
           if (response.success && response.hotels) {
             console.log('Hotels found:', response.hotels.length);
             setResults(processHotelResults(response.hotels));
           } else {
             console.error('Hotel search failed:', response.error || 'No hotels in response');
+            setError(response.error || 'No hotels found');
             setResults([]);
           }
         } else {
@@ -72,8 +76,7 @@ export default function SearchResultsScreen() {
         }
       } catch (error) {
         console.error('Search error:', error);
-        console.error('Error stack:', error.stack);
-        console.error('Error message:', error.message);
+        setError('Network error. If you are on Vercel, please use the local frontend (localhost:8081).');
         setResults([]);
       } finally {
         setLoading(false);
@@ -88,7 +91,7 @@ export default function SearchResultsScreen() {
       console.error('Flights is not an array:', flights);
       return [];
     }
-    
+
     return flights.map(flight => {
       try {
         return {
@@ -116,7 +119,7 @@ export default function SearchResultsScreen() {
       console.error('Hotels is not an array:', hotels);
       return [];
     }
-    
+
     return hotels.map(hotel => {
       try {
         return {
@@ -210,7 +213,7 @@ export default function SearchResultsScreen() {
           <Ionicons name="add-circle" size={20} color={theme.primary} />
           <Text style={[styles.addButtonText, { color: theme.primary }]}>Add to Cart</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.detailsButton, { backgroundColor: theme.primary }]}
           onPress={() => navigation.navigate('FlightDetails', { id: flight.id })}
         >
@@ -263,7 +266,7 @@ export default function SearchResultsScreen() {
             <Ionicons name="add-circle" size={20} color={theme.primary} />
             <Text style={[styles.addButtonText, { color: theme.primary }]}>Add to Cart</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.detailsButton, { backgroundColor: theme.primary }]}
             onPress={() => navigation.navigate('HotelDetails', { id: hotel.id })}
           >
@@ -332,7 +335,7 @@ export default function SearchResultsScreen() {
             <Ionicons name="add-circle" size={20} color={theme.primary} />
             <Text style={[styles.addButtonText, { color: theme.primary }]}>Add to Cart</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.detailsButton, { backgroundColor: theme.primary }]}
             onPress={() => {
               console.log('Package details pressed for:', pkg.id);
@@ -357,18 +360,38 @@ export default function SearchResultsScreen() {
     );
   }
 
-  if (results.length === 0) {
+  if (error || results.length === 0) {
+    const isNetworkError = error && (error.toLowerCase().includes('network') || error.toLowerCase().includes('failed'));
+
     return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={[styles.header, { backgroundColor: theme.backgroundSecondary, borderBottomColor: theme.border }]}>
           <Text style={[styles.title, { color: theme.text }]}>
-            No {searchType} found
+            {error ? 'Search Error' : `No ${searchType} found`}
           </Text>
         </View>
         <View style={styles.emptyContainer}>
-          <Ionicons name="search" size={64} color={theme.textSecondary} />
-          <Text style={[styles.emptyText, { color: theme.textSecondary }]}>No results found for your search</Text>
-          <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>Try adjusting your filters</Text>
+          <Ionicons
+            name={isNetworkError ? "cloud-offline-outline" : "search"}
+            size={64}
+            color={isNetworkError ? theme.error : theme.textSecondary}
+          />
+          <Text style={[styles.emptyText, { color: theme.text }]}>
+            {error || `No results found for your search`}
+          </Text>
+          <Text style={[styles.emptySubtext, { color: theme.textSecondary }]}>
+            {isNetworkError
+              ? "This usually happens when HTTPS (Vercel) cannot talk to HTTP (Localhost). Please run 'npm run web' and use http://localhost:8081."
+              : "Try adjusting your filters or searching for different dates."}
+          </Text>
+          {isNetworkError && (
+            <TouchableOpacity
+              style={[styles.detailsButton, { backgroundColor: theme.primary, marginTop: 24, paddingHorizontal: 24 }]}
+              onPress={() => fetchResults()}
+            >
+              <Text style={styles.detailsButtonText}>Retry Search</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     );
@@ -382,7 +405,7 @@ export default function SearchResultsScreen() {
         </Text>
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.results}
         showsVerticalScrollIndicator={true}

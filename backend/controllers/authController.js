@@ -1,11 +1,57 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Generate JWT token
+// Generate JWT Token
 const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRE || '7d'
+    return jwt.sign({ id }, process.env.JWT_SECRET || 'fallback_secret', {
+        expiresIn: '30d'
     });
+};
+
+exports.demoLogin = async (req, res) => {
+    try {
+        console.log('Demo Login: Request received');
+        const demoEmail = 'demo_user@travelease.com';
+
+        let user = await User.findOne({ email: demoEmail });
+        console.log('Demo Login: User lookup result:', user ? 'User found' : 'User not found');
+
+        if (!user) {
+            console.log('Demo Login: Creating new user');
+            user = await User.create({
+                name: 'Demo User',
+                email: demoEmail,
+                password: 'demo_password_123', // Dummy password
+                role: 'user',
+                phone: '1234567890'
+            });
+            console.log('Demo Login: New user created');
+        }
+
+        const token = generateToken(user._id);
+        console.log('Demo Login: Token generated');
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                token,
+                user: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                    phone: user.phone
+                }
+            }
+        });
+        console.log('Demo Login: Response sent');
+    } catch (error) {
+        console.error('Demo login error:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'Demo login failed'
+        });
+    }
 };
 
 // @desc    Register new user

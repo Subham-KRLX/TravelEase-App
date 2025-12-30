@@ -19,7 +19,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   const navigation = useNavigation();
   const { login } = useAuth();
 
@@ -29,14 +29,20 @@ export default function LoginScreen() {
       return;
     }
 
+    console.log('Attempting login with:', email);
     setLoading(true);
     const result = await login(email, password);
     setLoading(false);
+    console.log('Login result in screen:', result);
 
     if (result.success) {
       navigation.navigate('Home');
     } else {
-      Alert.alert('Error', result.error || 'Login failed');
+      if (Platform.OS === 'web') {
+        window.alert(result.error || 'Login failed');
+      } else {
+        Alert.alert('Error', result.error || 'Login failed');
+      }
     }
   };
 
@@ -96,6 +102,28 @@ export default function LoginScreen() {
               <Text style={styles.loginButtonText}>
                 {loading ? 'Logging in...' : 'Login'}
               </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.googleButton, { marginTop: 16, backgroundColor: '#fff', borderWidth: 1, borderColor: '#e2e8f0' }]}
+              onPress={async () => {
+                setLoading(true);
+                const result = await googleLogin();
+                setLoading(false);
+                if (result.success) {
+                  navigation.navigate('Home');
+                } else {
+                  if (Platform.OS === 'web') {
+                    window.alert(result.error);
+                  } else {
+                    Alert.alert('Error', result.error);
+                  }
+                }
+              }}
+              disabled={loading}
+            >
+              <Ionicons name="logo-google" size={20} color="#ea4335" style={{ marginRight: 8 }} />
+              <Text style={[styles.loginButtonText, { color: '#1e293b' }]}>Continue with Google</Text>
             </TouchableOpacity>
 
             <View style={styles.divider}>
@@ -180,6 +208,15 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  googleButton: {
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   loginButtonText: {
     color: '#fff',

@@ -13,6 +13,7 @@ import CheckoutScreen from '../screens/CheckoutScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignUpScreen from '../screens/SignUpScreen';
+import PaymentScreen from '../screens/PaymentScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -128,7 +129,7 @@ export default function AppNavigator() {
         <Stack.Screen
           name="Dashboard"
           component={DashboardScreen}
-          options={{ title: 'My Dashboard' }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="Login"
@@ -139,6 +140,11 @@ export default function AppNavigator() {
           name="SignUp"
           component={SignUpScreen}
           options={{ title: 'Sign Up' }}
+        />
+        <Stack.Screen
+          name="Payment"
+          component={PaymentScreen}
+          options={{ title: 'Secure Payment' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

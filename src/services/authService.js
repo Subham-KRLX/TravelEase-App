@@ -14,9 +14,10 @@ const authService = {
             }
             return { success: false, error: response.data.message };
         } catch (error) {
+            console.error('Signup Error Details:', error);
             return {
                 success: false,
-                error: error.response?.data?.message || 'Signup failed'
+                error: error.response?.data?.message || error.message || 'Signup failed'
             };
         }
     },
@@ -33,9 +34,29 @@ const authService = {
             }
             return { success: false, error: response.data.message };
         } catch (error) {
+            console.error('Login Error Details:', error);
             return {
                 success: false,
-                error: error.response?.data?.message || 'Login failed'
+                error: error.response?.data?.message || error.message || 'Login failed'
+            };
+        }
+    },
+
+    // Mock Google Login (Demo Login)
+    googleLogin: async () => {
+        try {
+            const response = await api.post('/auth/demo-login', {});
+            if (response.data.status === 'success') {
+                const { token, user } = response.data.data;
+                await AsyncStorage.setItem('auth_token', token);
+                await AsyncStorage.setItem('travelease_user', JSON.stringify(user));
+                return { success: true, user };
+            }
+            return { success: false, error: response.data.message };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Google Auth failed'
             };
         }
     },

@@ -21,7 +21,7 @@ export default function SignUpScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   const navigation = useNavigation();
   const { signup } = useAuth();
 
@@ -42,13 +42,22 @@ export default function SignUpScreen() {
     }
 
     setLoading(true);
-    const result = await signup(name, email, password);
-    setLoading(false);
+    try {
+      const result = await signup(name, email, password);
+      console.log('Signup screen result:', result);
 
-    if (result.success) {
-      navigation.navigate('Home');
-    } else {
-      Alert.alert('Error', result.error || 'Sign up failed');
+      if (result.success) {
+        Alert.alert('Success', 'Account created successfully!', [
+          { text: 'OK', onPress: () => navigation.navigate('Home') }
+        ]);
+      } else {
+        Alert.alert('Sign Up Failed', result.error || 'Please check your details and try again.');
+      }
+    } catch (error) {
+      console.error('Signup screen catch block:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 

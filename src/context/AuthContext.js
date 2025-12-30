@@ -42,6 +42,8 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const result = await authService.login({ email, password });
 
+      console.log('Login result:', result);
+
       if (result.success) {
         setUser(result.user);
         return { success: true };
@@ -49,7 +51,28 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: result.error };
       }
     } catch (error) {
-      return { success: false, error: 'Login failed' };
+      console.error('Login exception:', error);
+      return { success: false, error: error.message || 'Login failed' };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const googleLogin = async () => {
+    try {
+      setLoading(true);
+      const result = await authService.googleLogin();
+      console.log('Google login result:', result);
+
+      if (result.success) {
+        setUser(result.user);
+        return { success: true };
+      } else {
+        return { success: false, error: result.error };
+      }
+    } catch (error) {
+      console.error('Google login exception:', error);
+      return { success: false, error: 'Google login failed' };
     } finally {
       setLoading(false);
     }
@@ -59,15 +82,18 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const result = await authService.signup({ name, email, password });
+      console.log('Signup result:', result);
 
       if (result.success) {
         setUser(result.user);
         return { success: true };
       } else {
+        console.error('Signup failed with error:', result.error);
         return { success: false, error: result.error };
       }
     } catch (error) {
-      return { success: false, error: 'Signup failed' };
+      console.error('Signup exception:', error);
+      return { success: false, error: 'Signup failed. Please check your internet connection or try again later.' };
     } finally {
       setLoading(false);
     }
@@ -86,6 +112,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     login,
+    googleLogin,
     signup,
     logout
   };

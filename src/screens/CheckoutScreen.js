@@ -4,7 +4,8 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  Alert
+  Alert,
+  Platform
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -22,11 +23,17 @@ export default function CheckoutScreen() {
 
 
   const handleCheckout = async () => {
+    console.log('Proceed to Payment clicked');
     if (!user) {
-      Alert.alert('Login Required', 'Please login to complete your booking', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Login', onPress: () => navigation.navigate('Login') }
-      ]);
+      if (Platform.OS === 'web') {
+        window.alert('Please login to complete your booking');
+        navigation.navigate('Login');
+      } else {
+        Alert.alert('Login Required', 'Please login to complete your booking', [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Login', onPress: () => navigation.navigate('Login') }
+        ]);
+      }
       return;
     }
 
@@ -35,48 +42,12 @@ export default function CheckoutScreen() {
       return;
     }
 
-    try {
-      // Process each item in cart as a booking
-      // In a real payment flow, we would first create a payment intent here
-
-      const bookingPromises = cartItems.map(item => {
-        const bookingData = {
-          type: item.type,
-          itemId: item.id,
-          details: {
-            ...item,
-            passengers: 1, // Default, should come from cart item customization
-            guests: 1      // Default
-          },
-          totalPrice: item.price * item.quantity
-        };
-        return bookingService.createBooking(bookingData);
-      });
-
-      const results = await Promise.all(bookingPromises);
-      const successfulBookings = results.filter(r => r.success);
-
-      if (successfulBookings.length === results.length) {
-        Alert.alert(
-          'Booking Confirmed!',
-          'Your booking has been confirmed. You will receive a confirmation email shortly.',
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                clearCart();
-                navigation.navigate('Dashboard');
-              }
-            }
-          ]
-        );
-      } else {
-        Alert.alert('Booking Issue', 'Some items could not be booked. Please try again.');
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      Alert.alert('Error', 'Failed to process booking. Please try again.');
-    }
+    // Navigate to Payment Screen with total amount and cart items
+    console.log('Navigating to Payment with:', { amount: Math.round(getTotalPrice() * 1.18), itemsCount: cartItems.length });
+    navigation.navigate('Payment', {
+      amount: Math.round(getTotalPrice() * 1.18),
+      items: cartItems
+    });
   };
 
   const renderCartItem = (item) => (
