@@ -10,6 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import SearchBar from '../components/SearchBar';
 
 const { width } = Dimensions.get('window');
@@ -17,6 +18,7 @@ const { width } = Dimensions.get('window');
 export default function HomeScreen() {
   const navigation = useNavigation();
   const { theme } = useTheme();
+  const { user } = useAuth();
 
   const features = [
     {
@@ -209,14 +211,16 @@ export default function HomeScreen() {
             style={styles.ctaButton}
             onPress={() => navigation.navigate('SearchResults')}
           >
-            <Text style={styles.ctaButtonText}>Start Planning</Text>
+            <Text style={styles.ctaButtonText}>{user ? 'Search More' : 'Start Planning'}</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.ctaButtonSecondary}
-            onPress={() => navigation.navigate('SignUp')}
-          >
-            <Text style={styles.ctaButtonSecondaryText}>Create Account</Text>
-          </TouchableOpacity>
+          {!user && (
+            <TouchableOpacity
+              style={styles.ctaButtonSecondary}
+              onPress={() => navigation.navigate('SignUp')}
+            >
+              <Text style={styles.ctaButtonSecondaryText}>Create Account</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </ScrollView>
