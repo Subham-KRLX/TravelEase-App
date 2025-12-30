@@ -14,6 +14,7 @@ import DashboardScreen from '../screens/DashboardScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import PaymentScreen from '../screens/PaymentScreen';
+import PackageDetailsScreen from '../screens/PackageDetailsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -145,6 +146,11 @@ export default function AppNavigator() {
           name="Payment"
           component={PaymentScreen}
           options={{ title: 'Secure Payment' }}
+        />
+        <Stack.Screen
+          name="PackageDetails"
+          component={PackageDetailsScreen}
+          options={{ title: 'Package Details' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

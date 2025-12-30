@@ -3,6 +3,7 @@ const connectDB = require('../config/database');
 const User = require('../models/User');
 const seedFlights = require('./flightSeeder');
 const seedHotels = require('./hotelSeeder');
+const seedPackages = require('./packageSeeder');
 
 const seedDatabase = async () => {
     try {
@@ -16,10 +17,12 @@ const seedDatabase = async () => {
         await User.deleteMany({});
         await require('../models/Flight').deleteMany({});
         await require('../models/Hotel').deleteMany({});
+        await require('../models/Package').deleteMany({}); // Added clearing for packages
         await require('../models/Booking').deleteMany({});
         await require('../models/Review').deleteMany({});
         console.log('✅ Existing data cleared\n');
 
+        // ... existing user creation ...
         // Create admin user
         console.log('👤 Creating admin user...');
         const adminUser = await User.create({
@@ -50,12 +53,17 @@ const seedDatabase = async () => {
         const hotelsCount = await seedHotels();
         console.log(`\n✅ Total hotels seeded: ${hotelsCount}\n`);
 
+        // Seed packages
+        const packagesCount = await seedPackages();
+        console.log(`\n✅ Total packages seeded: ${packagesCount}\n`);
+
         console.log('🎉 Database seeding completed successfully!');
         console.log('\n📝 Summary:');
         console.log(`   - Admin User: ${process.env.ADMIN_EMAIL || 'admin@travelease.com'} / ${process.env.ADMIN_PASSWORD || 'admin123'}`);
         console.log(`   - Demo User: demo@travelease.com / demo123`);
         console.log(`   - Flights: ${flightsCount}`);
         console.log(`   - Hotels: ${hotelsCount}`);
+        console.log(`   - Packages: ${packagesCount}`);
         console.log('\n✨ You can now start the server with: npm start\n');
 
         process.exit(0);

@@ -25,6 +25,7 @@ app.use(morgan('dev')); // Request logging
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/flights', require('./routes/flights'));
 app.use('/api/hotels', require('./routes/hotels'));
+app.use('/api/packages', require('./routes/packages'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/admin', require('./routes/admin'));

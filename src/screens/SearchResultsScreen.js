@@ -15,6 +15,7 @@ import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import flightService from '../services/flightService';
 import hotelService from '../services/hotelService';
+import packageService from '../services/packageService';
 
 export default function SearchResultsScreen() {
   const [results, setResults] = useState([]);
@@ -70,9 +71,19 @@ export default function SearchResultsScreen() {
             setError(response.error || 'No hotels found');
             setResults([]);
           }
-        } else {
-          // Keep packages mock as no backend yet
-          setResults(generateMockResults('packages'));
+        } else if (searchType === 'packages') {
+          const params = {
+            destination: route.params?.destination?.trim?.() || '',
+          };
+
+          const response = await packageService.searchPackages(params);
+          if (response.success) {
+            setResults(processPackageResults(response.packages));
+          } else {
+            console.error('Package search failed:', response.error);
+            setError(response.error);
+            setResults([]);
+          }
         }
       } catch (error) {
         console.error('Search error:', error);
@@ -138,6 +149,22 @@ export default function SearchResultsScreen() {
         return null;
       }
     }).filter(h => h !== null);
+  };
+
+  const processPackageResults = (packages) => {
+    if (!Array.isArray(packages)) return [];
+    return packages.map(pkg => ({
+      id: pkg._id,
+      type: 'package',
+      name: pkg.name,
+      destination: pkg.destination,
+      duration: pkg.duration,
+      includes: pkg.includes,
+      price: pkg.price,
+      image: pkg.image,
+      description: pkg.description,
+      rating: pkg.rating
+    }));
   };
 
   const generateMockResults = (type) => {
@@ -287,7 +314,7 @@ export default function SearchResultsScreen() {
         borderColor: theme.border,
         borderWidth: 1,
       }]}
-      onPress={() => navigation.navigate('Home')}
+      onPress={() => navigation.navigate('PackageDetails', { id: pkg.id })}
     >
       <Image source={{ uri: pkg.image }} style={styles.hotelImage} />
 
@@ -338,9 +365,7 @@ export default function SearchResultsScreen() {
           <TouchableOpacity
             style={[styles.detailsButton, { backgroundColor: theme.primary }]}
             onPress={() => {
-              console.log('Package details pressed for:', pkg.id);
-              // Package details screen would be implemented similarly to hotels/flights
-              Alert.alert('Package Details', 'Package details screen coming soon!');
+              navigation.navigate('PackageDetails', { id: pkg.id });
             }}
           >
             <Text style={styles.detailsButtonText}>View Details</Text>
