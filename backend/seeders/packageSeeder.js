@@ -184,6 +184,66 @@ const packages = [
             { day: 4, title: 'To Darjeeling', activities: ['Drive to Darjeeling', 'Evening at the Mall road'] },
             { day: 5, title: 'Darjeeling Sunrise', activities: ['Tiger Hill sunrise', 'Batasia Loop', 'Tea Garden visit'] }
         ]
+    },
+    {
+        name: 'Bali Tropical Getaway',
+        description: 'Discover the island of Gods. From ancient temples and lush rice terraces to stunning beaches and vibrant nightlife, Bali has it all.',
+        destination: 'Bali, Indonesia',
+        duration: '6 Days, 5 Nights',
+        price: 49999,
+        image: 'https://images.pexels.com/photos/2166553/pexels-photo-2166553.jpeg?auto=compress&cs=tinysrgb&w=800',
+        rating: 4.9,
+        isPopular: true,
+        includes: ['Flight', 'Hotel', 'Breakfast', 'Transfer', 'Sightseeing', 'Guide'],
+        itinerary: [
+            { day: 1, title: 'Arrive in Bali', activities: ['Pick up from Ngurah Rai Airport', 'Check-in to Seminyak resort', 'Evening at Potato Head beach club'] },
+            { day: 2, title: 'Ubud Culture', activities: ['Visit Sacred Monkey Forest', 'Tegalalang Rice Terraces', 'Ubud Royal Palace'] },
+            { day: 3, title: 'Temple & Sunset', activities: ['Tirta Empul Water Temple', 'Mt. Batur viewpoint', 'Kanto Lampo Waterfall'] },
+            { day: 4, title: 'Island Adventure', activities: ['Fast boat to Nusa Penida', 'Kelingking Beach', 'Broken Beach & Angel Billabong'] },
+            { day: 5, title: 'Coastal Wonders', activities: ['Uluwatu Temple cliff view', 'Kecak Fire Dance performance', 'Jimbaran bay seafood dinner'] },
+            { day: 6, title: 'Farewell Bali', activities: ['Breakfast with a view', 'Last minute shopping in Kuta', 'Transfer to airport'] }
+        ]
+    },
+    {
+        name: 'Switzerland Winter Wonderland',
+        description: 'Experience the magic of the Swiss Alps. Snow-covered peaks, charming villages, and world-class ski resorts await you.',
+        destination: 'Switzerland',
+        duration: '7 Days, 6 Nights',
+        price: 145999,
+        image: 'https://images.pexels.com/photos/358447/pexels-photo-358447.jpeg?auto=compress&cs=tinysrgb&w=800',
+        rating: 5.0,
+        isPopular: true,
+        includes: ['Flight', 'Hotel', 'Breakfast', 'Transfer', 'Sightseeing', 'Activities'],
+        itinerary: [
+            { day: 1, title: 'Arrive in Zurich', activities: ['Check-in to hotel', 'Evening walking tour of Old Town', 'Dinner by the lake'] },
+            { day: 2, title: 'Lucerne & Mount Pilatus', activities: ['Scenic train to Lucerne', 'Cable car to Pilatus Kulm', 'Chapel Bridge stroll'] },
+            { day: 3, title: 'Interlaken Adventure', activities: ['Train to Interlaken', 'Paragliding over the city', 'Harder Kulm funicular'] },
+            { day: 4, title: 'Jungfraujoch - Top of Europe', activities: ['Cogwheel train to highest station in Europe', 'Ice Palace & Sphinx Observatory'] },
+            { day: 5, title: 'Zermatt & Matterhorn', activities: ['Glacier Express train journey', 'Electric taxi to Zermatt village'] },
+            { day: 6, title: 'St. Moritz Luxury', activities: ['Visit the world\'s oldest ski resort', 'Ice skating on the lake', 'Apres-ski social'] },
+            { day: 7, title: 'Depart Zurich', activities: ['Breakfast', 'Visit Swiss National Museum', 'Transfer to ZRH Airport'] }
+        ]
+    },
+    {
+        name: 'Classical Greece Journey',
+        description: 'Walk through history in the birthplace of democracy. Explore ancient ruins, iconic islands, and savor delicious Mediterranean cuisine.',
+        destination: 'Greece',
+        duration: '8 Days, 7 Nights',
+        price: 112999,
+        image: 'https://images.pexels.com/photos/1010657/pexels-photo-1010657.jpeg?auto=compress&cs=tinysrgb&w=800',
+        rating: 4.8,
+        isPopular: false,
+        includes: ['Flight', 'Hotel', 'Breakfast', 'Transfer', 'Sightseeing', 'Guide'],
+        itinerary: [
+            { day: 1, title: 'Athens Arrival', activities: ['Transfer to hotel near Plaka', 'Welcome dinner with Acropolis view'] },
+            { day: 2, title: 'Acropolis Discovery', activities: ['Parthenon guided tour', 'New Acropolis Museum', 'Stroll through Anafiotika'] },
+            { day: 3, title: 'To Santorini', activities: ['Ferry to Thira', 'Check-in to Oia cliffside villa'] },
+            { day: 4, title: 'Santorini Caldera', activities: ['Volcano boat tour', 'Swimming in hot springs', 'Wine tasting at sunset'] },
+            { day: 5, title: 'Mykonos vibes', activities: ['High-speed ferry to Mykonos', 'Visit Windmills & Little Venice'] },
+            { day: 6, title: 'Historic Delos', activities: ['Morning trip to sacred island of Delos', 'Afternoon at Paradise Beach'] },
+            { day: 7, title: 'Back to Athens', activities: ['Flight to Athens', 'Shopping at Monastiraki flea market'] },
+            { day: 8, title: 'Departure', activities: ['Breakfast', 'Transfer to Eleftherios Venizelos Airport'] }
+        ]
     }
 ];
 
