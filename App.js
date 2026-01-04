@@ -6,7 +6,7 @@ import AppNavigator from './src/navigation/AppNavigator';
 
 function AppContent() {
   const { isDarkMode } = useTheme();
-  
+
   return (
     <>
       <StatusBar style={isDarkMode ? 'light' : 'light'} />
@@ -14,7 +14,6 @@ function AppContent() {
     </>
   );
 }
-
 export default function App() {
   return (
     <ThemeProvider>
