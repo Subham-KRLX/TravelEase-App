@@ -3,7 +3,7 @@ const Package = require('../models/Package');
 const packages = [
     {
         name: 'Goa Beach Paradise',
-        description: 'Experience the ultimate beach getaway in Goa. Relax on sun-kissed sands, explore vibrant markets, and enjoy thrilling water sports.',
+        description: 'Experience the ultimate beach getaway in Goa. Relax on sun-kissed sands, explore vibrant markets, and enjoy thrilling water sports. This package covers North and South Goa highlights.',
         destination: 'Goa, India',
         duration: '5 Days, 4 Nights',
         price: 24999,
@@ -21,6 +21,49 @@ const packages = [
         images: [
             'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=800',
             'https://images.pexels.com/photos/457882/pexels-photo-457882.jpeg?auto=compress&cs=tinysrgb&w=800'
+        ]
+    },
+    {
+        name: 'Heaven on Earth - Kashmir',
+        description: 'Discover the breathtaking beauty of Kashmir. Shikara rides on Dal Lake, snow-capped mountains of Gulmarg, and lush valleys of Pahalgam.',
+        destination: 'Kashmir, India',
+        duration: '6 Days, 5 Nights',
+        price: 34999,
+        image: 'https://images.pexels.com/photos/1659437/pexels-photo-1659437.jpeg?auto=compress&cs=tinysrgb&w=800',
+        rating: 4.9,
+        isPopular: true,
+        includes: ['Flight', 'Houseboat Stay', 'Breakfast', 'Transfer', 'Sightseeing', 'Shikara Ride'],
+        itinerary: [
+            { day: 1, title: 'Arrival in Srinagar', activities: ['Pickup from airport', 'Check-in to Houseboat', 'Evening Shikara ride on Dal Lake'] },
+            { day: 2, title: 'Srinagar Sightseeing', activities: ['Mughal Gardens (Nishat & Shalimar)', 'Shankaracharya Temple'] },
+            { day: 3, title: 'Excursion to Gulmarg', activities: ['Drive to Gulmarg', 'Gondola ride', 'Snow activities'] },
+            { day: 4, title: 'Pahalgam Valley', activities: ['Drive to Pahalgam', 'Visit Betaab Valley', 'Aru Valley'] },
+            { day: 5, title: 'Back to Srinagar', activities: ['Shopping for pashminas and spices', 'Leisure evening'] },
+            { day: 6, title: 'Departure', activities: ['Breakfast', 'Transfer to Srinagar Airport'] }
+        ],
+        images: [
+            'https://images.pexels.com/photos/1659437/pexels-photo-1659437.jpeg?auto=compress&cs=tinysrgb&w=800',
+            'https://images.pexels.com/photos/6738593/pexels-photo-6738593.jpeg?auto=compress&cs=tinysrgb&w=800'
+        ]
+    },
+    {
+        name: 'Luxury Goa Escape',
+        description: 'Indulge in a 5-star experience in South Goa. Private beach access, spa treatments, and gourmet dining.',
+        destination: 'Goa, India',
+        duration: '4 Days, 3 Nights',
+        price: 49999,
+        image: 'https://images.pexels.com/photos/261181/pexels-photo-261181.jpeg?auto=compress&cs=tinysrgb&w=800',
+        rating: 5.0,
+        isPopular: true,
+        includes: ['Flight', '5-Star Hotel', 'All Meals', 'Spa Credit', 'Transfer'],
+        itinerary: [
+            { day: 1, title: 'Welcome to Luxury', activities: ['Private transfer to resort', 'Welcome drink', 'Sunset dinner'] },
+            { day: 2, title: 'Relaxation & Spa', activities: ['Morning yoga', 'Full body massage', 'Beach lounging'] },
+            { day: 3, title: 'Cultural Tour', activities: ['Private tour of Old Goa', 'Fine dining experience'] },
+            { day: 4, title: 'Departure', activities: ['Champagne breakfast', 'Transfer to airport'] }
+        ],
+        images: [
+            'https://images.pexels.com/photos/261181/pexels-photo-261181.jpeg?auto=compress&cs=tinysrgb&w=800'
         ]
     },
     {

@@ -177,7 +177,7 @@ export default function HomeScreen() {
             <TouchableOpacity
               key={destination.id}
               style={styles.destinationCard}
-              onPress={() => navigation.navigate('SearchResults', { destination: destination.name })}
+              onPress={() => navigation.navigate('SearchResults', { type: 'packages', destination: destination.name })}
             >
               <Image
                 source={{ uri: destination.image }}

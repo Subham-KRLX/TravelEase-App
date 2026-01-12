@@ -21,7 +21,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
 
   const navigation = useNavigation();
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -29,20 +29,21 @@ export default function LoginScreen() {
       return;
     }
 
-    console.log('Attempting login with:', email);
     setLoading(true);
-    const result = await login(email, password);
-    setLoading(false);
-    console.log('Login result in screen:', result);
+    try {
+      const result = await login(email, password);
+      console.log('Login result in screen:', result);
 
-    if (result.success) {
-      navigation.navigate('Home');
-    } else {
-      if (Platform.OS === 'web') {
-        window.alert(result.error || 'Login failed');
+      if (result.success) {
+        navigation.navigate('Home');
       } else {
-        Alert.alert('Error', result.error || 'Login failed');
+        Alert.alert('Login Failed', result.error || 'Please check your credentials');
       }
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred');
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -108,16 +109,18 @@ export default function LoginScreen() {
               style={[styles.googleButton, { marginTop: 16, backgroundColor: '#fff', borderWidth: 1, borderColor: '#e2e8f0' }]}
               onPress={async () => {
                 setLoading(true);
-                const result = await googleLogin();
-                setLoading(false);
-                if (result.success) {
-                  navigation.navigate('Home');
-                } else {
-                  if (Platform.OS === 'web') {
-                    window.alert(result.error);
+                try {
+                  const result = await googleLogin();
+
+                  if (result.success) {
+                    navigation.navigate('Home');
                   } else {
-                    Alert.alert('Error', result.error);
+                    Alert.alert('Google Login Failed', result.error || 'Could not sign in with Google');
                   }
+                } catch (error) {
+                  Alert.alert('Error', 'Google login failed');
+                } finally {
+                  setLoading(false);
                 }
               }}
               disabled={loading}

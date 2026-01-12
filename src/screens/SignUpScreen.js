@@ -47,9 +47,7 @@ export default function SignUpScreen() {
       console.log('Signup screen result:', result);
 
       if (result.success) {
-        Alert.alert('Success', 'Account created successfully!', [
-          { text: 'OK', onPress: () => navigation.navigate('Home') }
-        ]);
+        navigation.navigate('Home');
       } else {
         Alert.alert('Sign Up Failed', result.error || 'Please check your details and try again.');
       }

@@ -35,7 +35,7 @@ const packageSchema = new mongoose.Schema({
     },
     includes: [{
         type: String,
-        enum: ['Flight', 'Hotel', 'Breakfast', 'Lunch', 'Dinner', 'Transfer', 'Sightseeing', 'Guide', 'Activities', 'Visa']
+        enum: ['Flight', 'Hotel', 'Breakfast', 'Lunch', 'Dinner', 'Transfer', 'Sightseeing', 'Guide', 'Activities', 'Visa', 'Houseboat Stay', 'Shikara Ride', '5-Star Hotel', 'All Meals', 'Spa Credit', 'Cruise']
     }],
     itinerary: [{
         day: Number,
