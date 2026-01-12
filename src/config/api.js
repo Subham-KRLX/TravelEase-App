@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // API Configuration
 // In production (Vercel), EXPO_PUBLIC_API_URL will be set via environment variables
 // In development, it falls back to the deployed backend
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5001/api';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://127.0.0.1:5001/api';
 
 const api = axios.create({
     baseURL: API_URL,

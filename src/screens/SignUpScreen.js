@@ -53,7 +53,7 @@ export default function SignUpScreen() {
       }
     } catch (error) {
       console.error('Signup screen catch block:', error);
-      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+      Alert.alert('Error', 'An unexpected error occurred during sign up. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -40,8 +40,8 @@ export default function LoginScreen() {
         Alert.alert('Login Failed', result.error || 'Please check your credentials');
       }
     } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred');
-      console.error(error);
+      Alert.alert('Error', 'An unexpected error occurred during login');
+      console.error('Login Screen Error:', error);
     } finally {
       setLoading(false);
     }

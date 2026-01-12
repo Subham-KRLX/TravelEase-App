@@ -14,7 +14,7 @@ const authService = {
             }
             return { success: false, error: response.data.message };
         } catch (error) {
-            console.error('Signup Error Details:', error);
+            console.error('Signup Error Details:', error.response ? error.response.data : error.message);
             return {
                 success: false,
                 error: error.response?.data?.message || error.message || 'Signup failed'
@@ -34,7 +34,7 @@ const authService = {
             }
             return { success: false, error: response.data.message };
         } catch (error) {
-            console.error('Login Error Details:', error);
+            console.error('Login Error Details:', error.response ? error.response.data : error.message);
             return {
                 success: false,
                 error: error.response?.data?.message || error.message || 'Login failed'
