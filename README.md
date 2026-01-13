@@ -248,11 +248,3 @@ Secure Stripe payment integration.
 
 ### Dashboard
 User dashboard with booking stats and history.
-
----
-
-<div align="center">
-  Made with ❤️ by Subham Sangwan
-  
-  ⭐ Star this repo if you find it helpful!
-</div>
