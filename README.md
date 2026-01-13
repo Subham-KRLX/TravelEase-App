@@ -97,8 +97,8 @@ TravelEase-App/
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/Subham-KRLX/Final-Travel.git
-cd Final-Travel
+git clone https://github.com/Subham-KRLX/TravelEase-App.git
+cd TravelEase-App
 ```
 
 ### 2. Backend Setup
@@ -224,7 +224,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Subham Sangwan**
 - GitHub: [@Subham-KRLX](https://github.com/Subham-KRLX)
-- Repository: [Final-Travel](https://github.com/Subham-KRLX/Final-Travel)
+- Repository: [TravelEase-App](https://github.com/Subham-KRLX/TravelEase-App)
 
 ## 🙏 Acknowledgments
 
@@ -235,17 +235,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📸 Screenshots
 
-### Home Page
-Beautiful landing page with hero section and search bar.
+### 🏠 Home Page
+Beautiful landing page with hero section and intelligent search bar.
 
-### Search Results
-Grid layout with flight/hotel/package cards.
+![TravelEase Home Page](screenshots/home_page.png)
 
-### Checkout
-Professional checkout experience with cart management.
+### ✈️ Flight Search Results
+Professional grid layout with real-time flight cards and smart filters.
 
-### Payment
-Secure Stripe payment integration.
+![Flight Search Results](screenshots/flight_results.png)
 
-### Dashboard
-User dashboard with booking stats and history.
+---
+
+**Built with ❤️ by Subham Sangwan** | [Live Demo](https://subham-travel.vercel.app) | [Report Bug](https://github.com/Subham-KRLX/TravelEase-App/issues)
