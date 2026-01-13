@@ -58,6 +58,7 @@ A modern, full-stack travel booking application with flight, hotel, and package 
 ## 📁 Project Structure
 
 ```
+# TravelEase App 🚀
 TravelEase-App/
 ├── frontend/                # React frontend
 │   ├── src/
