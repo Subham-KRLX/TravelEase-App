@@ -13,10 +13,7 @@ connectDB();
 
 // Middleware
 app.use(helmet()); // Security headers
-app.use(cors({
-    origin: process.env.FRONTEND_URL || '*',
-    credentials: true
-}));
+app.use(cors()); // Allow all origins, no credentials (cookies) needed for Bearer auth
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev')); // Request logging
