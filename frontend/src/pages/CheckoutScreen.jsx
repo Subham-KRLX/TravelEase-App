@@ -76,7 +76,7 @@ const CheckoutScreen = () => {
                                                 {item.departure?.time || item.departTime} - {item.arrival?.time || item.arriveTime} • {item.duration}
                                             </>
                                         )}
-                                        {item.type === 'hotel' && item.location}
+                                        {item.type === 'hotel' && (item.from || (item.location?.city ? `${item.location.address}, ${item.location.city}` : item.location))}
                                     </ItemDetails>
                                     <ItemPrice theme={theme}>
                                         ₹{(typeof item.price === 'number' ? item.price : (item.price?.economy || item.price?.pricePerNight || item.pricePerNight || 0)).toLocaleString()} × {item.quantity}

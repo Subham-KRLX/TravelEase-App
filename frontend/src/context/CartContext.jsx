@@ -41,16 +41,21 @@ export const CartProvider = ({ children }) => {
     };
 
     const addToCart = (item) => {
+        const itemToStore = {
+            ...item,
+            id: item.id || item._id // Ensure we have a consistent id
+        };
+
         setCartItems(prev => {
-            const existingItem = prev.find(cartItem => cartItem.id === item.id && cartItem.type === item.type);
+            const existingItem = prev.find(cartItem => cartItem.id === itemToStore.id && cartItem.type === itemToStore.type);
             if (existingItem) {
                 return prev.map(cartItem =>
-                    cartItem.id === item.id && cartItem.type === item.type
+                    cartItem.id === itemToStore.id && cartItem.type === itemToStore.type
                         ? { ...cartItem, quantity: cartItem.quantity + 1 }
                         : cartItem
                 );
             }
-            return [...prev, { ...item, quantity: 1 }];
+            return [...prev, itemToStore];
         });
     };
 

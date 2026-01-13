@@ -12,6 +12,7 @@ import {
   IoPerson,
   IoChevronForward
 } from 'react-icons/io5';
+import api from '../config/api';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -20,11 +21,31 @@ const DashboardScreen = () => {
   const { theme, isDarkMode } = useTheme();
   const navigate = useNavigate();
   const [statsVisible, setStatsVisible] = useState(false);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     // Simple entrance animation trigger
     setTimeout(() => setStatsVisible(true), 100);
-  }, []);
+    if (user) {
+      fetchBookings();
+    }
+  }, [user]);
+
+  const fetchBookings = async () => {
+    try {
+      const response = await api.get('/bookings');
+      if (response.data.status === 'success') {
+        setBookings(response.data.data.bookings);
+      }
+    } catch (err) {
+      console.error('Error fetching bookings:', err);
+      setError('Failed to fetch bookings');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     if (window.confirm('Are you sure you want to logout?')) {
@@ -32,25 +53,6 @@ const DashboardScreen = () => {
       navigate('/');
     }
   };
-
-  const mockBookings = [
-    {
-      id: 1,
-      type: 'flight',
-      title: 'Mumbai to Delhi',
-      date: '15 Nov 2025',
-      status: 'Confirmed',
-      amount: 8999
-    },
-    {
-      id: 2,
-      type: 'hotel',
-      title: 'The Taj Mahal Palace',
-      date: '20 Nov 2025',
-      status: 'Confirmed',
-      amount: 15999
-    }
-  ];
 
   if (!user) {
     return (
@@ -94,7 +96,7 @@ const DashboardScreen = () => {
           <IconCircle color={theme.primary}>
             <IoCalendar size={20} color="#fff" />
           </IconCircle>
-          <StatValue theme={theme}>{mockBookings.length}</StatValue>
+          <StatValue theme={theme}>{bookings.length}</StatValue>
           <StatLabel theme={theme}>Bookings</StatLabel>
         </StatCard>
 
@@ -102,7 +104,7 @@ const DashboardScreen = () => {
           <IconCircle color="#10b981">
             <IoCheckmarkCircle size={20} color="#fff" />
           </IconCircle>
-          <StatValue theme={theme}>{mockBookings.length}</StatValue>
+          <StatValue theme={theme}>{bookings.filter(b => b.paymentStatus === 'completed').length}</StatValue>
           <StatLabel theme={theme}>Completed</StatLabel>
         </StatCard>
 
@@ -110,7 +112,7 @@ const DashboardScreen = () => {
           <IconCircle color="#f59e0b">
             <IoTime size={20} color="#fff" />
           </IconCircle>
-          <StatValue theme={theme}>0</StatValue>
+          <StatValue theme={theme}>{bookings.filter(b => b.bookingStatus === 'confirmed' && b.paymentStatus !== 'completed').length}</StatValue>
           <StatLabel theme={theme}>Upcoming</StatLabel>
         </StatCard>
       </StatsContainer>
@@ -122,37 +124,49 @@ const DashboardScreen = () => {
         </SectionHeader>
 
         <BookingsList>
-          {mockBookings.map((booking) => (
-            <BookingCard key={booking.id} theme={theme}>
+          {loading ? (
+            <StatLabel theme={theme}>Loading bookings...</StatLabel>
+          ) : bookings.length === 0 ? (
+            <StatLabel theme={theme}>No bookings found. Start exploring!</StatLabel>
+          ) : bookings.map((booking) => (
+            <BookingCard key={booking._id} theme={theme}>
               <BookingHeader>
                 <BookingIcon theme={theme} isDarkMode={isDarkMode}>
-                  {booking.type === 'flight' ?
+                  {booking.bookingType === 'flight' ?
                     <IoAirplane size={24} color={theme.primary} /> :
                     <IoBed size={24} color={theme.primary} />
                   }
                 </BookingIcon>
                 <BookingInfo>
-                  <BookingTitle theme={theme}>{booking.title}</BookingTitle>
-                  <BookingDate theme={theme}>{booking.date}</BookingDate>
+                  <BookingTitle theme={theme}>
+                    {booking.bookingType === 'flight' ?
+                      `${booking.flight?.origin?.city || 'Flight'} to ${booking.flight?.destination?.city || ''}` :
+                      (booking.hotel?.name || 'Hotel Stay')}
+                  </BookingTitle>
+                  <BookingDate theme={theme}>
+                    {new Date(booking.createdAt).toLocaleDateString('en-IN', {
+                      day: 'numeric', month: 'short', year: 'numeric'
+                    })}
+                  </BookingDate>
                 </BookingInfo>
-                <StatusBadge status={booking.status}>
-                  {booking.status}
+                <StatusBadge paymentStatus={booking.paymentStatus}>
+                  {booking.paymentStatus}
                 </StatusBadge>
               </BookingHeader>
               <Divider theme={theme} />
               <BookingFooter>
                 <div>
                   <AmountLabel theme={theme}>Total Amount</AmountLabel>
-                  <Amount theme={theme}>₹{booking.amount.toLocaleString()}</Amount>
+                  <Amount theme={theme}>₹{booking.totalPrice?.toLocaleString()}</Amount>
                 </div>
                 <DetailsLink
                   theme={theme}
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate('/search', { state: { type: booking.type === 'flight' ? 'flights' : 'hotels' } });
+                    navigate(`/dashboard`);
                   }}
                 >
-                  View Details <IoChevronForward />
+                  {booking.bookingType.toUpperCase()} {booking.bookingReference}
                 </DetailsLink>
               </BookingFooter>
             </BookingCard>
@@ -429,7 +443,7 @@ const BookingDate = styled.span`
 `;
 
 const StatusBadge = styled.span`
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: ${props => props.paymentStatus === 'completed' ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'};
   color: white;
   padding: 6px 12px;
   border-radius: 20px;
@@ -437,7 +451,7 @@ const StatusBadge = styled.span`
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 `;
 
 const Divider = styled.div`

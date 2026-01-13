@@ -20,7 +20,7 @@ exports.createPaymentIntent = async (req, res) => {
             amount: Math.round(amount * 100), // Convert to cents
             currency: 'inr',
             metadata: {
-                bookingId: bookingId || '',
+                bookingIds: Array.isArray(bookingIds) ? bookingIds.join(',') : (bookingId || ''),
                 userId: req.user.id
             }
         });

@@ -7,7 +7,7 @@ This guide explains how to deploy TravelEase's **frontend** (Vite + React) and *
 ```
 TravelEase
 ├── Frontend (Vite + React) → Deploy to Vercel
-├── Backend (Node.js + Express) → Deploy to Render
+├── Backend (Node.js + Express) → Deploy to Renderf
 └── Database (MongoDB) → MongoDB Atlas
 ```
 

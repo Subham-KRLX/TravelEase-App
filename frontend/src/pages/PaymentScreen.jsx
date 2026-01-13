@@ -6,10 +6,10 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import { IoLockClosedOutline, IoArrowBack, IoCardOutline } from 'react-icons/io5';
 import { useTheme } from '../context/ThemeContext';
 import { useCart } from '../context/CartContext';
+import api from '../config/api';
 
 // Replace with your actual Stripe publishable key
-// For testing, use: pk_test_51...
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_YOUR_KEY_HERE');
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_51OqP8hSJbYfX9Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y');
 
 const CheckoutForm = ({ amount, items }) => {
     const stripe = useStripe();
@@ -37,7 +37,6 @@ const CheckoutForm = ({ amount, items }) => {
             return;
         }
 
-        // Validate email
         if (!email || !email.includes('@')) {
             setError('Please enter a valid email address');
             return;
@@ -46,32 +45,82 @@ const CheckoutForm = ({ amount, items }) => {
         setProcessing(true);
         setError(null);
 
-        // For demo purposes, we'll simulate a successful payment
-        // In production, you'd create a payment intent on your backend first
         try {
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            // In production, you would:
-            // 1. Create payment intent on backend: const { clientSecret } = await fetch('/create-payment-intent', {...})
-            // 2. Confirm the payment: const { error } = await stripe.confirmCardPayment(clientSecret, {...})
-
-            // For demo: just mark as succeeded
-            setSucceeded(true);
-            clearCart();
-
-            // Redirect to success page after a brief delay
-            setTimeout(() => {
-                navigate('/dashboard', {
-                    state: {
-                        paymentSuccess: true,
-                        amount: amount
+            // 1. Create bookings first (in pending state)
+            const bookingPromises = items.map(async (item) => {
+                const bookingData = {
+                    bookingType: item.type,
+                    itemId: item.id || item._id,
+                    totalPrice: typeof item.price === 'number' ? item.price :
+                        (item.price?.economy || item.price?.pricePerNight || item.pricePerNight || 0),
+                    details: item.type === 'flight' ? {
+                        class: item.travelClass || 'economy',
+                        passengers: item.passengers || [{ firstName: name.split(' ')[0], lastName: name.split(' ')[1] || '', age: 25, gender: 'M' }]
+                    } : {
+                        checkInDate: new Date(),
+                        checkOutDate: new Date(Date.now() + 86400000),
+                        numberOfNights: 1,
+                        roomType: item.roomType || 'Standard',
+                        guests: [{ firstName: name.split(' ')[0], lastName: name.split(' ')[1] || '', age: 25 }]
                     }
-                });
-            }, 1500);
+                };
+                const response = await api.post('/bookings', bookingData);
+                return response.data.data.booking._id;
+            });
 
+            const bookingIds = await Promise.all(bookingPromises);
+
+            // 2. Create Payment Intent on backend
+            const { data } = await api.post('/payments/create-intent', {
+                amount: amount,
+                bookingIds: bookingIds // We'll update backend to handle array
+            });
+
+            const clientSecret = data.data.clientSecret;
+
+            // 3. Confirm payment with Stripe
+            const result = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: {
+                    card: elements.getElement(CardElement),
+                    billing_details: {
+                        name: name,
+                        email: email,
+                        address: {
+                            line1: address.line1,
+                            city: address.city,
+                            state: address.state,
+                            postal_code: address.postal_code,
+                            country: address.country,
+                        }
+                    },
+                }
+            });
+
+            if (result.error) {
+                setError(result.error.message);
+                setProcessing(false);
+            } else {
+                if (result.paymentIntent.status === 'succeeded') {
+                    // 4. Confirm completion on backend for all bookings
+                    await Promise.all(bookingIds.map(id =>
+                        api.post('/payments/confirm', {
+                            paymentIntentId: result.paymentIntent.id,
+                            bookingId: id
+                        })
+                    ));
+
+                    setSucceeded(true);
+                    clearCart();
+
+                    setTimeout(() => {
+                        navigate('/dashboard', {
+                            state: { paymentSuccess: true, amount: amount }
+                        });
+                    }, 1500);
+                }
+            }
         } catch (err) {
-            setError(`Payment failed: ${err.message}`);
+            setError(`Payment failed: ${err.response?.data?.message || err.message}`);
             setProcessing(false);
         }
     };
