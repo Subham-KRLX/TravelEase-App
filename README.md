@@ -247,4 +247,4 @@ Professional grid layout with real-time flight cards and smart filters.
 
 ---
 
-**Built with ❤️ by Subham Sangwan** | [Live Demo](https://subham-travel.vercel.app) | [Report Bug](https://github.com/Subham-KRLX/TravelEase-App/issues)
+ [Live Demo](https://subham-travel.vercel.app) | [Report Bug](https://github.com/Subham-KRLX/TravelEase-App/issues)
