@@ -58,12 +58,14 @@ export default function Header() {
 
 // Styled Components
 const HeaderContainer = styled.header`
-  background-color: ${props => props.theme.headerBackground || '#1e40af'};
+  background: linear-gradient(135deg, ${props => props.theme.headerBackground || '#1e40af'} 0%, ${props => props.theme.headerBackground || '#1e40af'}dd 100%);
   padding: 12px 16px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   position: sticky;
   top: 0;
   z-index: 1000;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   
   @media (min-width: 640px) {
     padding: 16px 24px;
@@ -94,14 +96,15 @@ const Logo = styled(NavLink)`
 const LogoText = styled.span`
   color: ${props => props.theme.headerText || '#fff'};
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 800;
+  letter-spacing: -0.5px;
   
   @media (min-width: 640px) {
     font-size: 20px;
   }
   
   @media (max-width: 480px) {
-    display: none; /* Hide text on very small screens */
+    display: none;
   }
 `;
 
@@ -120,30 +123,38 @@ const IconButton = styled.button`
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.2s;
-  min-width: 40px; /* Touch-friendly */
+  transition: all 0.3s ease;
+  min-width: 40px;
   min-height: 40px;
+  border-radius: 8px;
+  position: relative;
 
   &:hover {
-    opacity: 0.8;
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 
 const Badge = styled.div`
   position: absolute;
-  top: -4px;
-  right: -4px;
-  background-color: #ef4444;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   border-radius: 50%;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
 `;
 
 const BadgeText = styled.span`
@@ -153,22 +164,29 @@ const BadgeText = styled.span`
 `;
 
 const LoginButton = styled(NavLink)`
-  background-color: ${props => props.theme.headerText || '#fff'};
+  background: linear-gradient(135deg, ${props => props.theme.headerText || '#fff'} 0%, ${props => props.theme.headerText || '#fff'}dd 100%);
   color: ${props => props.theme.headerBackground || '#1e40af'};
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 700;
   text-decoration: none;
   font-size: 14px;
-  transition: opacity 0.2s;
+  transition: all 0.3s ease;
   white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+  letter-spacing: 0.3px;
 
   &:hover {
-    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
   
   @media (min-width: 640px) {
-    padding: 8px 16px;
+    padding: 10px 24px;
     font-size: 15px;
   }
 `;
