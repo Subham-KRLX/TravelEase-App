@@ -1,0 +1,21 @@
+# Vercel build ignore file - only deploy frontend
+
+# Ignore backend
+backend
+render.yaml
+
+# Ignore root-level docs
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+DEPLOYMENT_INSTRUCTIONS.md
+LICENSE
+README.md
+
+# Ignore git
+.git
+.gitignore
+
+# Ignore environment
+.env
+.env.local
+.env.*.local
