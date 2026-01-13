@@ -30,6 +30,8 @@ expo-env.d.ts
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+*.log
+logs/
 
 # macOS
 .DS_Store
@@ -95,10 +97,6 @@ local.properties
 coverage/
 .nyc_output
 
-# Logs
-*.log
-logs/
-
 # Misc
 .watchmanconfig
 .buckconfig
@@ -106,3 +104,21 @@ logs/
 buck-out/
 \.buckd/
 vendor/bundle/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# IDE
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Build outputs
+dist/
+build/
+out/
+
+# OS specific
+Thumbs.db
