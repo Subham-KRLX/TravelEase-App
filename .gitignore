@@ -122,3 +122,6 @@ out/
 
 # OS specific
 Thumbs.db
+
+# Secrets
+MONGODB_CREDENTIALS.md
