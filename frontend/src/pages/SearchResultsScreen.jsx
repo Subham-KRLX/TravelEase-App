@@ -224,10 +224,10 @@ export default function SearchResultsScreen() {
           )}
           <EmptyText theme={theme}>{error || `No results found for your search`}</EmptyText>
           <EmptySubtext theme={theme}>
-            {error && error.includes('select')
+            {error && error.toLowerCase().includes('backend')
+              ? "💡 Make sure MongoDB is running and the backend server is started on http://localhost:5000"
+              : error
               ? "Please use the search form to select valid origin, destination, or city."
-              : error && error.includes('backend')
-              ? "Make sure your backend server is running on http://localhost:5000"
               : !error
               ? "Try adjusting your filters or searching for different dates."
               : "Try again with different search criteria."}

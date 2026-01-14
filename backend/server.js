@@ -16,6 +16,11 @@ connectDB().then(async () => {
         const Flight = require('./models/Flight');
         const flightCount = await Flight.countDocuments();
         
+        console.log(`\n📊 Database Status:
+        - Connected: ✅
+        - Flights in DB: ${flightCount}
+        `);
+        
         // If no flights exist, seed the database
         if (flightCount === 0) {
             console.log('📊 No data found in database. Auto-seeding...');
@@ -74,6 +79,9 @@ app.use((err, req, res, next) => {
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📍 Environment: ${process.env.NODE_ENV}`);
+    console.log(`\n🚀 Server Status:
+    - Running on: http://localhost:${PORT}
+    - Environment: ${process.env.NODE_ENV || 'development'}
+    - API Base: http://localhost:${PORT}/api
+    `);
 });
