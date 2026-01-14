@@ -38,8 +38,11 @@ export default function SearchResultsScreen() {
       setError(null);
       try {
         if (searchType === 'flights') {
-          // Check if this is "Explore All" mode
-          if (params.exploreAll) {
+          const origin = params.from?.trim?.() || '';
+          const destination = params.to?.trim?.() || '';
+
+          // If no origin/destination provided, explore all flights
+          if (!origin || !destination) {
             console.log('🔍 Exploring all flights...');
             const response = await flightService.searchFlights({
               origin: '',
@@ -61,8 +64,8 @@ export default function SearchResultsScreen() {
           } else {
             // Regular search with specific route
             const searchParams = {
-              origin: params.from?.trim?.() || '',
-              destination: params.to?.trim?.() || '',
+              origin: origin,
+              destination: destination,
               departureDate: params.departDate?.trim?.() || '',
               returnDate: params.returnDate?.trim?.() || '',
               passengers: params.passengers || 1,
@@ -70,13 +73,6 @@ export default function SearchResultsScreen() {
             };
 
             console.log('📍 Flight search params from UI:', searchParams);
-
-            if (!searchParams.origin || !searchParams.destination) {
-              setError('Please select both origin and destination cities');
-              setResults([]);
-              setLoading(false);
-              return;
-            }
 
             const response = await flightService.searchFlights(searchParams);
             
@@ -92,37 +88,56 @@ export default function SearchResultsScreen() {
             }
           }
         } else if (searchType === 'hotels') {
-          const searchParams = {
-            city: params.location?.trim?.() || '',
-            checkIn: params.checkIn?.trim?.() || '',
-            checkOut: params.checkOut?.trim?.() || '',
-            guests: params.guests || '1'
-          };
+          const city = params.location?.trim?.() || '';
 
-          console.log('📍 Hotel search params from UI:', searchParams);
+          // If no city provided, explore all hotels
+          if (!city) {
+            console.log('🔍 Exploring all hotels...');
+            const response = await hotelService.searchHotels({
+              city: '',
+              checkIn: '',
+              checkOut: '',
+              guests: '1'
+            });
 
-          if (!searchParams.city) {
-            setError('Please select a city');
-            setResults([]);
-            setLoading(false);
-            return;
-          }
+            console.log('📊 All hotels response:', response);
 
-          const response = await hotelService.searchHotels(searchParams);
-
-          console.log('📊 Hotel search response:', response);
-
-          if (response.success && response.hotels && response.hotels.length > 0) {
-            setResults(processHotelResults(response.hotels));
-            setError(null);
+            if (response.success && response.hotels && response.hotels.length > 0) {
+              setResults(processHotelResults(response.hotels));
+              setError(null);
+            } else {
+              const errorMsg = 'No hotels available. Please check if backend is running on http://localhost:5000';
+              setError(errorMsg);
+              setResults([]);
+            }
           } else {
-            const errorMsg = response.error || 'No hotels found in this city. Try a different destination.';
-            setError(errorMsg);
-            setResults([]);
+            const searchParams = {
+              city: city,
+              checkIn: params.checkIn?.trim?.() || '',
+              checkOut: params.checkOut?.trim?.() || '',
+              guests: params.guests || '1'
+            };
+
+            console.log('📍 Hotel search params from UI:', searchParams);
+
+            const response = await hotelService.searchHotels(searchParams);
+
+            console.log('📊 Hotel search response:', response);
+
+            if (response.success && response.hotels && response.hotels.length > 0) {
+              setResults(processHotelResults(response.hotels));
+              setError(null);
+            } else {
+              const errorMsg = response.error || 'No hotels found in this city. Try a different destination.';
+              setError(errorMsg);
+              setResults([]);
+            }
           }
         } else if (searchType === 'packages') {
+          const destination = params.destination?.trim?.() || '';
+          
           const searchParams = {
-            destination: params.destination?.trim?.() || '',
+            destination: destination,
           };
 
           const response = await packageService.searchPackages(searchParams);
