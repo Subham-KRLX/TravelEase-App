@@ -1,6 +1,6 @@
 const Flight = require('../models/Flight');
 
-// @desc    Search flights with filters
+// @desc    Search flights with filters or get all flights
 // @route   GET /api/flights/search
 // @access  Public
 exports.searchFlights = async (req, res) => {
@@ -23,35 +23,41 @@ exports.searchFlights = async (req, res) => {
         // Build query
         let query = {};
 
-        // More flexible origin matching
-        if (origin && origin.trim()) {
-            const originTrim = origin.trim();
-            // Match either city name or airport code
-            query.$or = [
-                { 'origin.city': new RegExp(originTrim, 'i') },
-                { 'origin.airportCode': new RegExp(originTrim, 'i') }
-            ];
-        }
-
-        // More flexible destination matching
-        if (destination && destination.trim()) {
-            const destTrim = destination.trim();
-            const destQuery = {
-                $or: [
-                    { 'destination.city': new RegExp(destTrim, 'i') },
-                    { 'destination.airportCode': new RegExp(destTrim, 'i') }
-                ]
-            };
-            
-            // Combine with existing OR condition or create new one
-            if (query.$or) {
-                query.$and = [
-                    { $or: query.$or },
-                    destQuery
+        // If no origin and destination, get all flights (Explore All mode)
+        if (!origin && !destination) {
+            console.log('📊 Explore All mode - fetching all available flights');
+            // Don't add any location filters
+        } else {
+            // More flexible origin matching
+            if (origin && origin.trim()) {
+                const originTrim = origin.trim();
+                // Match either city name or airport code
+                query.$or = [
+                    { 'origin.city': new RegExp(originTrim, 'i') },
+                    { 'origin.airportCode': new RegExp(originTrim, 'i') }
                 ];
-                delete query.$or;
-            } else {
-                query.$or = destQuery.$or;
+            }
+
+            // More flexible destination matching
+            if (destination && destination.trim()) {
+                const destTrim = destination.trim();
+                const destQuery = {
+                    $or: [
+                        { 'destination.city': new RegExp(destTrim, 'i') },
+                        { 'destination.airportCode': new RegExp(destTrim, 'i') }
+                    ]
+                };
+                
+                // Combine with existing OR condition or create new one
+                if (query.$or) {
+                    query.$and = [
+                        { $or: query.$or },
+                        destQuery
+                    ];
+                    delete query.$or;
+                } else {
+                    query.$or = destQuery.$or;
+                }
             }
         }
 
@@ -103,7 +109,7 @@ exports.searchFlights = async (req, res) => {
 
         console.log('📋 Query object:', JSON.stringify(query, null, 2));
         
-        const flights = await Flight.find(query).sort(sortOption).limit(50);
+        const flights = await Flight.find(query).sort(sortOption).limit(100);
         
         console.log(`✅ Found ${flights.length} flights`);
 

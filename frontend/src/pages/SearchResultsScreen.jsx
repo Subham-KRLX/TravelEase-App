@@ -38,35 +38,58 @@ export default function SearchResultsScreen() {
       setError(null);
       try {
         if (searchType === 'flights') {
-          const searchParams = {
-            origin: params.from?.trim?.() || '',
-            destination: params.to?.trim?.() || '',
-            departureDate: params.departDate?.trim?.() || '',
-            returnDate: params.returnDate?.trim?.() || '',
-            passengers: params.passengers || 1,
-            class: 'economy' // Default for now
-          };
-
-          console.log('📍 Flight search params from UI:', searchParams);
-
-          if (!searchParams.origin || !searchParams.destination) {
-            setError('Please select both origin and destination cities');
-            setResults([]);
-            setLoading(false);
-            return;
-          }
-
-          const response = await flightService.searchFlights(searchParams);
-          
-          console.log('📊 Flight search response:', response);
-          
-          if (response.success && response.flights && response.flights.length > 0) {
-            setResults(processFlightResults(response.flights));
-            setError(null);
+          // Check if this is "Explore All" mode
+          if (params.exploreAll) {
+            console.log('🔍 Exploring all flights...');
+            const response = await flightService.searchFlights({
+              origin: '',
+              destination: '',
+              passengers: 1,
+              class: 'economy'
+            });
+            
+            console.log('📊 All flights response:', response);
+            
+            if (response.success && response.flights && response.flights.length > 0) {
+              setResults(processFlightResults(response.flights));
+              setError(null);
+            } else {
+              const errorMsg = 'No flights available. Please check if backend is running on http://localhost:5000';
+              setError(errorMsg);
+              setResults([]);
+            }
           } else {
-            const errorMsg = response.error || 'No flights found for this route. Try different cities or dates.';
-            setError(errorMsg);
-            setResults([]);
+            // Regular search with specific route
+            const searchParams = {
+              origin: params.from?.trim?.() || '',
+              destination: params.to?.trim?.() || '',
+              departureDate: params.departDate?.trim?.() || '',
+              returnDate: params.returnDate?.trim?.() || '',
+              passengers: params.passengers || 1,
+              class: 'economy'
+            };
+
+            console.log('📍 Flight search params from UI:', searchParams);
+
+            if (!searchParams.origin || !searchParams.destination) {
+              setError('Please select both origin and destination cities');
+              setResults([]);
+              setLoading(false);
+              return;
+            }
+
+            const response = await flightService.searchFlights(searchParams);
+            
+            console.log('📊 Flight search response:', response);
+            
+            if (response.success && response.flights && response.flights.length > 0) {
+              setResults(processFlightResults(response.flights));
+              setError(null);
+            } else {
+              const errorMsg = response.error || 'No flights found for this route. Try different cities or dates.';
+              setError(errorMsg);
+              setResults([]);
+            }
           }
         } else if (searchType === 'hotels') {
           const searchParams = {
@@ -122,7 +145,7 @@ export default function SearchResultsScreen() {
     };
 
     fetchResults();
-  }, [searchType, JSON.stringify(params)]) // Deep dependency check simplifier
+  }, [searchType, JSON.stringify(params)]);
 
   const processFlightResults = (flights) => {
     if (!Array.isArray(flights)) return [];

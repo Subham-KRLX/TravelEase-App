@@ -110,21 +110,34 @@ export default function HomeScreen() {
           <HeroSubtitle theme={theme}>
             Book smarter, travel better with exclusive deals
           </HeroSubtitle>
-          <HeroButton theme={theme} onClick={() => {
-            // Navigate with default search parameters
-            const defaultParams = {
-              type: 'flights',
-              from: 'Mumbai',
-              to: 'Delhi',
-              departDate: new Date().toISOString().split('T')[0],
-              returnDate: new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0],
-              passengers: 1
-            };
-            navigate('/search', { state: defaultParams });
-          }}>
-            <HeroButtonText>Start Exploring</HeroButtonText>
-            <IoArrowForwardCircle size={20} color="#fff" />
-          </HeroButton>
+          <HeroButtonGroup>
+            <HeroButton theme={theme} onClick={() => {
+              // Navigate with default search parameters
+              const defaultParams = {
+                type: 'flights',
+                from: 'Mumbai',
+                to: 'Delhi',
+                departDate: new Date().toISOString().split('T')[0],
+                returnDate: new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0],
+                passengers: 1
+              };
+              navigate('/search', { state: defaultParams });
+            }}>
+              <HeroButtonText>Start Exploring</HeroButtonText>
+              <IoArrowForwardCircle size={20} color="#fff" />
+            </HeroButton>
+            <ExploreAllButton theme={theme} onClick={() => {
+              // Navigate to explore all flights
+              const exploreParams = {
+                type: 'flights',
+                exploreAll: true // Show all available flights
+              };
+              navigate('/search', { state: exploreParams });
+            }}>
+              <HeroButtonText>Explore All</HeroButtonText>
+              <IoArrowForwardCircle size={20} color="#fff" />
+            </ExploreAllButton>
+          </HeroButtonGroup>
         </HeroContent>
       </HeroContainer>
 
@@ -898,5 +911,38 @@ const CtaButtonSecondary = styled.button`
     background-color: rgba(255,255,255,0.15);
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  }
+`;
+
+const HeroButtonGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    gap: 16px;
+  }
+`;
+
+const ExploreAllButton = styled.button`
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: none;
+  padding: 16px 40px;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px rgba(245, 87, 108, 0.6);
   }
 `;
