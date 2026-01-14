@@ -1,91 +1,89 @@
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
-  Plane,
-  Hotel,
-  Map,
-  ShieldCheck,
-  Clock,
-  Award,
-  ArrowRight,
-  Star,
-  Search,
-  CheckCircle2
-} from 'lucide-react';
+  IoCheckmarkCircle,
+  IoArrowForwardCircle,
+  IoTimeOutline,
+  IoShieldCheckmarkOutline,
+  IoTrophyOutline,
+  IoAirplane,
+  IoBed,
+  IoGift,
+  IoLocation,
+  IoArrowForward
+} from 'react-icons/io5';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import SearchBar from '../components/SearchBar';
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: 'easeOut' },
-  },
-};
-
+// Mock Data
 const features = [
   {
-    icon: Clock,
+    icon: IoTimeOutline,
     title: '24/7 Support',
-    description: 'Expert travel assistance whenever you need it, anywhere in the world.'
+    description: 'Round-the-clock customer service for all your travel needs'
   },
   {
-    icon: ShieldCheck,
+    icon: IoShieldCheckmarkOutline,
     title: 'Secure Booking',
-    description: 'Military-grade encryption for all your transactions and data.'
+    description: 'Your payments and personal data are always protected'
   },
   {
-    icon: Award,
-    title: 'Best Price Guarantee',
-    description: 'Find a lower price elsewhere? We will match it, no questions asked.'
+    icon: IoTrophyOutline,
+    title: 'Best Prices',
+    description: 'Compare prices and get the best deals on flights and hotels'
   }
 ];
 
-const topDestinations = [
+const destinations = [
   {
     id: 1,
-    name: 'Santorini, Greece',
-    image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=800&q=80',
-    price: '₹45,999',
-    rating: 4.9,
-    reviews: 1240
+    name: 'Goa, India',
+    image: 'https://images.pexels.com/photos/962464/pexels-photo-962464.jpeg?auto=compress&cs=tinysrgb&w=800',
+    price: 'From ₹8,999',
+    description: 'Beautiful beaches and vibrant nightlife'
   },
   {
     id: 2,
-    name: 'Kyoto, Japan',
-    image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80',
-    price: '₹38,500',
-    rating: 4.8,
-    reviews: 980
+    name: 'Kerala, India',
+    image: 'https://images.pexels.com/photos/2476632/pexels-photo-2476632.jpeg?auto=compress&cs=tinysrgb&w=800',
+    price: 'From ₹12,999',
+    description: "God's own country with backwaters"
   },
   {
     id: 3,
-    name: 'Swiss Alps',
-    image: 'https://images.unsplash.com/photo-1531310197839-ccf54634509e?auto=format&fit=crop&w=800&q=80',
-    price: '₹52,000',
-    rating: 5.0,
-    reviews: 850
+    name: 'Rajasthan, India',
+    image: 'https://images.pexels.com/photos/3581368/pexels-photo-3581368.jpeg?auto=compress&cs=tinysrgb&w=800',
+    price: 'From ₹6,999',
+    description: 'Royal palaces and desert landscapes'
   },
   {
     id: 4,
-    name: 'Bali, Indonesia',
-    image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80',
-    price: '₹22,999',
-    rating: 4.7,
-    reviews: 2100
+    name: 'Kashmir, India',
+    image: 'https://images.pexels.com/photos/1670770/pexels-photo-1670770.jpeg?auto=compress&cs=tinysrgb&w=800',
+    price: 'From ₹15,999',
+    description: 'Paradise on earth with stunning valleys'
+  }
+];
+
+const services = [
+  {
+    icon: IoAirplane,
+    title: 'Flights',
+    description: 'Find the best flight deals worldwide',
+    color: '#1e40af'
+  },
+  {
+    icon: IoBed,
+    title: 'Hotels',
+    description: 'Book comfortable accommodations',
+    color: '#f97316'
+  },
+  {
+    icon: IoGift,
+    title: 'Packages',
+    description: 'Complete vacation packages',
+    color: '#16a34a'
   }
 ];
 
@@ -95,575 +93,721 @@ export default function HomeScreen() {
   const { user } = useAuth();
 
   return (
-    <PageContainer
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
+    <PageContainer theme={theme}>
       {/* Hero Section */}
-      <HeroSection>
-        <HeroBg>
-          <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80" alt="Travel Backdrop" />
-          <div className="overlay" />
-        </HeroBg>
-
+      <HeroContainer>
+        <HeroImage src="https://images.unsplash.com/photo-1488085061387-422e29b40080?w=1600" alt="Hero" />
+        <HeroOverlay theme={theme} />
         <HeroContent>
-          <motion.div variants={itemVariants}>
-            <HeroBadge>
-              <CheckCircle2 size={14} />
-              Trusted by 5M+ Travelers Worldwide
-            </HeroBadge>
-          </motion.div>
-
-          <motion.h1 variants={itemVariants}>
-            Book flights, hotels, and<br />
-            <span>travel packages easily</span>
-          </motion.h1>
-
-          <motion.p variants={itemVariants}>
-            Experience the world like never before. Effortless planning,
-            exclusive deals, and memories that last a lifetime.
-          </motion.p>
-
-          <motion.div variants={itemVariants}>
-            <CtaGroup>
-              <HeroCta onClick={() => navigate('/search')}>
-                Start Exploring
-                <ArrowRight size={18} />
-              </HeroCta>
-              {!user && (
-                <SecondaryCta onClick={() => navigate('/signup')}>
-                  Join the Club
-                </SecondaryCta>
-              )}
-            </CtaGroup>
-          </motion.div>
+          <HeroBadge>
+            <IoCheckmarkCircle size={16} color={theme.primary} />
+            <HeroBadgeText theme={theme}>#1 Travel App in India</HeroBadgeText>
+          </HeroBadge>
+          <HeroTitle>
+            Explore the<br />
+            <HeroHighlight theme={theme}>World 🌍</HeroHighlight>
+          </HeroTitle>
+          <HeroSubtitle theme={theme}>
+            Book smarter, travel better with exclusive deals
+          </HeroSubtitle>
+          <HeroButton theme={theme} onClick={() => {
+            // Navigate with default search parameters
+            const defaultParams = {
+              type: 'flights',
+              from: 'Mumbai',
+              to: 'Delhi',
+              departDate: new Date().toISOString().split('T')[0],
+              returnDate: new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0],
+              passengers: 1
+            };
+            navigate('/search', { state: defaultParams });
+          }}>
+            <HeroButtonText>Start Exploring</HeroButtonText>
+            <IoArrowForwardCircle size={20} color="#fff" />
+          </HeroButton>
         </HeroContent>
-      </HeroSection>
+      </HeroContainer>
 
-      {/* Floating Search Bar */}
-      <SearchWrapper variants={itemVariants}>
-        <div className="search-container">
-          <SearchBar />
-        </div>
-      </SearchWrapper>
+      {/* Search Bar - Positioned over Hero/Content junction */}
+      <SearchBarContainer>
+        <SearchBar />
+      </SearchBarContainer>
 
-      {/* Why Choose Us */}
+      {/* Features Section */}
       <Section>
-        <SectionHeader>
-          <h2>The TravelEase Difference</h2>
-          <p>We handle the details, you handle the discovery.</p>
-        </SectionHeader>
-
         <FeaturesGrid>
-          {features.map((f, i) => (
-            <FeatureCard key={i} variants={itemVariants} whileHover={{ y: -5 }}>
-              <div className="icon">
-                <f.icon size={24} />
-              </div>
-              <h3>{f.title}</h3>
-              <p>{f.description}</p>
+          {features.map((feature, index) => (
+            <FeatureCard key={index} theme={theme} onClick={() => { }}>
+              <FeatureIconContainer theme={theme}>
+                <feature.icon size={28} color={theme.primary} />
+              </FeatureIconContainer>
+              <FeatureTitle theme={theme}>{feature.title}</FeatureTitle>
+              <FeatureDescription theme={theme}>{feature.description}</FeatureDescription>
             </FeatureCard>
           ))}
         </FeaturesGrid>
       </Section>
 
-      {/* Quick Services */}
-      <BookingSection>
+      {/* Services Section */}
+      <Section>
         <SectionHeader>
-          <h2>What would you like to book?</h2>
+          <SectionTitle theme={theme}>What We Offer</SectionTitle>
+          <SectionSubtitle theme={theme}>Everything you need for your perfect trip</SectionSubtitle>
         </SectionHeader>
 
-        <BookingGrid>
-          <BookingCard
-            variants={itemVariants}
-            bg="#006AFF"
-            onClick={() => navigate('/search', { state: { type: 'flights' } })}
-          >
-            <div className="card-content">
-              <Plane size={32} />
-              <h3>Flights</h3>
-              <p>Find the best domestic and international flight deals.</p>
-            </div>
-            <div className="card-image">
-              <img src="https://images.unsplash.com/photo-1464037862335-6c65a52bab89?auto=format&fit=crop&w=400&q=80" alt="Flights" />
-            </div>
-          </BookingCard>
-
-          <BookingCard
-            variants={itemVariants}
-            bg="#10B981"
-            onClick={() => navigate('/search', { state: { type: 'hotels' } })}
-          >
-            <div className="card-content">
-              <Hotel size={32} />
-              <h3>Hotels</h3>
-              <p>Book from over 1M+ hotels and vacation rentals.</p>
-            </div>
-            <div className="card-image">
-              <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80" alt="Hotels" />
-            </div>
-          </BookingCard>
-
-          <BookingCard
-            variants={itemVariants}
-            bg="#F59E0B"
-            onClick={() => navigate('/search', { state: { type: 'packages' } })}
-          >
-            <div className="card-content">
-              <Map size={32} />
-              <h3>Packages</h3>
-              <p>Curated vacation packages for every budget.</p>
-            </div>
-            <div className="card-image">
-              <img src="https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?auto=format&fit=crop&w=400&q=80" alt="Packages" />
-            </div>
-          </BookingCard>
-        </BookingGrid>
-      </BookingSection>
-
-      {/* Popular Destinations */}
-      <Section className="destinations">
-        <SectionHeader>
-          <div className="flex-header">
-            <div>
-              <h2>Popular Destinations</h2>
-              <p>Hand-picked locations for your next adventure</p>
-            </div>
-            <ViewAll onClick={() => navigate('/search')}>
-              View All <ArrowRight size={16} />
-            </ViewAll>
-          </div>
-        </SectionHeader>
-
-        <DestinationsGrid>
-          {topDestinations.map(dest => (
-            <DestCard key={dest.id} variants={itemVariants} whileHover={{ y: -10 }}>
-              <div className="img-wrapper">
-                <img src={dest.image} alt={dest.name} />
-                <div className="rating">
-                  <Star size={14} fill="currentColor" />
-                  {dest.rating} ({dest.reviews})
-                </div>
-              </div>
-              <div className="content">
-                <h3>{dest.name}</h3>
-                <div className="footer">
-                  <span className="price">Starting <span>{dest.price}</span></span>
-                  <BookingBtn onClick={() => navigate('/search', { state: { destination: dest.name } })}>
-                    Book
-                  </BookingBtn>
-                </div>
-              </div>
-            </DestCard>
+        <ServicesGrid>
+          {services.map((service, index) => (
+            <ServiceCard
+              key={index}
+              theme={theme}
+              onClick={() => navigate('/search', { state: { type: service.title.toLowerCase() } })}
+            >
+              <ServiceIcon bg={service.color}>
+                <service.icon size={32} color="#fff" />
+              </ServiceIcon>
+              <ServiceContent>
+                <ServiceTitle theme={theme}>{service.title}</ServiceTitle>
+                <ServiceDescription theme={theme}>{service.description}</ServiceDescription>
+              </ServiceContent>
+              <IoArrowForward size={20} color={theme.textSecondary} />
+            </ServiceCard>
           ))}
-        </DestinationsGrid>
+        </ServicesGrid>
       </Section>
 
-      {/* Newsletter */}
-      <NewsletterSection variants={itemVariants}>
-        <div className="nl-content">
-          <h2>Get exclusive travel deals</h2>
-          <p>Join 100,000+ travelers and receive the best flight & hotel deals in your inbox.</p>
-          <div className="input-group">
-            <input type="email" placeholder="Enter your email address" />
-            <button>Subscribe</button>
-          </div>
-        </div>
-      </NewsletterSection>
+      {/* Destinations Section */}
+      <Section>
+        <SectionHeader>
+          <SectionTitle theme={theme} style={{ color: '#1e293b' }}>Popular Destinations</SectionTitle>
+          <SectionSubtitle theme={theme}>Explore the world's most amazing places</SectionSubtitle>
+        </SectionHeader>
+
+        <DestinationsScroll>
+          {destinations.map(destination => (
+            <DestinationCard
+              key={destination.id}
+              onClick={() => navigate('/search', { state: { type: 'packages', destination: destination.name } })}
+            >
+              <DestinationImage src={destination.image} alt={destination.name} />
+              <DestinationOverlay>
+                <PriceTag>
+                  <PriceText>{destination.price}</PriceText>
+                </PriceTag>
+              </DestinationOverlay>
+              <DestinationContent>
+                <DestinationNameContainer>
+                  <IoLocation size={16} color="#1e40af" />
+                  <DestinationName>{destination.name}</DestinationName>
+                </DestinationNameContainer>
+                <DestinationDescription>{destination.description}</DestinationDescription>
+              </DestinationContent>
+            </DestinationCard>
+          ))}
+        </DestinationsScroll>
+      </Section>
+
+      {/* CTA Section */}
+      <CtaSection>
+        <CtaTitle>Ready to Start Your Adventure?</CtaTitle>
+        <CtaSubtitle>
+          Join millions of travelers who trust TravelEase for their journeys
+        </CtaSubtitle>
+        <CtaButtons>
+          <CtaButton onClick={() => navigate('/search')}>
+            {user ? 'Search More' : 'Start Planning'}
+          </CtaButton>
+          {!user && (
+            <CtaButtonSecondary onClick={() => navigate('/signup')}>
+              Create Account
+            </CtaButtonSecondary>
+          )}
+        </CtaButtons>
+      </CtaSection>
     </PageContainer>
   );
 }
 
-const PageContainer = styled(motion.div)`
+// Styled Components
+const PageContainer = styled.div`
   min-height: 100vh;
-  padding-bottom: 80px;
+  background-color: ${props => props.theme.background || '#fff'};
 `;
 
-const HeroSection = styled.section`
-  height: 90vh;
-  min-height: 600px;
-  max-height: 800px;
+const HeroContainer = styled.div`
+  height: 320px;
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  text-align: center;
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  
+  @media (min-width: 640px) {
+    height: 420px;
+  }
+  
+  @media (min-width: 1024px) {
+    height: 500px;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(30, 64, 175, 0.1) 0%, transparent 50%);
+    animation: float 8s ease-in-out infinite;
+    z-index: 1;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0px, 0px); }
+    50% { transform: translate(15px, -15px); }
+  }
 `;
 
-const HeroBg = styled.div`
+const HeroImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+`;
+
+const HeroOverlay = styled.div`
   position: absolute;
-  inset: 0;
-  z-index: -1;
-  
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 53, 128, 0.4) 0%,
-      rgba(0, 0, 0, 0.6) 100%
-    );
-  }
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: ${props => props.theme.isDarkMode ? 'rgba(12, 10, 9, 0.5)' : 'rgba(0, 0, 0, 0.2)'};
+  backdrop-filter: blur(2px);
+  z-index: 2;
 `;
 
 const HeroContent = styled.div`
-  max-width: 800px;
-  padding: 0 24px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  z-index: 3;
+  animation: fadeInContent 0.8s ease-out;
   
-  h1 {
-    font-size: clamp(2.5rem, 8vw, 4.5rem);
-    font-weight: 800;
-    line-height: 1.1;
-    margin-bottom: 24px;
-    letter-spacing: -2px;
-    
-    span {
-      background: linear-gradient(to right, #60A5FA, #93C5FD);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+  @media (min-width: 640px) {
+    padding: 24px;
   }
-  
-  p {
-    font-size: clamp(1rem, 3vw, 1.25rem);
-    color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 40px;
-    max-width: 600px;
-    margin-inline: auto;
+
+  @keyframes fadeInContent {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 `;
 
 const HeroBadge = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  padding: 8px 16px;
-  border-radius: 50px;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-`;
-
-const CtaGroup = styled.div`
   display: flex;
-  gap: 16px;
-  justify-content: center;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(255, 255, 255, 0.98);
+  padding: 10px 18px;
+  border-radius: 30px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  animation: slideInDown 0.6s ease-out;
+
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 `;
 
-const HeroCta = styled.button`
-  background: #fff;
-  color: #001E4D;
-  padding: 16px 32px;
-  border-radius: 12px;
+const HeroBadgeText = styled.span`
+  color: ${props => props.theme.primary};
+  font-size: 14px;
   font-weight: 700;
-  font-size: 16px;
+`;
+
+const HeroTitle = styled.h1`
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 12px;
+  text-shadow: 0 3px 20px rgba(0, 0, 0, 0.4);
+  line-height: 1.2;
+  animation: slideInUp 0.7s ease-out 0.1s both;
+  letter-spacing: -0.5px;
+  
+  @media (min-width: 640px) {
+    font-size: 36px;
+    margin-bottom: 16px;
+  }
+  
+  @media (min-width: 1024px) {
+    font-size: 52px;
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+const HeroHighlight = styled.span`
+  color: #fbbf24;
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(120deg, #fbbf24, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  
+  @media (min-width: 640px) {
+    font-size: 42px;
+  }
+  
+  @media (min-width: 1024px) {
+    font-size: 56px;
+  }
+`;
+
+const HeroSubtitle = styled.p`
+  font-size: 14px;
+  color: #f1f5f9;
+  text-align: center;
+  margin-bottom: 20px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  max-width: 90%;
+  animation: slideInUp 0.7s ease-out 0.2s both;
+  
+  @media (min-width: 640px) {
+    font-size: 16px;
+    margin-bottom: 28px;
+    max-width: 500px;
+  }
+  
+  @media (min-width: 1024px) {
+    font-size: 18px;
+    margin-bottom: 32px;
+    max-width: 600px;
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+const HeroButton = styled.button`
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 32px;
+  border-radius: 50px;
   border: none;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: transform 0.2s, box-shadow 0.2s;
-  
+  box-shadow: 0 10px 30px rgba(251, 191, 36, 0.4);
+  transition: all 0.3s ease;
+  animation: slideInUp 0.7s ease-out 0.3s both;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #1e40af;
+
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 15px 40px rgba(251, 191, 36, 0.6);
+  }
+
+  &:active {
+    transform: translateY(-1px);
+  }
+  
+  @media (min-width: 640px) {
+    gap: 10px;
+    padding: 16px 40px;
+  }
+
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 `;
 
-const SecondaryCta = styled.button`
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  color: #fff;
-  padding: 16px 32px;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  cursor: pointer;
-  transition: all 0.2s;
+const HeroButtonText = styled.span`
+  color: #1e40af;
+  font-size: 14px;
+  font-weight: 700;
   
-  &:hover {
-    background: rgba(255, 255, 255, 0.2);
+  @media (min-width: 640px) {
+    font-size: 16px;
   }
 `;
 
-const SearchWrapper = styled(motion.div)`
-  margin-top: -60px;
-  position: relative;
-  z-index: 10;
-  padding: 0 24px;
+const SearchBarContainer = styled.div`
+  max-width: 800px;
+  margin: -40px auto 24px;
+  padding: 0 16px;
   
-  .search-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    background: #fff;
-    padding: 8px;
-    border-radius: 20px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+  @media (min-width: 640px) {
+    margin: -50px auto 32px;
+  }
+  
+  @media (min-width: 1024px) {
+    margin: -60px auto 40px;
   }
 `;
 
 const Section = styled.section`
-  max-width: 1280px;
-  margin: 80px auto 0;
-  padding: 0 24px;
+  padding: 24px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
   
-  &.destinations {
-    background: ${props => props.theme.backgroundSecondary};
-    padding: 80px 24px;
-    max-width: 100%;
-    
-    .flex-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-    }
+  @media (min-width: 640px) {
+    padding: 32px 20px;
+  }
+  
+  @media (min-width: 1024px) {
+    padding: 40px 24px;
   }
 `;
 
 const SectionHeader = styled.div`
-  margin-bottom: 48px;
+  margin-bottom: 30px;
+  text-align: center;
+`;
+
+const SectionTitle = styled.h2`
+  font-size: 22px;
+  font-weight: bold;
+  color: ${props => props.theme.text};
+  margin-bottom: 8px;
   
-  h2 {
-    font-size: clamp(1.75rem, 5vw, 2.5rem);
-    font-weight: 800;
-    margin-bottom: 8px;
-    color: ${props => props.theme.text};
+  @media (min-width: 640px) {
+    font-size: 26px;
   }
   
-  p {
-    color: ${props => props.theme.textSecondary};
-    font-size: 1.1rem;
+  @media (min-width: 1024px) {
+    font-size: 28px;
   }
+`;
+
+const SectionSubtitle = styled.p`
+  font-size: 16px;
+  color: ${props => props.theme.textSecondary};
 `;
 
 const FeaturesGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 32px;
-`;
-
-const FeatureCard = styled(motion.div)`
-  background: ${props => props.theme.backgroundSecondary};
-  padding: 40px;
-  border-radius: 24px;
-  border: 1px solid ${props => props.theme.border};
-  
-  .icon {
-    width: 48px;
-    height: 48px;
-    background: ${props => props.theme.primary}10;
-    color: ${props => props.theme.primary};
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 24px;
-  }
-  
-  h3 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-bottom: 12px;
-  }
-  
-  p {
-    color: ${props => props.theme.textSecondary};
-    line-height: 1.6;
-  }
-`;
-
-const BookingSection = styled.section`
-  max-width: 1280px;
-  margin: 100px auto 0;
-  padding: 0 24px;
-`;
-
-const BookingGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 24px;
-`;
-
-const BookingCard = styled(motion.div)`
-  height: 280px;
-  background: ${props => props.bg};
-  border-radius: 24px;
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
   display: flex;
-  
-  .card-content {
-    flex: 1;
-    padding: 40px;
-    color: #fff;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    
-    h3 {
-      font-size: 1.75rem;
-      font-weight: 800;
-      margin: 16px 0 8px;
-    }
-    
-    p {
-      opacity: 0.9;
-      font-size: 0.95rem;
-    }
-  }
-  
-  .card-image {
-    width: 150px;
-    position: relative;
-    pointer-events: none;
-    
-    img {
-      position: absolute;
-      top: 50%;
-      right: -20px;
-      transform: translateY(-50%) rotate(-5deg);
-      height: 120%;
-      width: auto;
-      object-fit: cover;
-      border-radius: 20px;
-      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
-    }
-  }
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: center;
 `;
 
-const DestinationsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 32px;
-  margin-top: 40px;
-  max-width: 1280px;
-  margin-inline: auto;
-`;
-
-const DestCard = styled(motion.div)`
-  background: ${props => props.theme.surface};
+const FeatureCard = styled.div`
+  flex: 1;
+  min-width: 250px;
+  background: linear-gradient(135deg, ${props => props.theme.card} 0%, ${props => props.theme.card}dd 100%);
+  padding: 28px;
   border-radius: 20px;
-  overflow: hidden;
-  box-shadow: ${props => props.theme.shadows.sm};
-  border: 1px solid ${props => props.theme.border};
-  
-  .img-wrapper {
-    height: 240px;
-    position: relative;
-    
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .rating {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 4px 10px;
-      border-radius: 50px;
-      font-size: 12px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      color: #F59E0B;
-      backdrop-filter: blur(4px);
-    }
-  }
-  
-  .content {
-    padding: 24px;
-    
-    h3 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin-bottom: 20px;
-    }
-    
-    .footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      
-      .price {
-        font-size: 0.9rem;
-        color: ${props => props.theme.textSecondary};
-        
-        span {
-          display: block;
-          color: ${props => props.theme.text};
-          font-weight: 800;
-          font-size: 1.1rem;
-        }
-      }
-    }
-  }
-`;
-
-const BookingBtn = styled.button`
-  background: ${props => props.theme.primary};
-  color: #fff;
-  border: none;
-  padding: 10px 24px;
-  border-radius: 50px;
-  font-weight: 600;
+  border: 2px solid ${props => props.theme.primary}25;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   cursor: pointer;
-  transition: opacity 0.2s;
-  
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
   &:hover {
-    opacity: 0.9;
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    border-color: ${props => props.theme.primary}40;
+
+    &::before {
+      opacity: 1;
+    }
   }
 `;
 
-const ViewAll = styled.button`
-  background: transparent;
-  border: none;
-  color: ${props => props.theme.primary};
-  font-weight: 700;
+const FeatureIconContainer = styled.div`
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, ${props => props.theme.primary}25 0%, ${props => props.theme.primary}10 100%);
   display: flex;
   align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  
-  &:hover {
-    gap: 12px;
+  justify-content: center;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+
+  ${FeatureCard}:hover & {
+    background: linear-gradient(135deg, ${props => props.theme.primary}35 0%, ${props => props.theme.primary}20 100%);
+    transform: scale(1.1) rotate(5deg);
   }
-  transition: all 0.2s;
 `;
 
-const NewsletterSection = styled(motion.section)`
-  max-width: 1200px;
-  margin: 100px auto 0;
-  padding: 80px 40px;
-  background: #001E4D;
-  border-radius: 32px;
-  color: #fff;
-  text-align: center;
+const FeatureTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 700;
+  color: ${props => props.theme.text};
+  margin-bottom: 8px;
+`;
+
+const FeatureDescription = styled.p`
+  font-size: 14px;
+  color: ${props => props.theme.textSecondary};
+  line-height: 1.5;
+`;
+
+const ServicesGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+`;
+
+const ServiceCard = styled.div`
+  background: linear-gradient(135deg, ${props => props.theme.card} 0%, ${props => props.theme.card}dd 100%);
+  padding: 24px;
+  border-radius: 16px;
+  border: 2px solid ${props => props.theme.border || '#e2e8f0'};
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -100px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1), transparent);
+    transition: right 0.3s ease;
+  }
+
+  &:hover {
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    border-color: #cbd5e1;
+    transform: translateY(-4px);
+
+    &::before {
+      right: 0;
+    }
+  }
+`;
+
+const ServiceIcon = styled.div`
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, ${props => props.bg} 0%, ${props => props.bg}dd 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 15px ${props => props.bg}40;
+  transition: all 0.3s ease;
+
+  ${ServiceCard}:hover & {
+    transform: scale(1.15) rotate(-5deg);
+    box-shadow: 0 8px 25px ${props => props.bg}60;
+  }
+`;
+
+const ServiceContent = styled.div`
+  flex: 1;
+`;
+
+const ServiceTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  color: ${props => props.theme.text};
+  margin-bottom: 4px;
+`;
+
+const ServiceDescription = styled.p`
+  font-size: 14px;
+  color: ${props => props.theme.textSecondary};
+`;
+
+const DestinationsScroll = styled.div`
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  padding-bottom: 20px; /* Space for scrollbar or shadow */
+  scrollbar-width: thin;
+  
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+  }
+`;
+
+const DestinationCard = styled.div`
+  min-width: 280px;
+  width: 280px;
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  
+  &:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+  }
+`;
+
+const DestinationImage = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+`;
+
+const DestinationOverlay = styled.div`
+  position: relative;
+  height: 0;
+`;
+
+const PriceTag = styled.div`
+  position: absolute;
+  top: -190px;
+  right: 12px;
+  background-color: #1e40af;
+  padding: 6px 12px;
+  border-radius: 20px;
+  z-index: 10;
+`;
+
+const PriceText = styled.span`
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+`;
+
+const DestinationContent = styled.div`
+  padding: 16px;
+`;
+
+const DestinationNameContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+`;
+
+const DestinationName = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+`;
+
+const DestinationDescription = styled.p`
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.4;
+`;
+
+const CtaSection = styled.div`
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  margin: 24px 16px 40px;
+  padding: 24px 16px;
+  border-radius: 20px;
+  text-align: center;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 15px 40px rgba(30, 64, 175, 0.3);
   
   &::before {
     content: '';
     position: absolute;
     top: -50%;
+    right: -50%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1), transparent);
+    border-radius: 50%;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -50%;
     left: -50%;
     width: 500px;
     height: 500px;
