@@ -1,455 +1,633 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import {
-    CreditCard,
-    Lock,
-    ShieldCheck,
-    CheckCircle2,
-    ArrowLeft,
-    Smartphone,
-    Info,
-    ChevronRight,
-    Landmark,
-    AlertCircle
-} from 'lucide-react';
-import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
-import { useCart } from '../context/CartContext';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { IoLockClosedOutline, IoArrowBack, IoCardOutline } from 'react-icons/io5';
 import { useTheme } from '../context/ThemeContext';
+import { useCart } from '../context/CartContext';
 import api from '../config/api';
 
-export default function PaymentScreen() {
-    const navigate = useNavigate();
+// Replace with your actual Stripe publishable key
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_51OqP8hSJbYfX9Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y8Y');
+
+const CheckoutForm = ({ amount, items }) => {
     const stripe = useStripe();
     const elements = useElements();
-    const { getCartTotal, clearCart, cartItems } = useCart();
+    const navigate = useNavigate();
     const { theme } = useTheme();
-    const [method, setMethod] = useState('card');
-    const [status, setStatus] = useState('idle'); // idle, processing, success, error
+    const { clearCart } = useCart();
     const [error, setError] = useState(null);
-    const [clientSecret, setClientSecret] = useState('');
+    const [processing, setProcessing] = useState(false);
+    const [succeeded, setSucceeded] = useState(false);
+    const [email, setEmail] = useState('');
+    const [name, setName] = useState('');
+    const [address, setAddress] = useState({
+        line1: '',
+        city: '',
+        state: '',
+        postal_code: '',
+        country: 'IN'
+    });
 
-    const total = getCartTotal() * 1.12;
+    const handleSubmit = async (event) => {
+        event.preventDefault();
 
-    useEffect(() => {
-        // Create Payment Intent as soon as the page loads
-        if (total > 0) {
-            createPaymentIntent();
+        if (!stripe || !elements) {
+            return;
         }
-    }, [total]);
 
-    const createPaymentIntent = async () => {
-        try {
-            const response = await api.post('/payments/create-intent', {
-                amount: total,
-                // Pass booking related info if needed
-            });
-            setClientSecret(response.data.data.clientSecret);
-        } catch (err) {
-            console.error('Error creating payment intent:', err);
-            setError('Failed to initialize payment. Please try again.');
+        if (!email || !email.includes('@')) {
+            setError('Please enter a valid email address');
+            return;
         }
-    };
 
-    const handlePayment = async (e) => {
-        e.preventDefault();
-
-        if (!stripe || !elements) return;
-
-        setStatus('processing');
+        setProcessing(true);
         setError(null);
 
         try {
-            const cardElement = elements.getElement(CardElement);
-
-            const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-                payment_method: {
-                    card: cardElement,
-                    billing_details: {
-                        name: 'Guest User', // Ideally get from AuthContext
-                    },
-                },
+            // 1. Create bookings first (in pending state)
+            const bookingPromises = items.map(async (item) => {
+                const bookingData = {
+                    bookingType: item.type,
+                    itemId: item.id || item._id,
+                    totalPrice: typeof item.price === 'number' ? item.price :
+                        (item.price?.economy || item.price?.pricePerNight || item.pricePerNight || 0),
+                    details: item.type === 'flight' ? {
+                        class: item.travelClass || 'economy',
+                        passengers: item.passengers || [{ firstName: name.split(' ')[0], lastName: name.split(' ')[1] || '', age: 25, gender: 'M' }]
+                    } : {
+                        checkInDate: new Date(),
+                        checkOutDate: new Date(Date.now() + 86400000),
+                        numberOfNights: 1,
+                        roomType: item.roomType || 'Standard',
+                        guests: [{ firstName: name.split(' ')[0], lastName: name.split(' ')[1] || '', age: 25 }]
+                    }
+                };
+                const response = await api.post('/bookings', bookingData);
+                return response.data.data.booking._id;
             });
 
-            if (error) {
-                setError(error.message);
-                setStatus('error');
-            } else if (paymentIntent.status === 'succeeded') {
-                setStatus('success');
-                // Notify backend of success if necessary
-                await api.post('/payments/confirm', {
-                    paymentIntentId: paymentIntent.id
-                });
+            const bookingIds = await Promise.all(bookingPromises);
 
-                setTimeout(() => {
+            // 2. Create Payment Intent on backend
+            const { data } = await api.post('/payments/create-intent', {
+                amount: amount,
+                bookingIds: bookingIds // We'll update backend to handle array
+            });
+
+            const clientSecret = data.data.clientSecret;
+
+            // 3. Confirm payment with Stripe
+            const result = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: {
+                    card: elements.getElement(CardElement),
+                    billing_details: {
+                        name: name,
+                        email: email,
+                        address: {
+                            line1: address.line1,
+                            city: address.city,
+                            state: address.state,
+                            postal_code: address.postal_code,
+                            country: address.country,
+                        }
+                    },
+                }
+            });
+
+            if (result.error) {
+                setError(result.error.message);
+                setProcessing(false);
+            } else {
+                if (result.paymentIntent.status === 'succeeded') {
+                    // 4. Confirm completion on backend for all bookings
+                    await Promise.all(bookingIds.map(id =>
+                        api.post('/payments/confirm', {
+                            paymentIntentId: result.paymentIntent.id,
+                            bookingId: id
+                        })
+                    ));
+
+                    setSucceeded(true);
                     clearCart();
-                    navigate('/dashboard');
-                }, 3000);
+
+                    // Clear the pending payment from localStorage
+                    localStorage.removeItem('pending_payment');
+
+                    setTimeout(() => {
+                        navigate('/dashboard', {
+                            state: { paymentSuccess: true, amount: amount }
+                        });
+                    }, 1500);
+                }
             }
         } catch (err) {
-            setError('An unexpected error occurred.');
-            setStatus('error');
+            setError(`Payment failed: ${err.response?.data?.message || err.message}`);
+            setProcessing(false);
         }
     };
-
-    if (status === 'success') {
-        return (
-            <SuccessState>
-                <div className="icon"><CheckCircle2 size={80} /></div>
-                <h2>Payment Successful!</h2>
-                <p>Your booking has been confirmed. You will receive an email shortly with your itinerary and tickets.</p>
-                <div className="redirect">Redirecting to your dashboard...</div>
-            </SuccessState>
-        );
-    }
 
     const cardElementOptions = {
         style: {
             base: {
                 fontSize: '16px',
-                color: theme.text,
-                fontFamily: 'Inter, sans-serif',
+                color: theme.text || '#1e293b',
                 '::placeholder': {
-                    color: theme.textSecondary,
+                    color: theme.textTertiary || '#94a3b8',
                 },
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             },
             invalid: {
-                color: theme.danger || '#ef4444',
+                color: '#ef4444',
             },
         },
     };
 
     return (
-        <Container>
-            <ProgressSteps>
-                <Step $completed><span><CheckCircle2 size={16} /></span> Bag</Step>
-                <div className="line active" />
-                <Step $completed><span><CheckCircle2 size={16} /></span> Details</Step>
-                <div className="line active" />
-                <Step $active><span>3</span> Payment</Step>
-            </ProgressSteps>
+        <Form onSubmit={handleSubmit}>
+            {/* Email Section */}
+            <FormSection>
+                <SectionLabel theme={theme}>Email</SectionLabel>
+                <Input
+                    theme={theme}
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                />
+            </FormSection>
 
-            <Content>
-                <div className="payment-methods">
-                    <header>
-                        <h1>Choose payment method</h1>
-                        <p>All transactions are secure and encrypted.</p>
-                    </header>
+            {/* Shipping Section */}
+            <FormSection>
+                <SectionLabel theme={theme}>Shipping</SectionLabel>
+                <Input
+                    theme={theme}
+                    type="text"
+                    placeholder="Full name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                />
+                <Input
+                    theme={theme}
+                    type="text"
+                    placeholder="Address line 1"
+                    value={address.line1}
+                    onChange={(e) => setAddress({ ...address, line1: e.target.value })}
+                    required
+                />
+                <TwoColumnGrid>
+                    <Input
+                        theme={theme}
+                        type="text"
+                        placeholder="City"
+                        value={address.city}
+                        onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                        required
+                    />
+                    <Input
+                        theme={theme}
+                        type="text"
+                        placeholder="State"
+                        value={address.state}
+                        onChange={(e) => setAddress({ ...address, state: e.target.value })}
+                        required
+                    />
+                </TwoColumnGrid>
+                <Input
+                    theme={theme}
+                    type="text"
+                    placeholder="PIN Code"
+                    value={address.postal_code}
+                    onChange={(e) => setAddress({ ...address, postal_code: e.target.value })}
+                    required
+                />
+            </FormSection>
 
-                    {error && (
-                        <ErrorBanner>
-                            <AlertCircle size={20} />
-                            {error}
-                        </ErrorBanner>
-                    )}
+            {/* Payment Section */}
+            <FormSection>
+                <SectionLabel theme={theme}>Payment</SectionLabel>
+                <CardElementWrapper theme={theme}>
+                    <CardElement options={cardElementOptions} />
+                </CardElementWrapper>
+            </FormSection>
 
-                    <MethodGrid>
-                        <MethodCard $active={method === 'card'} onClick={() => setMethod('card')}>
-                            <CreditCard size={24} />
-                            <div className="text">
-                                <h4>Credit / Debit Card</h4>
-                                <span>Visa, Mastercard, Amex</span>
-                            </div>
-                            <div className="radio" />
-                        </MethodCard>
+            {error && <ErrorMessage>{error}</ErrorMessage>}
+            {succeeded && <SuccessMessage>Payment successful! Redirecting...</SuccessMessage>}
 
-                        <MethodCard $active={method === 'upi'} onClick={() => setMethod('upi')}>
-                            <Smartphone size={24} />
-                            <div className="text">
-                                <h4>UPI Payment</h4>
-                                <span>Google Pay, PhonePe, Paytm</span>
-                            </div>
-                            <div className="radio" />
-                        </MethodCard>
+            <PayButton
+                theme={theme}
+                type="submit"
+                disabled={processing || !stripe || succeeded}
+            >
+                <IoLockClosedOutline size={20} />
+                {processing ? 'Processing...' : succeeded ? 'Payment Complete!' : `Pay ₹${amount.toLocaleString()}`}
+            </PayButton>
 
-                        <MethodCard $active={method === 'netbanking'} onClick={() => setMethod('netbanking')}>
-                            <Landmark size={24} />
-                            <div className="text">
-                                <h4>Net Banking</h4>
-                                <span>All major Indian banks</span>
-                            </div>
-                            <div className="radio" />
-                        </MethodCard>
-                    </MethodGrid>
+            <SecurityNote theme={theme}>
+                <IoLockClosedOutline size={14} />
+                Your payment information is encrypted and secure
+            </SecurityNote>
+        </Form>
+    );
+};
 
-                    {method === 'card' && (
-                        <CardForm>
-                            <div className="field">
-                                <label>Secure Card Payment</label>
-                                <div className="stripe-input-wrapper">
-                                    <CardElement options={cardElementOptions} />
-                                </div>
-                            </div>
-                            <div className="field">
-                                <label>Cardholder Name</label>
-                                <input type="text" placeholder="John Doe" />
-                            </div>
-                            <div className="save-card">
-                                <input type="checkbox" id="save" />
-                                <label htmlFor="save">Securely save card for future bookings</label>
-                            </div>
-                        </CardForm>
-                    )}
-                </div>
+const PaymentScreen = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { theme } = useTheme();
 
-                <div className="sidebar">
-                    <OrderSummary>
-                        <h3>Order Summary</h3>
-                        <div className="total-box">
-                            <span>Final Amount</span>
-                            <div className="amt">₹{total.toLocaleString()}</div>
-                        </div>
+    // Try to get payment data from route state or localStorage
+    let paymentData = location.state;
 
-                        <button
-                            className="pay-btn"
-                            onClick={handlePayment}
-                            disabled={status === 'processing' || !stripe || !clientSecret}
-                        >
-                            {status === 'processing' ? 'Processing...' : `Pay ₹${total.toLocaleString()}`}
-                        </button>
+    if (!paymentData || !paymentData.amount) {
+        // Try localStorage fallback
+        const savedPaymentData = localStorage.getItem('pending_payment');
+        if (savedPaymentData) {
+            try {
+                paymentData = JSON.parse(savedPaymentData);
+            } catch (e) {
+                console.error('Error parsing payment data:', e);
+            }
+        }
+    }
 
-                        <div className="secure-badges">
-                            <span><Lock size={12} /> SSL Secure</span>
-                            <span><ShieldCheck size={12} /> PCI Compliant</span>
-                        </div>
-                    </OrderSummary>
+    const { amount, items } = paymentData || { amount: 0, items: [] };
 
-                    <HelpCard>
-                        <Info size={20} />
-                        <div>
-                            <h4>Safe & Secure</h4>
-                            <p>Your payment details are never stored on our servers.</p>
-                        </div>
-                    </HelpCard>
-                </div>
-            </Content>
+    // Automatically redirect if no valid payment data - PERMANENT FIX
+    useEffect(() => {
+        if (!amount || amount === 0 || !items || items.length === 0) {
+            console.log('No valid payment data, redirecting to checkout...');
+            setTimeout(() => {
+                navigate('/checkout', { replace: true });
+            }, 100);
+        }
+    }, [amount, items, navigate]);
+
+    if (!amount || amount === 0) {
+        return (
+            <Container theme={theme}>
+                <ContentWrapper>
+                    <p style={{ textAlign: 'center', padding: '40px' }}>Redirecting to checkout...</p>
+                </ContentWrapper>
+            </Container>
+        );
+    }
+
+    return (
+        <Container theme={theme}>
+            <ContentWrapper>
+                <Header>
+                    <BackButton theme={theme} onClick={() => navigate(-1)}>
+                        <IoArrowBack size={24} />
+                        Back
+                    </BackButton>
+                </Header>
+
+                <Grid>
+                    <PaymentCard theme={theme}>
+                        <CardHeader>
+                            <CardIcon>
+                                <IoCardOutline size={32} color={theme.primary} />
+                            </CardIcon>
+                            <Title theme={theme}>Complete Your Payment</Title>
+                            <Subtitle theme={theme}>Enter your card details below</Subtitle>
+                        </CardHeader>
+
+                        <Elements stripe={stripePromise}>
+                            <CheckoutForm amount={amount} items={items} />
+                        </Elements>
+
+                        <TestCardInfo theme={theme}>
+                            <InfoTitle>Test Card Numbers</InfoTitle>
+                            <InfoText>Use these for testing:</InfoText>
+                            <CodeBlock>4242 4242 4242 4242</CodeBlock>
+                            <InfoText>Any future date, any CVC, any ZIP</InfoText>
+                        </TestCardInfo>
+                    </PaymentCard>
+
+                    <SummaryCard theme={theme}>
+                        <SummaryTitle theme={theme}>Order Summary</SummaryTitle>
+                        <OrderItems>
+                            {items && items.map((item, idx) => (
+                                <OrderItem key={idx} theme={theme}>
+                                    <ItemName>{item.name || item.airline || 'Item'}</ItemName>
+                                    <ItemQuantity>×{item.quantity || 1}</ItemQuantity>
+                                </OrderItem>
+                            ))}
+                        </OrderItems>
+                        <Divider theme={theme} />
+                        <TotalRow>
+                            <TotalLabel theme={theme}>Total Amount</TotalLabel>
+                            <TotalValue theme={theme}>₹{Number.isFinite(amount) ? amount.toLocaleString() : '0'}</TotalValue>
+                        </TotalRow>
+                    </SummaryCard>
+                </Grid>
+            </ContentWrapper>
         </Container>
     );
-}
+};
 
-const ErrorBanner = styled.div`
-    background: #FEF2F2;
-    color: #991B1B;
-    padding: 16px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
-    font-weight: 600;
-`;
-
+// Styled Components
 const Container = styled.div`
-    max-width: 1280px;
-    margin: 40px auto;
-    padding: 0 24px;
-`;
-
-const ProgressSteps = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 60px;
-    .line {
-        width: 100px;
-        height: 2px;
-        background: ${props => props.theme.border};
-        &.active { background: ${props => props.theme.primary}; }
-    }
-`;
-
-const Step = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 700;
-    color: ${props => props.$active || props.$completed ? props.theme.primary : props.theme.textTertiary};
-    span {
-        width: 32px;
-        height: 32px;
-        background: ${props => props.$active || props.$completed ? props.theme.primary : props.theme.backgroundTertiary};
-        color: #fff;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-`;
-
-const Content = styled.div`
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 60px;
-    @media (max-width: 1024px) { grid-template-columns: 1fr; }
-
-    .payment-methods {
-       header {
-          margin-bottom: 32px;
-          h1 { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
-          p { color: ${props => props.theme.textSecondary}; font-weight: 500; }
-       }
-    }
-`;
-
-const MethodGrid = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 40px;
-`;
-
-const MethodCard = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 20px;
+    min-height: 100vh;
+    background-color: ${props => props.theme.backgroundSecondary || '#f8fafc'};
     padding: 24px;
-    background: #fff;
-    border: 2px solid ${props => props.$active ? props.theme.primary : props.theme.border};
-    border-radius: 20px;
+`;
+
+const ContentWrapper = styled.div`
+    max-width: 1000px;
+    margin: 0 auto;
+`;
+
+const Header = styled.div`
+    margin-bottom: 24px;
+`;
+
+const BackButton = styled.button`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: ${props => props.theme.text};
+    font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
-    
-    svg { color: ${props => props.$active ? props.theme.primary : props.theme.textSecondary}; }
-    
-    .text {
-       flex: 1;
-       h4 { font-weight: 800; margin-bottom: 4px; }
-       span { font-size: 0.85rem; color: ${props => props.theme.textSecondary}; font-weight: 600; }
-    }
-    
-    .radio {
-       width: 24px;
-       height: 24px;
-       border: 2px solid ${props => props.$active ? props.theme.primary : props.theme.border};
-       border-radius: 50%;
-       position: relative;
-       &::after {
-          content: '';
-          position: absolute;
-          inset: 4px;
-          background: ${props => props.theme.primary};
-          border-radius: 50%;
-          opacity: ${props => props.$active ? 1 : 0};
-          transition: opacity 0.2s;
-       }
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: ${props => props.theme.card};
     }
 `;
 
-const CardForm = styled.div`
-    background: #fff;
-    border: 1px solid ${props => props.theme.border};
-    border-radius: 24px;
+const Grid = styled.div`
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+
+    @media (min-width: 968px) {
+        grid-template-columns: 1fr 350px;
+        gap: 32px;
+    }
+`;
+
+const PaymentCard = styled.div`
+    background-color: ${props => props.theme.card};
+    border-radius: 16px;
     padding: 32px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+`;
+
+const CardHeader = styled.div`
+    text-align: center;
+    margin-bottom: 32px;
+`;
+
+const CardIcon = styled.div`
+    margin-bottom: 16px;
+`;
+
+const Title = styled.h1`
+    font-size: 24px;
+    font-weight: 700;
+    color: ${props => props.theme.text};
+    margin-bottom: 8px;
+`;
+
+const Subtitle = styled.p`
+    color: ${props => props.theme.textSecondary};
+`;
+
+const Form = styled.form`
     display: flex;
     flex-direction: column;
     gap: 24px;
-    
-    .field {
-       label { display: block; font-size: 0.85rem; font-weight: 800; margin-bottom: 8px; color: ${props => props.theme.textSecondary}; }
-       
-       input, .stripe-input-wrapper {
-          width: 100%;
-          padding: 16px;
-          border-radius: 12px;
-          border: 1px solid ${props => props.theme.border};
-          font-weight: 600;
-          font-size: 1rem;
-          outline: none;
-          background: #fff;
-          transition: all 0.2s;
-          &:focus, &.StripeElement--focus { 
-            border-color: ${props => props.theme.primary};
-            box-shadow: 0 0 0 4px ${props => props.theme.primary}10;
-          }
-       }
-
-       .stripe-input-wrapper {
-          padding: 18px 16px;
-       }
-    }
-    
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    
-    .save-card {
-       display: flex;
-       align-items: center;
-       gap: 12px;
-       font-weight: 600;
-       font-size: 0.9rem;
-       color: ${props => props.theme.textSecondary};
-       input { width: 18px; height: 18px; }
-    }
 `;
 
-const OrderSummary = styled.div`
-    background: #fff;
-    border: 1px solid ${props => props.theme.border};
-    padding: 32px;
-    border-radius: 24px;
-    box-shadow: ${props => props.theme.shadows.sm};
-    position: sticky;
-    top: 100px;
-    
-    h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 24px; }
-    
-    .total-box {
-       background: ${props => props.theme.backgroundTertiary};
-       padding: 24px;
-       border-radius: 16px;
-       margin-bottom: 32px;
-       text-align: center;
-       span { font-weight: 700; color: ${props => props.theme.textSecondary}; font-size: 0.9rem; }
-       .amt { font-size: 2rem; font-weight: 900; color: ${props => props.theme.primary}; margin-top: 4px; }
-    }
-    
-    .pay-btn {
-       width: 100%;
-       background: #10B981;
-       color: #fff;
-       border: none;
-       padding: 18px;
-       border-radius: 16px;
-       font-size: 1.1rem;
-       font-weight: 800;
-       cursor: pointer;
-       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-       &:disabled { background: ${props => props.theme.border}; box-shadow: none; cursor: not-allowed; }
-    }
-    
-    .secure-badges {
-       display: flex;
-       justify-content: center;
-       gap: 16px;
-       margin-top: 24px;
-       span { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: ${props => props.theme.textTertiary}; font-weight: 800; text-transform: uppercase; }
-    }
-`;
-
-const HelpCard = styled.div`
-    margin-top: 24px;
-    padding: 24px;
-    border-radius: 20px;
-    border: 1px solid ${props => props.theme.border};
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    h4 { font-weight: 800; font-size: 1rem; margin-bottom: 4px; }
-    p { font-size: 0.8rem; color: ${props => props.theme.textSecondary}; line-height: 1.4; }
-    svg { color: #10B981; }
-`;
-
-const SuccessState = styled.div`
-    height: 80vh;
+const FormSection = styled.div`
     display: flex;
     flex-direction: column;
+    gap: 12px;
+`;
+
+const SectionLabel = styled.label`
+    font-size: 14px;
+    font-weight: 600;
+    color: ${props => props.theme.text};
+    margin-bottom: 4px;
+`;
+
+const Input = styled.input`
+    padding: 14px 16px;
+    border: 1px solid ${props => props.theme.border || '#e2e8f0'};
+    border-radius: 8px;
+    font-size: 16px;
+    color: ${props => props.theme.text};
+    background-color: ${props => props.theme.card};
+    transition: all 0.2s;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    &::placeholder {
+        color: ${props => props.theme.textTertiary || '#94a3b8'};
+    }
+    
+    &:focus {
+        outline: none;
+        border-color: ${props => props.theme.primary};
+        box-shadow: 0 0 0 3px ${props => props.theme.primary}20;
+    }
+    
+    &:hover {
+        border-color: ${props => props.theme.primary}80;
+    }
+`;
+
+const TwoColumnGrid = styled.div`
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    
+    @media (max-width: 640px) {
+        grid-template-columns: 1fr;
+    }
+`;
+
+const CardElementWrapper = styled.div`
+    padding: 16px;
+    border: 1px solid ${props => props.theme.border || '#e2e8f0'};
+    border-radius: 8px;
+    background-color: ${props => props.theme.card};
+    
+    &:focus-within {
+        border-color: ${props => props.theme.primary};
+        box-shadow: 0 0 0 3px ${props => props.theme.primary}20;
+    }
+`;
+
+const PayButton = styled.button`
+    background-color: ${props => props.theme.primary};
+    color: white;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    display: flex;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    padding: 40px;
-    
-    .icon { color: #10B981; margin-bottom: 32px; }
-    h2 { font-size: 2.5rem; font-weight: 900; margin-bottom: 16px; }
-    p { font-size: 1.1rem; color: ${props => props.theme.textSecondary}; max-width: 500px; line-height: 1.6; margin-bottom: 40px; }
-    .redirect { font-weight: 700; color: ${props => props.theme.textTertiary}; }
+    gap: 8px;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+        background-color: ${props => props.theme.secondary};
+        transform: translateY(-1px);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
 `;
+
+const SecurityNote = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: ${props => props.theme.textSecondary};
+    font-size: 13px;
+    text-align: center;
+`;
+
+const ErrorMessage = styled.div`
+    background-color: #fee2e2;
+    color: #dc2626;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+`;
+
+const SuccessMessage = styled.div`
+    background-color: #d1fae5;
+    color: #10b981;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+`;
+
+const TestCardInfo = styled.div`
+    margin-top: 32px;
+    padding: 16px;
+    background-color: ${props => props.theme.backgroundSecondary};
+    border-radius: 8px;
+`;
+
+const InfoTitle = styled.div`
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 14px;
+`;
+
+const InfoText = styled.div`
+    font-size: 13px;
+    color: ${props => props.theme.textSecondary};
+    margin-bottom: 8px;
+`;
+
+const CodeBlock = styled.div`
+    background-color: ${props => props.theme.card};
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    margin: 8px 0;
+    border: 1px solid ${props => props.theme.border};
+`;
+
+const SummaryCard = styled.div`
+    background-color: ${props => props.theme.card};
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+`;
+
+const SummaryTitle = styled.h2`
+    font-size: 18px;
+    font-weight: 700;
+    color: ${props => props.theme.text};
+    margin-bottom: 20px;
+`;
+
+const OrderItems = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+`;
+
+const OrderItem = styled.div`
+    display: flex;
+    justify-content: space-between;
+    color: ${props => props.theme.textSecondary};
+    font-size: 14px;
+`;
+
+const ItemName = styled.span``;
+const ItemQuantity = styled.span``;
+
+const Divider = styled.div`
+    height: 1px;
+    background-color: ${props => props.theme.border || '#e2e8f0'};
+    margin: 20px 0;
+`;
+
+const TotalRow = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`;
+
+const TotalLabel = styled.span`
+    font-size: 16px;
+    font-weight: 600;
+    color: ${props => props.theme.text};
+`;
+
+const TotalValue = styled.span`
+    font-size: 24px;
+    font-weight: 800;
+    color: ${props => props.theme.primary};
+`;
+
+const ErrorCard = styled.div`
+    background-color: ${props => props.theme.card};
+    border-radius: 16px;
+    padding: 48px;
+    text-align: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+`;
+
+const ErrorTitle = styled.h1`
+    font-size: 24px;
+    font-weight: 700;
+    color: ${props => props.theme.text};
+    margin-bottom: 16px;
+`;
+
+const ErrorText = styled.p`
+    color: ${props => props.theme.textSecondary};
+    margin-bottom: 32px;
+`;
+
+export default PaymentScreen;

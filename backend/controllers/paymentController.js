@@ -6,7 +6,7 @@ const Booking = require('../models/Booking');
 // @access  Private
 exports.createPaymentIntent = async (req, res) => {
     try {
-        const { amount, bookingId, bookingIds } = req.body;
+        const { amount, bookingId } = req.body;
 
         if (!amount || amount <= 0) {
             return res.status(400).json({

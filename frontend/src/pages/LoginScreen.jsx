@@ -1,36 +1,38 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate, Link } from 'react-router-dom';
-import {
-  Plane,
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  ArrowRight,
-  ShieldCheck,
-  Globe
-} from 'lucide-react';
+import { IoAirplane, IoMailOutline, IoLockClosedOutline, IoEyeOutline, IoEyeOffOutline, IoLogoGoogle } from 'react-icons/io5';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
-  const { login } = useAuth();
-  const { theme } = useTheme();
+  const { login, googleLogin } = useAuth(); // Assuming googleLogin is available in AuthContext
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (!email || !password) {
+      alert('Please fill in all fields');
+      return;
+    }
+
     setLoading(true);
     try {
       const result = await login(email, password);
-      if (result.success) navigate('/');
+      console.log('Login result in screen:', result);
+
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        alert(result.error || 'Please check your credentials');
+      }
     } catch (error) {
-      console.error('Login error:', error);
+      alert('An unexpected error occurred during login');
+      console.error('Login Screen Error:', error);
     } finally {
       setLoading(false);
     }
@@ -38,237 +40,263 @@ export default function LoginScreen() {
 
   return (
     <Container>
-      <AuthCard>
-        <div className="card-header">
-          <div className="logo">
-            <Plane size={32} />
-          </div>
-          <h1>Welcome Back</h1>
-          <p>Enter your details to access your account</p>
-        </div>
+      <Content>
+        <FormCard>
+          <Header>
+            <IoAirplane size={48} color="#1e40af" />
+            <Title>Welcome Back!</Title>
+            <Subtitle>Login to continue your journey</Subtitle>
+          </Header>
 
-        <form onSubmit={handleLogin}>
-          <div className="input-group">
-            <label>Email Address</label>
-            <div className="input-wrapper">
-              <Mail size={18} />
-              <input
+          <Form onSubmit={handleLogin}>
+            <InputGroup>
+              <InputIcon>
+                <IoMailOutline size={20} color="#64748b" />
+              </InputIcon>
+              <Input
                 type="email"
-                placeholder="name@company.com"
+                placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-            </div>
-          </div>
+            </InputGroup>
 
-          <div className="input-group">
-            <div className="label-row">
-              <label>Password</label>
-              <button type="button" className="forgot">Forgot?</button>
-            </div>
-            <div className="input-wrapper">
-              <Lock size={18} />
-              <input
+            <InputGroup>
+              <InputIcon>
+                <IoLockClosedOutline size={20} color="#64748b" />
+              </InputIcon>
+              <Input
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <button
-                type="button"
-                className="toggle-pass"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
+              <EyeButton type="button" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <IoEyeOffOutline size={20} color="#64748b" /> : <IoEyeOutline size={20} color="#64748b" />}
+              </EyeButton>
+            </InputGroup>
 
-          <button className="submit-btn" type="submit" disabled={loading}>
-            {loading ? 'Processing...' : 'Sign In'} <ArrowRight size={20} />
-          </button>
-        </form>
+            <ForgotPasswordButton type="button">
+              Forgot Password?
+            </ForgotPasswordButton>
 
-        <div className="divider">
-          <span>Or continue with</span>
-        </div>
+            <LoginButton type="submit" disabled={loading}>
+              {loading ? 'Logging in...' : 'Login'}
+            </LoginButton>
 
-        <div className="social-grid">
-          <button className="social-btn">
-            <img src="https://www.google.com/favicon.ico" alt="Google" />
-            Google
-          </button>
-          <button className="social-btn">
-            <Globe size={18} />
-            Apple
-          </button>
-        </div>
+            <GoogleButton type="button" onClick={async () => {
+              setLoading(true);
+              await googleLogin();
+              // Logic for google login result handling
+              setLoading(false);
+            }} disabled={loading}>
+              <IoLogoGoogle size={20} color="#ea4335" />
+              <GoogleButtonText>Continue with Google</GoogleButtonText>
+            </GoogleButton>
 
-        <p className="footer-text">
-          Don't have an account? <Link to="/signup">Create one for free</Link>
-        </p>
+            <Divider>
+              <DividerLine />
+              <DividerText>OR</DividerText>
+              <DividerLine />
+            </Divider>
 
-        <div className="trust-footer">
-          <ShieldCheck size={14} /> 256-bit AES Encryption
-        </div>
-      </AuthCard>
+            <SignupLinkContainer>
+              <SignupText>
+                Don't have an account? <StyledLink to="/signup">Sign Up</StyledLink>
+              </SignupText>
+            </SignupLinkContainer>
+          </Form>
+        </FormCard>
+      </Content>
     </Container>
   );
 }
 
+// Styled Components
 const Container = styled.div`
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: ${props => props.theme.backgroundTertiary};
-    padding: 24px;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  padding: 24px;
 `;
 
-const AuthCard = styled.div`
-    width: 100%;
-    max-width: 440px;
-    background: #fff;
-    border-radius: 32px;
-    padding: 48px;
-    box-shadow: ${props => props.theme.shadows.md};
-    border: 1px solid ${props => props.theme.border};
+const Content = styled.div`
+  width: 100%;
+  max-width: 400px;
+`;
 
-    .card-header {
-        text-align: center;
-        margin-bottom: 40px;
-        .logo {
-            width: 64px;
-            height: 64px;
-            background: ${props => props.theme.primary};
-            color: #fff;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 24px;
-            box-shadow: 0 8px 16px ${props => props.theme.primary}40;
-        }
-        h1 { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
-        p { color: ${props => props.theme.textSecondary}; font-weight: 500; }
-    }
+const FormCard = styled.div`
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+`;
 
-    form {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
+const Header = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+`;
 
-        .input-group {
-            label { display: block; font-size: 0.9rem; font-weight: 700; margin-bottom: 8px; color: ${props => props.theme.text}; }
-            .label-row { display: flex; justify-content: space-between; align-items: center; }
-            .forgot { border: none; background: transparent; color: ${props => props.theme.primary}; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
-            
-            .input-wrapper {
-                position: relative;
-                display: flex;
-                align-items: center;
-                
-                svg:first-child { position: absolute; left: 16px; color: ${props => props.theme.textTertiary}; }
-                
-                input {
-                    width: 100%;
-                    padding: 16px 48px;
-                    border-radius: 12px;
-                    border: 1px solid ${props => props.theme.border};
-                    font-size: 1rem;
-                    font-weight: 600;
-                    background: ${props => props.theme.backgroundTertiary}50;
-                    outline: none;
-                    transition: all 0.2s;
-                    
-                    &:focus { border-color: ${props => props.theme.primary}; background: #fff; box-shadow: 0 0 0 4px ${props => props.theme.primary}10; }
-                }
-                
-                .toggle-pass {
-                    position: absolute;
-                    right: 12px;
-                    background: none;
-                    border: none;
-                    color: ${props => props.theme.textTertiary};
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                }
-            }
-        }
+const Title = styled.h1`
+  font-size: 28px;
+  font-weight: bold;
+  color: #1e293b;
+  margin-top: 16px;
+  margin-bottom: 8px;
+`;
 
-        .submit-btn {
-            background: ${props => props.theme.primary};
-            color: #fff;
-            border: none;
-            padding: 18px;
-            border-radius: 16px;
-            font-size: 1.1rem;
-            font-weight: 800;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            transition: all 0.2s;
-            box-shadow: 0 4px 12px ${props => props.theme.primary}30;
-            
-            &:hover { transform: translateY(-2px); box-shadow: 0 8px 20px ${props => props.theme.primary}40; }
-            &:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        }
-    }
+const Subtitle = styled.p`
+  font-size: 16px;
+  color: #64748b;
+  margin: 0;
+`;
 
-    .divider {
-        margin: 32px 0;
-        position: relative;
-        text-align: center;
-        &::before { content: ''; position: absolute; inset: 50% 0 0; border-top: 1px solid ${props => props.theme.border}; }
-        span { position: relative; background: #fff; padding: 0 16px; font-size: 0.85rem; font-weight: 700; color: ${props => props.theme.textTertiary}; text-transform: uppercase; letter-spacing: 0.5px; }
-    }
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
 
-    .social-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        margin-bottom: 32px;
-        
-        .social-btn {
-            background: #fff;
-            border: 1px solid ${props => props.theme.border};
-            padding: 12px;
-            border-radius: 12px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            
-            img { width: 18px; }
-            &:hover { background: ${props => props.theme.backgroundTertiary}; }
-        }
-    }
+const InputGroup = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+`;
 
-    .footer-text {
-        text-align: center;
-        color: ${props => props.theme.textSecondary};
-        font-weight: 500;
-        a { color: ${props => props.theme.primary}; font-weight: 700; text-decoration: none; }
-    }
+const InputIcon = styled.div`
+  position: absolute;
+  left: 12px;
+  pointer-events: none;
+  display: flex;
+`;
 
-    .trust-footer {
-        margin-top: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        font-size: 0.75rem;
-        color: ${props => props.theme.textTertiary};
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
+const Input = styled.input`
+  width: 100%;
+  padding: 12px 40px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #1e293b;
+  background-color: #f8fafc;
+  transition: all 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #1e40af;
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+  }
+`;
+
+const EyeButton = styled.button`
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+`;
+
+const ForgotPasswordButton = styled.button`
+  background: none;
+  border: none;
+  color: #1e40af;
+  font-size: 14px;
+  cursor: pointer;
+  align-self: flex-end;
+  padding: 0;
+  margin-bottom: 8px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const LoginButton = styled.button`
+  background-color: #1e40af;
+  color: white;
+  padding: 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #1e3a8a;
+  }
+
+  &:disabled {
+    background-color: #94a3b8;
+    cursor: not-allowed;
+  }
+`;
+
+const GoogleButton = styled.button`
+  background-color: white;
+  color: #1e293b;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f8fafc;
+  }
+`;
+
+const GoogleButtonText = styled.span``;
+
+const Divider = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+`;
+
+const DividerLine = styled.div`
+  flex: 1;
+  height: 1px;
+  background-color: #e2e8f0;
+`;
+
+const DividerText = styled.span`
+  margin: 0 16px;
+  color: #64748b;
+  font-size: 14px;
+`;
+
+const SignupLinkContainer = styled.div`
+  text-align: center;
+`;
+
+const SignupText = styled.p`
+  color: #64748b;
+  font-size: 14px;
+  margin: 0;
+`;
+
+const StyledLink = styled(Link)`
+  color: #1e40af;
+  font-weight: 600;
+  text-decoration: none;
+  
+  &:hover {
+    text-decoration: underline;
+  }
 `;
