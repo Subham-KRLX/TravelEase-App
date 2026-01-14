@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { IoAirplane, IoSunny, IoMoon, IoCart, IoPerson, IoLogOutOutline } from 'react-icons/io5';
+import { Sun, Moon, ShoppingCart, User, LogOut, Plane } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
@@ -14,21 +14,26 @@ export default function Header() {
   return (
     <HeaderContainer theme={theme}>
       <HeaderContent>
-        <Logo to="/" theme={theme}>
-          <IoAirplane size={24} color={theme.headerText} />
-          <LogoText theme={theme}>TravelEase</LogoText>
+        <Logo to="/">
+          <LogoIconWrapper>
+            <Plane size={24} color="#fff" />
+          </LogoIconWrapper>
+          <LogoText>TravelEase</LogoText>
         </Logo>
 
+        <NavLinks>
+          <NavLinkItem to="/search">Explore</NavLinkItem>
+          <NavLinkItem to="/search?type=hotels">Hotels</NavLinkItem>
+          <NavLinkItem to="/search?type=packages">Packages</NavLinkItem>
+        </NavLinks>
+
         <Actions>
-          <IconButton onClick={toggleTheme} theme={theme}>
-            {isDarkMode ?
-              <IoSunny size={24} color={theme.headerText} /> :
-              <IoMoon size={24} color={theme.headerText} />
-            }
+          <IconButton onClick={toggleTheme} title="Toggle Theme">
+            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
           </IconButton>
 
-          <IconButton onClick={() => navigate('/checkout')} theme={theme} style={{ position: 'relative' }}>
-            <IoCart size={24} color={theme.headerText} />
+          <IconButton onClick={() => navigate('/checkout')} style={{ position: 'relative' }} title="Cart">
+            <ShoppingCart size={20} />
             {getTotalItems() > 0 && (
               <Badge>
                 <BadgeText>{getTotalItems()}</BadgeText>
@@ -37,18 +42,19 @@ export default function Header() {
           </IconButton>
 
           {user ? (
-            <>
-              <IconButton onClick={() => navigate('/dashboard')} theme={theme}>
-                <IoPerson size={24} color={theme.headerText} />
+            <UserSection>
+              <IconButton onClick={() => navigate('/dashboard')} title="Dashboard">
+                <User size={20} />
               </IconButton>
-              <IconButton onClick={() => { logout(); navigate('/'); }} theme={theme}>
-                <IoLogOutOutline size={24} color={theme.headerText} />
+              <IconButton onClick={() => { logout(); navigate('/'); }} title="Logout">
+                <LogOut size={20} />
               </IconButton>
-            </>
+            </UserSection>
           ) : (
-            <LoginButton to="/login" theme={theme}>
-              Login
-            </LoginButton>
+            <AuthButtons>
+              <LoginLink to="/login">Sign In</LoginLink>
+              <SignUpButton to="/signup">Sign Up</SignUpButton>
+            </AuthButtons>
           )}
         </Actions>
       </HeaderContent>
@@ -56,137 +62,163 @@ export default function Header() {
   );
 }
 
-// Styled Components
 const HeaderContainer = styled.header`
-  background: linear-gradient(135deg, ${props => props.theme.headerBackground || '#1e40af'} 0%, ${props => props.theme.headerBackground || '#1e40af'}dd 100%);
-  padding: 12px 16px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  background: ${props => props.theme.headerBackground};
+  padding: 0 24px;
+  height: 72px;
+  display: flex;
+  align-items: center;
   position: sticky;
   top: 0;
   z-index: 1000;
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  
-  @media (min-width: 640px) {
-    padding: 16px 24px;
-  }
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid ${props => props.theme.border};
+  box-shadow: ${props => props.theme.shadows?.sm || '0 1px 2px rgba(0,0,0,0.05)'};
 `;
 
 const HeaderContent = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
+  width: 100%;
+  max-width: 1280px;
   margin: 0 auto;
-  gap: 8px;
-  
-  @media (min-width: 640px) {
-    gap: 16px;
-  }
 `;
 
 const Logo = styled(NavLink)`
   display: flex;
-  flex-direction: row;
   align-items: center;
   text-decoration: none;
-  gap: 8px;
+  gap: 12px;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const LogoIconWrapper = styled.div`
+  background: ${props => props.theme.primary};
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(-10deg);
+  box-shadow: 0 4px 12px rgba(0, 106, 255, 0.3);
 `;
 
 const LogoText = styled.span`
-  color: ${props => props.theme.headerText || '#fff'};
-  font-size: 18px;
+  color: ${props => props.theme.text};
+  font-size: 22px;
   font-weight: 800;
+  font-family: 'Outfit', sans-serif;
   letter-spacing: -0.5px;
-  
-  @media (min-width: 640px) {
-    font-size: 20px;
+`;
+
+const NavLinks = styled.nav`
+  display: none;
+  gap: 32px;
+
+  @media (min-width: 768px) {
+    display: flex;
   }
-  
-  @media (max-width: 480px) {
-    display: none;
+`;
+
+const NavLinkItem = styled(NavLink)`
+  text-decoration: none;
+  color: ${props => props.theme.textSecondary};
+  font-size: 15px;
+  font-weight: 500;
+  transition: color 0.2s;
+
+  &:hover, &.active {
+    color: ${props => props.theme.primary};
   }
 `;
 
 const Actions = styled.div`
   display: flex;
-  flex-direction: row;
   align-items: center;
-  gap: 8px;
-  
-  @media (min-width: 640px) {
-    gap: 16px;
-  }
+  gap: 12px;
 `;
 
 const IconButton = styled.button`
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 6px;
+  padding: 8px;
+  color: ${props => props.theme.textSecondary};
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  min-width: 40px;
-  min-height: 40px;
+  transition: all 0.2s;
   border-radius: 8px;
-  position: relative;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    transform: scale(1.05);
-  }
-
-  &:active {
-    transform: scale(0.95);
+    background: ${props => props.theme.backgroundTertiary};
+    color: ${props => props.theme.text};
   }
 `;
 
 const Badge = styled.div`
   position: absolute;
-  top: -8px;
-  right: -8px;
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  top: 4px;
+  right: 4px;
+  background: ${props => props.theme.accent};
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+  border: 2px solid ${props => props.theme.surface};
 `;
 
 const BadgeText = styled.span`
   color: #fff;
-  font-size: 10px;
-  font-weight: bold;
+  font-size: 9px;
+  font-weight: 700;
 `;
 
-const LoginButton = styled(NavLink)`
-  background: linear-gradient(135deg, ${props => props.theme.headerText || '#fff'} 0%, ${props => props.theme.headerText || '#fff'}dd 100%);
-  color: ${props => props.theme.headerBackground || '#1e40af'};
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 700;
+const UserSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const AuthButtons = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+`;
+
+const LoginLink = styled(NavLink)`
   text-decoration: none;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
-  letter-spacing: 0.3px;
+  color: ${props => props.theme.text};
+  font-size: 15px;
+  font-weight: 600;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-  
-  @media (min-width: 640px) {
-    padding: 10px 24px;
-    font-size: 15px;
+    color: ${props => props.theme.primary};
   }
 `;
+
+const SignUpButton = styled(NavLink)`
+  background: ${props => props.theme.primary};
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 106, 255, 0.2);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 106, 255, 0.3);
+  }
+`;
+

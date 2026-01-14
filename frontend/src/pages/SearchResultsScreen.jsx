@@ -1,696 +1,770 @@
 import { useState, useEffect } from 'react';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  IoAirplane,
-  IoBed,
-  IoGift,
-  IoTimeOutline,
-  IoLocation,
-  IoStar,
-  IoAddCircle,
-  IoArrowForward,
-  IoCloudOfflineOutline,
-  IoSearch
-} from 'react-icons/io5';
-import { useCart } from '../context/CartContext';
+  Plane,
+  Hotel,
+  Package,
+  Clock,
+  MapPin,
+  Star,
+  ArrowRight,
+  Filter,
+  ArrowUpDown,
+  Info,
+  ChevronRight,
+  CheckCircle2,
+  Calendar
+} from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import flightService from '../services/flightService';
 import hotelService from '../services/hotelService';
 import packageService from '../services/packageService';
 
 export default function SearchResultsScreen() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { theme } = useTheme();
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { addToCart } = useCart();
-  const { theme } = useTheme();
-
-  const params = location.state || {}; // Get params from router state
-  const searchType = params.type || 'flights';
+  const [type, setType] = useState(location.state?.type || 'flights');
 
   useEffect(() => {
-    const fetchResults = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        if (searchType === 'flights') {
-          const origin = params.from?.trim?.() || '';
-          const destination = params.to?.trim?.() || '';
-
-          // If no origin/destination provided, explore all flights
-          if (!origin || !destination) {
-            console.log('🔍 Exploring all flights...');
-            const response = await flightService.searchFlights({
-              origin: '',
-              destination: '',
-              passengers: 1,
-              class: 'economy'
-            });
-
-            console.log('📊 All flights response:', response);
-
-            if (response.success && response.flights && response.flights.length > 0) {
-              setResults(processFlightResults(response.flights));
-              setError(null);
-            } else {
-              const errorMsg = 'No flights available. Please check if backend is running on http://localhost:8000';
-              setError(errorMsg);
-              setResults([]);
-            }
-          } else {
-            // Regular search with specific route
-            const searchParams = {
-              origin: origin,
-              destination: destination,
-              departureDate: params.departDate?.trim?.() || '',
-              returnDate: params.returnDate?.trim?.() || '',
-              passengers: params.passengers || 1,
-              class: 'economy'
-            };
-
-            console.log('📍 Flight search params from UI:', searchParams);
-
-            const response = await flightService.searchFlights(searchParams);
-
-            console.log('📊 Flight search response:', response);
-
-            if (response.success && response.flights && response.flights.length > 0) {
-              setResults(processFlightResults(response.flights));
-              setError(null);
-            } else {
-              const errorMsg = response.error || 'No flights found for this route. Try different cities or dates.';
-              setError(errorMsg);
-              setResults([]);
-            }
-          }
-        } else if (searchType === 'hotels') {
-          const city = params.location?.trim?.() || '';
-
-          // If no city provided, explore all hotels
-          if (!city) {
-            console.log('🔍 Exploring all hotels...');
-            const response = await hotelService.searchHotels({
-              city: '',
-              checkIn: '',
-              checkOut: '',
-              guests: '1'
-            });
-
-            console.log('📊 All hotels response:', response);
-
-            if (response.success && response.hotels && response.hotels.length > 0) {
-              setResults(processHotelResults(response.hotels));
-              setError(null);
-            } else {
-              const errorMsg = 'No hotels available. Please check if backend is running on http://localhost:8000';
-              setError(errorMsg);
-              setResults([]);
-            }
-          } else {
-            const searchParams = {
-              city: city,
-              checkIn: params.checkIn?.trim?.() || '',
-              checkOut: params.checkOut?.trim?.() || '',
-              guests: params.guests || '1'
-            };
-
-            console.log('📍 Hotel search params from UI:', searchParams);
-
-            const response = await hotelService.searchHotels(searchParams);
-
-            console.log('📊 Hotel search response:', response);
-
-            if (response.success && response.hotels && response.hotels.length > 0) {
-              setResults(processHotelResults(response.hotels));
-              setError(null);
-            } else {
-              const errorMsg = response.error || 'No hotels found in this city. Try a different destination.';
-              setError(errorMsg);
-              setResults([]);
-            }
-          }
-        } else if (searchType === 'packages') {
-          const destination = params.destination?.trim?.() || '';
-
-          const searchParams = {
-            destination: destination,
-          };
-
-          const response = await packageService.searchPackages(searchParams);
-          if (response.success && response.packages && response.packages.length > 0) {
-            setResults(processPackageResults(response.packages));
-            setError(null);
-          } else {
-            const errorMsg = response.error || 'No packages found for this destination.';
-            setError(errorMsg);
-            setResults([]);
-          }
-        }
-      } catch (error) {
-        console.error('❌ Search error:', error);
-        setError('Network error. Please make sure the backend server is running on http://localhost:8000');
-        setResults([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchResults();
-  }, [searchType, JSON.stringify(params)]);
+  }, [location.state]);
 
-  const processFlightResults = (flights) => {
-    if (!Array.isArray(flights)) return [];
-    return flights.map(flight => ({
-      id: flight._id,
-      type: 'flight',
-      airline: flight.airline?.name || 'Unknown Airline',
-      from: `${flight.origin?.city || 'Unknown'} (${flight.origin?.airportCode || 'N/A'})`,
-      to: `${flight.destination?.city || 'Unknown'} (${flight.destination?.airportCode || 'N/A'})`,
-      departTime: flight.departure?.time || 'N/A',
-      arriveTime: flight.arrival?.time || 'N/A',
-      duration: flight.duration || 'N/A',
-      price: flight.price?.economy || 0,
-      stops: flight.stops === 0 ? 'Non-stop' : `${flight.stops} Stop(s)`,
-      availableSeats: flight.availableSeats?.economy || 0
-    })).filter(Boolean);
+  const fetchResults = async () => {
+    setLoading(true);
+    try {
+      let data = [];
+      if (type === 'flights') {
+        data = await flightService.searchFlights(location.state);
+      } else if (type === 'hotels') {
+        data = await hotelService.searchHotels(location.state);
+      } else {
+        data = await packageService.searchPackages(location.state);
+      }
+      setResults(data);
+    } catch (error) {
+      console.error('Error fetching results:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const processHotelResults = (hotels) => {
-    if (!Array.isArray(hotels)) return [];
-    return hotels.map(hotel => ({
-      id: hotel._id,
-      type: 'hotel',
-      name: hotel.name || 'Unknown Hotel',
-      location: `${hotel.location?.city || 'Unknown'}, ${hotel.location?.country || 'Unknown'}`,
-      rating: hotel.rating?.average || 0,
-      reviews: hotel.rating?.count || 0,
-      price: hotel.pricePerNight || 0,
-      image: hotel.images?.length > 0 ? hotel.images[0].url : 'https://via.placeholder.com/800x600',
-      description: hotel.description || 'No description available'
-    })).filter(Boolean);
-  };
+  const renderFlightCard = (flight) => (
+    <ResultCard
+      key={flight._id}
+      whileHover={{ y: -4 }}
+      layout
+    >
+      <div className="card-header">
+        <div className="airline-info">
+          <div className="airline-logo">
+            {flight.airline?.[0] || 'A'}
+          </div>
+          <div>
+            <h3>{flight.airline || 'SkyHigh Airways'}</h3>
+            <span className="flight-num">Flight {flight.flightNumber || 'AI-101'}</span>
+          </div>
+        </div>
+        <div className="price-tag">
+          ₹{flight.price?.toLocaleString()}
+        </div>
+      </div>
 
-  const processPackageResults = (packages) => {
-    if (!Array.isArray(packages)) return [];
-    return packages.map(pkg => ({
-      id: pkg._id,
-      type: 'package',
-      name: pkg.name,
-      destination: pkg.destination,
-      duration: pkg.duration,
-      includes: pkg.includes || [],
-      price: pkg.price,
-      image: pkg.image,
-      description: pkg.description,
-      rating: pkg.rating
-    }));
-  };
+      <div className="flight-route">
+        <div className="point">
+          <time>{flight.departureTime || '10:00'}</time>
+          <span className="city">{flight.from || 'BOM'}</span>
+        </div>
 
-  const handleAddToCart = (item, e) => {
-    e.stopPropagation();
-    addToCart(item);
-    alert('Added to cart!');
-  };
+        <div className="duration">
+          <span>{flight.duration || '2h 15m'}</span>
+          <div className="line">
+            <div className="dot" />
+            <Plane size={14} />
+            <div className="dot" />
+          </div>
+          <span className="stops">{flight.stops === 0 ? 'Non-stop' : `${flight.stops} Stop`}</span>
+        </div>
 
-  if (loading) {
-    return (
-      <LoadingContainer theme={theme}>
-        <Spinner theme={theme} />
-        <LoadingText theme={theme}>Searching for best deals...</LoadingText>
-      </LoadingContainer>
-    );
-  }
+        <div className="point align-right">
+          <time>{flight.arrivalTime || '12:15'}</time>
+          <span className="city">{flight.to || 'DEL'}</span>
+        </div>
+      </div>
 
-  if (error || results.length === 0) {
-    return (
-      <Container theme={theme}>
-        <ResultsHeader theme={theme}>
-          <ResultsTitle theme={theme}>{error ? 'Search Error' : `No ${searchType} found`}</ResultsTitle>
-        </ResultsHeader>
-        <EmptyContainer>
-          {error ? (
-            <IoCloudOfflineOutline size={64} color={theme.danger} />
-          ) : (
-            <IoSearch size={64} color={theme.textSecondary} />
-          )}
-          <EmptyText theme={theme}>{error || `No results found for your search`}</EmptyText>
-          <EmptySubtext theme={theme}>
-            {error && error.toLowerCase().includes('backend')
-              ? "💡 Make sure MongoDB is running and the backend server is started on http://localhost:8000"
-              : error
-                ? "Please use the search form to select valid origin, destination, or city."
-                : !error
-                  ? "Try adjusting your filters or searching for different dates."
-                  : "Try again with different search criteria."}
-          </EmptySubtext>
-          <RetryButton theme={theme} onClick={() => navigate('/')}>
-            ← Back to Home
-          </RetryButton>
-        </EmptyContainer>
-      </Container>
-    );
-  }
+      <div className="card-footer">
+        <div className="features">
+          <span><CheckCircle2 size={14} /> Free Meals</span>
+          <span><CheckCircle2 size={14} /> WiFi</span>
+        </div>
+        <button onClick={() => navigate(`/flight-details/${flight._id}`)}>
+          Details <ChevronRight size={16} />
+        </button>
+      </div>
+    </ResultCard>
+  );
+
+  const renderHotelCard = (hotel) => (
+    <ResultCard
+      key={hotel._id}
+      className="hotel-card"
+      whileHover={{ y: -4 }}
+      layout
+    >
+      <div className="hotel-thumb">
+        <img src={hotel.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400'} alt={hotel.name} />
+        {hotel.rating && (
+          <div className="badge">
+            <Star size={12} fill="currentColor" /> {hotel.rating}
+          </div>
+        )}
+      </div>
+      <div className="hotel-content">
+        <div className="header">
+          <div>
+            <h3>{hotel.name}</h3>
+            <div className="location">
+              <MapPin size={14} /> {hotel.location}
+            </div>
+          </div>
+          <div className="price">
+            ₹{hotel.price?.toLocaleString()}
+            <span>/night</span>
+          </div>
+        </div>
+        <p className="description">{hotel.description?.substring(0, 100)}...</p>
+        <div className="card-footer">
+          <div className="amenities">
+            {hotel.amenities?.slice(0, 3).map((a, i) => (
+              <span key={i}>{a}</span>
+            ))}
+          </div>
+          <button onClick={() => navigate(`/hotel-details/${hotel._id}`)}>
+            View Deal
+          </button>
+        </div>
+      </div>
+    </ResultCard>
+  );
+
+  const renderPackageCard = (pkg) => (
+    <ResultCard
+      key={pkg._id}
+      className="package-card"
+      whileHover={{ y: -4 }}
+      layout
+    >
+      <div className="package-thumb">
+        <img src={pkg.image || 'https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=400'} alt={pkg.title} />
+      </div>
+      <div className="package-content">
+        <div className="duration">
+          <Clock size={14} /> {pkg.duration || '5 Days, 4 Nights'}
+        </div>
+        <h3>{pkg.title}</h3>
+        <div className="price-section">
+          <div className="price">
+            ₹{pkg.price?.toLocaleString()}
+            <span>per person</span>
+          </div>
+          <button onClick={() => navigate(`/package-details/${pkg._id}`)}>
+            View Details
+          </button>
+        </div>
+      </div>
+    </ResultCard>
+  );
 
   return (
-    <Container theme={theme}>
-      <ResultsHeader theme={theme}>
-        <ResultsTitle theme={theme}>{results.length} {searchType} found</ResultsTitle>
-      </ResultsHeader>
+    <Container>
+      <TopBar>
+        <div className="content">
+          <h1>{type.charAt(0).toUpperCase() + type.slice(1)} in {location.state?.to || location.state?.location || 'India'}</h1>
+          <div className="controls">
+            <ControlBtn>
+              <Filter size={18} /> Filters
+            </ControlBtn>
+            <ControlBtn>
+              <ArrowUpDown size={18} /> Sort by Price
+            </ControlBtn>
+          </div>
+        </div>
+      </TopBar>
 
-      <ResultsGrid>
-        {results.map(result => {
-          if (result.type === 'flight') return (
-            <Card key={result.id} theme={theme} onClick={() => navigate(`/flight-details/${result.id}`)}>
-              <CardHeader>
-                <Airline theme={theme}>{result.airline}</Airline>
-                <Price theme={theme}>₹{result.price.toLocaleString()}</Price>
-              </CardHeader>
+      <MainLayout>
+        <FiltersSidebar>
+          <div className="search-summary">
+            <h4>Your Search</h4>
+            <div className="item">
+              <MapPin size={16} />
+              <span>{location.state?.from || 'Anywhere'} → {location.state?.to || 'Everywhere'}</span>
+            </div>
+            <div className="item">
+              <Calendar size={16} />
+              <span>{location.state?.departDate ? new Date(location.state.departDate).toLocaleDateString() : 'Dates flexible'}</span>
+            </div>
+          </div>
 
-              <FlightInfo>
-                <FlightRoute>
-                  <RoutePoint>
-                    <Time theme={theme}>{result.departTime}</Time>
-                    <LocationText theme={theme}>{result.from}</LocationText>
-                  </RoutePoint>
+          <FilterGroup>
+            <h4>Price Range</h4>
+            <input type="range" min="0" max="100000" />
+          </FilterGroup>
 
-                  <DurationContainer>
-                    <DurationText theme={theme}>{result.duration}</DurationText>
-                    <FlightLine>
-                      <Line theme={theme} />
-                      <IoAirplane size={16} color={theme.textSecondary} />
-                      <Line theme={theme} />
-                    </FlightLine>
-                    <StopsText>{result.stops}</StopsText>
-                  </DurationContainer>
+          <FilterGroup>
+            <h4>Airlines / Brands</h4>
+            <label><input type="checkbox" /> Indigo</label>
+            <label><input type="checkbox" /> Air India</label>
+            <label><input type="checkbox" /> Spicejet</label>
+          </FilterGroup>
+        </FiltersSidebar>
 
-                  <RoutePoint>
-                    <Time theme={theme}>{result.arriveTime}</Time>
-                    <LocationText theme={theme}>{result.to}</LocationText>
-                  </RoutePoint>
-                </FlightRoute>
-              </FlightInfo>
-
-              <CardActions>
-                <AddButton theme={theme} onClick={(e) => handleAddToCart(result, e)}>
-                  <IoAddCircle size={20} color={theme.primary} />
-                  <span>Add to Cart</span>
-                </AddButton>
-                <DetailsButton theme={theme} onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/flight-details/${result.id}`);
-                }}>
-                  <span>View Details</span>
-                  <IoArrowForward size={16} />
-                </DetailsButton>
-              </CardActions>
-            </Card>
-          );
-
-          if (result.type === 'hotel' || result.type === 'package') return (
-            <Card key={result.id} theme={theme} onClick={() => navigate(`/${result.type}-details/${result.id}`)}>
-              <CardImage src={result.image} alt={result.name} />
-              <CardContent>
-                <CardHeader>
-                  <CardTitle theme={theme}>{result.name}</CardTitle>
-                  <Price theme={theme}>₹{result.price.toLocaleString()}</Price>
-                </CardHeader>
-
-                <LocationRow>
-                  <IoLocation size={14} color={theme.textSecondary} />
-                  <LocationTextSm theme={theme}>{result.location || result.destination}</LocationTextSm>
-                </LocationRow>
-
-                {result.type === 'package' && (
-                  <DurationRow>
-                    <IoTimeOutline size={14} color={theme.textSecondary} />
-                    <LocationTextSm theme={theme} style={{ marginLeft: 4 }}>{result.duration}</LocationTextSm>
-                  </DurationRow>
-                )}
-
-                <RatingRow>
-                  <IoStar size={16} color={theme.gold || '#eab308'} />
-                  <RatingText theme={theme}>{result.rating}</RatingText>
-                  {result.reviews && <ReviewsText theme={theme}>({result.reviews} reviews)</ReviewsText>}
-                </RatingRow>
-
-                <Description theme={theme}>{result.description}</Description>
-
-                {result.includes && (
-                  <IncludesContainer>
-                    {result.includes.slice(0, 3).map((item, idx) => (
-                      <IncludeBadge key={idx} theme={theme}>{item}</IncludeBadge>
-                    ))}
-                  </IncludesContainer>
-                )}
-
-                <CardActions>
-                  <AddButton theme={theme} onClick={(e) => handleAddToCart(result, e)}>
-                    <IoAddCircle size={20} color={theme.primary} />
-                    <span>Add to Cart</span>
-                  </AddButton>
-                  <DetailsButton theme={theme} onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/${result.type}-details/${result.id}`);
-                  }}>
-                    <span>View Details</span>
-                    <IoArrowForward size={16} />
-                  </DetailsButton>
-                </CardActions>
-              </CardContent>
-            </Card>
-          );
-
-          return null;
-        })}
-      </ResultsGrid>
+        <ResultsList>
+          {loading ? (
+            <LoadingState>
+              <div className="spinner" />
+              <p>Searching for the best deals...</p>
+            </LoadingState>
+          ) : results.length > 0 ? (
+            <AnimatePresence>
+              <Grid>
+                {results.map(item => {
+                  if (type === 'flights') return renderFlightCard(item);
+                  if (type === 'hotels') return renderHotelCard(item);
+                  return renderPackageCard(item);
+                })}
+              </Grid>
+            </AnimatePresence>
+          ) : (
+            <EmptyState>
+              <Info size={48} />
+              <h3>No results found</h3>
+              <p>Try adjusting your filters or searching for different dates.</p>
+              <button onClick={() => navigate('/')}>Return to Home</button>
+            </EmptyState>
+          )}
+        </ResultsList>
+      </MainLayout>
     </Container>
   );
 }
 
-// Styled Components
 const Container = styled.div`
   min-height: 100vh;
-  background-color: ${props => props.theme.background || '#f8fafc'};
-  padding-bottom: 40px;
+  background: ${props => props.theme.background};
 `;
 
-const LoadingContainer = styled.div`
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: ${props => props.theme.background || '#f8fafc'};
-`;
-
-const rotate = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`;
-
-const Spinner = styled.div`
-  width: 40px;
-  height: 40px;
-  border: 4px solid ${props => props.theme.borderLight || '#e2e8f0'};
-  border-top-color: ${props => props.theme.primary || '#1e40af'};
-  border-radius: 50%;
-  animation: ${rotate} 1s linear infinite;
-`;
-
-const LoadingText = styled.p`
-  margin-top: 16px;
-  color: ${props => props.theme.textSecondary};
-  font-size: 16px;
-`;
-
-const ResultsHeader = styled.div`
-  padding: 24px;
-  background-color: ${props => props.theme.card || '#fff'};
-  border-bottom: 1px solid ${props => props.theme.border || '#e2e8f0'};
-  margin-bottom: 24px;
-`;
-
-const ResultsTitle = styled.h2`
-  font-size: 24px;
-  font-weight: bold;
-  color: ${props => props.theme.text || '#1e293b'};
-  max-width: 1200px;
-  margin: 0 auto;
-`;
-
-const EmptyContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  text-align: center;
-`;
-
-const EmptyText = styled.h3`
-  font-size: 20px;
-  font-weight: 600;
-  margin-top: 16px;
-  color: ${props => props.theme.text};
-`;
-
-const EmptySubtext = styled.p`
-  font-size: 14px;
-  color: ${props => props.theme.textSecondary};
-  margin-top: 8px;
-  max-width: 400px;
-`;
-
-const ResultsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 16px;
-`;
-
-const Card = styled.div`
-  background-color: ${props => props.theme.card || '#fff'};
-  border-radius: 12px;
-  border: 1px solid ${props => props.theme.border || '#e2e8f0'};
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
-  cursor: pointer;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+const TopBar = styled.div`
+  background: #fff;
+  border-bottom: 1px solid ${props => props.theme.border};
+  padding: 24px 0;
+  position: sticky;
+  top: 72px;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  
+  .content {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: ${props => props.theme.text};
+    }
+    
+    .controls {
+      display: flex;
+      gap: 12px;
+    }
   }
 `;
 
-const CardHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding: ${props => props.noPadding ? '0' : '16px 16px 0 16px'};
-`;
-
-const Airline = styled.h3`
-  font-size: 18px;
-  font-weight: 600;
-  color: ${props => props.theme.text};
-`;
-
-const Price = styled.div`
-  font-size: 20px;
-  font-weight: bold;
-  color: ${props => props.theme.primary};
-`;
-
-const FlightInfo = styled.div`
-  padding: 0 16px;
-  margin-bottom: 16px;
-`;
-
-const FlightRoute = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-`;
-
-const RoutePoint = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const Time = styled.span`
-  font-size: 18px;
-  font-weight: 600;
-  color: ${props => props.theme.text};
-`;
-
-const LocationText = styled.span`
-  font-size: 12px;
-  color: ${props => props.theme.textSecondary};
-  margin-top: 4px;
-`;
-
-const DurationContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-  padding: 0 16px;
-`;
-
-const DurationText = styled.span`
-  font-size: 12px;
-  color: ${props => props.theme.textSecondary};
-  margin-bottom: 4px;
-`;
-
-const FlightLine = styled.div`
-  display: flex;
-  align-items: center;
-  width: 100%;
-  gap: 8px;
-`;
-
-const Line = styled.div`
-  flex: 1;
-  height: 1px;
-  background-color: ${props => props.theme.border};
-`;
-
-const StopsText = styled.span`
-  font-size: 12px;
-  color: #16a34a;
-  margin-top: 4px;
-`;
-
-const CardActions = styled.div`
-  display: flex;
-  gap: 12px;
-  padding: 16px;
-  border-top: 1px solid ${props => props.theme.border || '#e2e8f0'};
-  margin-top: auto;
-`;
-
-const AddButton = styled.button`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid ${props => props.theme.primary};
+const ControlBtn = styled.button`
   background: transparent;
-  color: ${props => props.theme.primary};
+  border: 1px solid ${props => props.theme.border};
+  padding: 8px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
-
-  &:hover {
-    background-color: ${props => props.theme.backgroundSecondary || '#eff6ff'};
-  }
-`;
-
-const DetailsButton = styled.button`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  background-color: ${props => props.theme.primary};
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
   
   &:hover {
-    opacity: 0.9;
+    background: ${props => props.theme.backgroundTertiary};
   }
 `;
 
-const CardImage = styled.img`
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-`;
-
-const CardContent = styled.div`
-  padding: 16px;
+const MainLayout = styled.div`
+  max-width: 1280px;
+  margin: 32px auto;
+  padding: 0 24px;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 32px;
 `;
 
-const CardTitle = styled.h3`
-  font-size: 18px;
-  font-weight: 600;
-  color: ${props => props.theme.text};
+const FiltersSidebar = styled.div`
+  width: 280px;
+  flex-shrink: 0;
+  display: none;
+  
+  @media (min-width: 1024px) {
+    display: block;
+  }
+  
+  .search-summary {
+    background: ${props => props.theme.primary}10;
+    padding: 20px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    
+    h4 {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      color: ${props => props.theme.primary};
+    }
+    
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: ${props => props.theme.text};
+    }
+  }
+`;
+
+const FilterGroup = styled.div`
+  margin-bottom: 32px;
+  
+  h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  
+  label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    color: ${props => props.theme.textSecondary};
+    
+    input {
+      width: 18px;
+      height: 18px;
+    }
+  }
+  
+  input[type="range"] {
+    width: 100%;
+  }
+`;
+
+const ResultsList = styled.div`
   flex: 1;
 `;
 
-const LocationRow = styled.div`
+const Grid = styled(motion.div)`
   display: flex;
-  align-items: center;
-  gap: 4px;
+  flex-direction: column;
+  gap: 20px;
 `;
 
-const DurationRow = styled.div`
+const ResultCard = styled(motion.div)`
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid ${props => props.theme.border};
+  padding: 24px;
+  box-shadow: ${props => props.theme.shadows.sm};
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    
+    .airline-info {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      
+      .airline-logo {
+        width: 48px;
+        height: 48px;
+        background: ${props => props.theme.backgroundTertiary};
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        color: ${props => props.theme.primary};
+      }
+      
+      h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+      }
+      
+      .flight-num {
+        font-size: 0.85rem;
+        color: ${props => props.theme.textSecondary};
+      }
+    }
+    
+    .price-tag {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: ${props => props.theme.primary};
+    }
+  }
+  
+  .flight-route {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 32px;
+    margin-bottom: 24px;
+    
+    .point {
+      flex: 1;
+      
+      time {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 800;
+      }
+      
+      .city {
+        color: ${props => props.theme.textSecondary};
+        font-weight: 600;
+      }
+      
+      &.align-right {
+        text-align: right;
+      }
+    }
+    
+    .duration {
+      text-align: center;
+      min-width: 120px;
+      
+      span {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: ${props => props.theme.textTertiary};
+      }
+      
+      .line {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 4px 0;
+        
+        .dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          border: 2px solid ${props => props.theme.border};
+        }
+        
+        svg {
+          color: ${props => props.theme.border};
+        }
+        
+        &::before, &::after {
+          content: '';
+          height: 2px;
+          background: ${props => props.theme.border};
+          flex: 1;
+        }
+      }
+      
+      .stops {
+        color: #10B981;
+      }
+    }
+  }
+  
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px solid ${props => props.theme.border};
+    
+    .features {
+      display: flex;
+      gap: 16px;
+      
+      span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        color: ${props => props.theme.textSecondary};
+        font-weight: 500;
+        
+        svg {
+          color: #10B981;
+        }
+      }
+    }
+    
+    button {
+      background: ${props => props.theme.primary};
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+  }
+  
+  &.hotel-card {
+    display: flex;
+    gap: 24px;
+    padding: 0;
+    overflow: hidden;
+    
+    .hotel-thumb {
+      width: 240px;
+      position: relative;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      
+      .badge {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        background: #fff;
+        padding: 4px 10px;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        color: #F59E0B;
+      }
+    }
+    
+    .hotel-content {
+      flex: 1;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      
+      .header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        
+        h3 {
+          font-size: 1.25rem;
+          font-weight: 800;
+        }
+        
+        .location {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          color: ${props => props.theme.textSecondary};
+          font-size: 0.9rem;
+          margin-top: 4px;
+        }
+        
+        .price {
+          text-align: right;
+          font-size: 1.5rem;
+          font-weight: 800;
+          color: ${props => props.theme.primary};
+          
+          span {
+            display: block;
+            font-size: 0.85rem;
+            color: ${props => props.theme.textSecondary};
+            font-weight: 500;
+          }
+        }
+      }
+      
+      .description {
+        color: ${props => props.theme.textSecondary};
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 20px;
+      }
+      
+      .amenities {
+        display: flex;
+        gap: 8px;
+        
+        span {
+          background: ${props => props.theme.backgroundTertiary};
+          padding: 4px 12px;
+          border-radius: 50px;
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
+  &.package-card {
+     display: flex;
+     gap: 24px;
+     padding: 0;
+     overflow: hidden;
+
+     .package-thumb {
+       width: 200px;
+       img {
+         width: 100%;
+         height: 100%;
+         object-fit: cover;
+       }
+     }
+
+     .package-content {
+       flex: 1;
+       padding: 24px;
+       display: flex;
+       flex-direction: column;
+       justify-content: center;
+
+       .duration {
+         display: flex;
+         align-items: center;
+         gap: 6px;
+         font-weight: 700;
+         color: ${props => props.theme.primary};
+         font-size: 0.85rem;
+         margin-bottom: 8px;
+       }
+
+       h3 {
+         font-size: 1.25rem;
+         font-weight: 800;
+         margin-bottom: 20px;
+       }
+
+       .price-section {
+         display: flex;
+         justify-content: space-between;
+         align-items: flex-end;
+
+         .price {
+           font-size: 1.5rem;
+           font-weight: 800;
+           color: ${props => props.theme.text};
+           
+           span {
+             display: block;
+             font-size: 0.85rem;
+             color: ${props => props.theme.textSecondary};
+             font-weight: 500;
+           }
+         }
+
+         button {
+           background: ${props => props.theme.primary};
+           color: #fff;
+           border: none;
+           padding: 12px 24px;
+           border-radius: 12px;
+           font-weight: 700;
+           cursor: pointer;
+         }
+       }
+     }
+  }
 `;
 
-const LocationTextSm = styled.span`
-  font-size: 14px;
-  color: ${props => props.theme.textSecondary};
-`;
-
-const RatingRow = styled.div`
+const LoadingState = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  margin-top: 4px;
+  justify-content: center;
+  padding: 100px 0;
+  
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid ${props => props.theme.border};
+    border-top-color: ${props => props.theme.primary};
+    border-radius: 50%;
+    animation: rotate 1s linear infinite;
+    margin-bottom: 24px;
+  }
+  
+  @keyframes rotate {
+    to { transform: rotate(360deg); }
+  }
+  
+  p {
+    color: ${props => props.theme.textSecondary};
+    font-weight: 600;
+  }
 `;
 
-const RatingText = styled.span`
-  font-size: 14px;
-  font-weight: 600;
-  color: ${props => props.theme.text};
-`;
-
-const ReviewsText = styled.span`
-  font-size: 12px;
-  color: ${props => props.theme.textSecondary};
-`;
-
-const Description = styled.p`
-  font-size: 14px;
-  color: ${props => props.theme.textSecondary};
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-`;
-
-const IncludesContainer = styled.div`
+const EmptyState = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-`;
-
-const IncludeBadge = styled.span`
-  background-color: ${props => props.theme.backgroundSecondary || '#f1f5f9'};
-  color: ${props => props.theme.textSecondary};
-  font-size: 11px;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-weight: 500;
-`;
-
-const RetryButton = styled.button`
-  margin-top: 24px;
-  padding: 12px 24px;
-  background-color: ${props => props.theme.primary};
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    opacity: 0.9;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  text-align: center;
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid ${props => props.theme.border};
+  
+  svg {
+    color: ${props => props.theme.textTertiary};
+    margin-bottom: 24px;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+  
+  p {
+    color: ${props => props.theme.textSecondary};
+    margin-bottom: 32px;
+    max-width: 400px;
+  }
+  
+  button {
+    background: ${props => props.theme.primary};
+    color: #fff;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
   }
 `;

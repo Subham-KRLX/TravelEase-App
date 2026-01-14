@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 
 const ThemeContext = createContext();
 
@@ -10,125 +11,114 @@ export const useTheme = () => {
     return context;
 };
 
-export const lightTheme = {
-    // TROPICAL BEACH THEME - Bright, sunny, vacation vibes
-    background: '#fffbeb',
-    backgroundSecondary: '#fef3c7',
-    backgroundTertiary: '#fde68a',
-    backgroundGradient: ['#fef3c7', '#fed7aa', '#fecaca'],
+const lightTheme = {
+    background: '#F8FAFC',
+    backgroundSecondary: '#FFFFFF',
+    backgroundTertiary: '#F1F5F9',
+    backgroundGradient: ['#F8FAFC', '#F1F5F9', '#E2E8F0'],
 
-    // Text colors - Warm and inviting
-    text: '#78350f',
-    textSecondary: '#92400e',
-    textTertiary: '#d97706',
+    text: '#0F172A',
+    textSecondary: '#475569',
+    textTertiary: '#94A3B8',
 
-    // Primary - Tropical sunset
-    primary: '#f59e0b',
-    primaryDark: '#d97706',
-    primaryLight: '#fbbf24',
-    primaryGradient: ['#fbbf24', '#f97316', '#ec4899'],
+    primary: '#006AFF',
+    primaryDark: '#0056D2',
+    primaryLight: '#3388FF',
+    primaryGradient: ['#006AFF', '#0056D2'],
 
-    // Accent - Ocean breeze
-    accent: '#06b6d4',
-    accentGradient: ['#22d3ee', '#06b6d4', '#0284c7'],
+    accent: '#FF4D6D',
+    accentGradient: ['#FF4D6D', '#FF8E53'],
 
-    // Status colors - Tropical
-    success: '#10b981',
-    successGradient: ['#34d399', '#10b981', '#059669'],
-    warning: '#f59e0b',
-    warningGradient: ['#fbbf24', '#f59e0b', '#d97706'],
-    danger: '#dc2626',
-    dangerGradient: ['#ef4444', '#dc2626', '#b91c1c'],
+    success: '#10B981',
+    successGradient: ['#10B981', '#059669'],
+    warning: '#F59E0B',
+    warningGradient: ['#F59E0B', '#D97706'],
+    danger: '#EF4444',
+    dangerGradient: ['#EF4444', '#DC2626'],
 
-    // Borders - Warm gold
-    border: '#fed7aa',
-    borderLight: '#fef3c7',
-    borderDark: '#fbbf24',
+    border: '#E2E8F0',
+    borderLight: '#F1F5F9',
+    borderDark: '#CBD5E1',
 
-    // Cards - Sunny
-    card: '#ffffff',
-    cardSecondary: '#fffbeb',
-    cardShadow: 'rgba(251, 191, 36, 0.3)',
-    cardShadowLarge: 'rgba(251, 191, 36, 0.5)',
+    card: '#FFFFFF',
+    cardSecondary: '#F8FAFC',
+    cardShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    cardShadowLarge: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
 
-    // Header - Sunset gradient
-    headerBackground: '#f97316',
-    headerGradient: ['#fbbf24', '#f97316', '#ec4899'],
-    headerText: '#ffffff',
+    headerBackground: '#FFFFFF',
+    headerGradient: ['#FFFFFF', '#F8FAFC'],
+    headerText: '#0F172A',
 
-    // Special - Beach paradise
-    heroGradient: ['#fbbf24', '#f97316', '#ec4899', '#a855f7'],
-    featureGradient: ['#fef3c7', '#fed7aa', '#fbbf24'],
+    heroGradient: ['#003580', '#006AFF'],
+    featureGradient: ['#F1F5F9', '#E2E8F0', '#CBD5E1'],
 
-    // Icons - Filled style for light mode
-    iconStyle: 'default', // use default filled icons
-
-    // Other
-    overlay: 'rgba(251, 146, 60, 0.6)',
-    overlayLight: 'rgba(251, 146, 60, 0.3)',
-    gold: '#fbbf24',
-    shimmer: '#fde68a',
+    iconStyle: 'outline',
+    overlay: 'rgba(15, 23, 42, 0.5)',
+    overlayLight: 'rgba(15, 23, 42, 0.1)',
+    gold: '#F59E0B',
+    shimmer: '#E2E8F0',
+    shadows: {
+        sm: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+    }
 };
 
-export const darkTheme = {
-    // MIDNIGHT GALAXY THEME - Deep space, neon stars
-    background: '#0c0a09',
-    backgroundSecondary: '#1c1917',
-    backgroundTertiary: '#292524',
-    backgroundGradient: ['#0c0a09', '#1c1917', '#292524'],
+const darkTheme = {
+    background: '#0F172A',
+    backgroundSecondary: '#1E293B',
+    backgroundTertiary: '#334155',
+    backgroundGradient: ['#0F172A', '#1E293B', '#334155'],
 
-    // Text colors - Neon glow
-    text: '#fafaf9',
-    textSecondary: '#e7e5e4',
-    textTertiary: '#a8a29e',
+    text: '#F8FAFC',
+    textSecondary: '#94A3B8',
+    textTertiary: '#64748B',
 
-    // Primary - Electric purple
-    primary: '#a855f7',
-    primaryDark: '#9333ea',
-    primaryLight: '#c084fc',
-    primaryGradient: ['#a855f7', '#ec4899', '#f43f5e'],
+    primary: '#3388FF',
+    primaryDark: '#006AFF',
+    primaryLight: '#66AAFF',
+    primaryGradient: ['#3388FF', '#006AFF'],
 
-    // Accent - Neon cyan
-    accent: '#22d3ee',
-    accentGradient: ['#67e8f9', '#22d3ee', '#06b6d4'],
+    accent: '#FF4D6D',
+    accentGradient: ['#FF4D6D', '#FF8E53'],
 
-    // Status - Neon signs
-    success: '#4ade80',
-    successGradient: ['#86efac', '#4ade80', '#22c55e'],
-    warning: '#fde047',
-    warningGradient: ['#fef08a', '#fde047', '#facc15'],
-    danger: '#f87171',
-    dangerGradient: ['#fca5a5', '#f87171', '#ef4444'],
+    success: '#34D399',
+    successGradient: ['#34D399', '#10B981'],
+    warning: '#FBBF24',
+    warningGradient: ['#FBBF24', '#F59E0B'],
+    danger: '#F87171',
+    dangerGradient: ['#F87171', '#EF4444'],
 
-    // Borders - Glowing
-    border: '#44403c',
-    borderLight: '#57534e',
-    borderDark: '#292524',
+    border: '#1E293B',
+    borderLight: '#334155',
+    borderDark: '#0F172A',
 
-    // Cards - Floating in space
-    card: '#1c1917',
-    cardSecondary: '#292524',
-    cardShadow: 'rgba(168, 85, 247, 0.4)',
-    cardShadowLarge: 'rgba(168, 85, 247, 0.6)',
+    card: '#1E293B',
+    cardSecondary: '#334155',
+    cardShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3)',
+    cardShadowLarge: '0 20px 25px -5px rgba(0, 0, 0, 0.5)',
 
-    // Header - Galaxy gradient
-    headerBackground: '#1c1917',
-    headerGradient: ['#a855f7', '#ec4899', '#f43f5e'],
-    headerText: '#fafaf9',
+    headerBackground: '#0F172A',
+    headerGradient: ['#0F172A', '#1E293B'],
+    headerText: '#F8FAFC',
 
-    // Special - Cosmic
-    heroGradient: ['#a855f7', '#ec4899', '#f43f5e', '#fb923c'],
-    featureGradient: ['#1c1917', '#292524', '#44403c'],
+    heroGradient: ['#001E4D', '#003580'],
+    featureGradient: ['#1E293B', '#334155', '#475569'],
 
-    // Icons - Outline style for dark mode
-    iconStyle: 'outline', // use outline icons for dark mode
-
-    // Other
-    overlay: 'rgba(168, 85, 247, 0.7)',
-    overlayLight: 'rgba(168, 85, 247, 0.5)',
-    gold: '#fde047',
-    shimmer: '#c084fc',
+    iconStyle: 'outline',
+    overlay: 'rgba(0, 0, 0, 0.7)',
+    overlayLight: 'rgba(0, 0, 0, 0.4)',
+    gold: '#FBBF24',
+    shimmer: '#1E293B',
+    shadows: {
+        sm: '0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2)',
+        md: '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)',
+        lg: '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2)',
+        xl: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4)',
+    }
 };
+
 
 export const ThemeProvider = ({ children }) => {
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -172,7 +162,9 @@ export const ThemeProvider = ({ children }) => {
 
     return (
         <ThemeContext.Provider value={value}>
-            {children}
+            <StyledThemeProvider theme={theme}>
+                {children}
+            </StyledThemeProvider>
         </ThemeContext.Provider>
     );
 };

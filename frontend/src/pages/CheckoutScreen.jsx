@@ -1,400 +1,466 @@
+import { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
-    IoCartOutline,
-    IoArrowForward,
-    IoAdd,
-    IoRemove,
-    IoTrashOutline
-} from 'react-icons/io5';
+    ShoppingBag,
+    Trash2,
+    Plus,
+    Minus,
+    ArrowRight,
+    ShieldCheck,
+    CreditCard,
+    ChevronRight,
+    Plane,
+    Hotel,
+    Package,
+    Calendar,
+    Ticket,
+    Info
+} from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
-const CheckoutScreen = () => {
+export default function CheckoutScreen() {
     const navigate = useNavigate();
-    const { cartItems, getTotalPrice, removeFromCart, updateQuantity } = useCart();
+    const { cartItems: cart, removeFromCart, updateQuantity, clearCart, getTotalPrice: getCartTotal } = useCart();
     const { user } = useAuth();
     const { theme } = useTheme();
+    const [promoCode, setPromoCode] = useState('');
 
-    const handleCheckout = () => {
+    const total = getCartTotal();
+    const taxes = total * 0.12;
+    const finalTotal = total + taxes;
+
+    const handleProceed = () => {
         if (!user) {
-            if (window.confirm('Please login to complete your booking')) {
-                navigate('/login');
-            }
+            navigate('/login', { state: { from: '/checkout' } });
             return;
         }
-
-        if (cartItems.length === 0) {
-            alert('Cart is empty!');
-            return;
-        }
-
-        // Navigate to Stripe payment screen
-        const subtotal = getTotalPrice();
-        
-        // Validate that subtotal is a finite number
-        if (!Number.isFinite(subtotal) || subtotal <= 0) {
-            alert('Error calculating order total. Please check your cart items.');
-            console.error('Invalid subtotal:', subtotal);
-            return;
-        }
-        
-        const amount = Math.round(subtotal * 1.18);
-        const paymentData = {
-            amount: amount,
-            items: cartItems,
-            subtotal: subtotal
-        };
-
-        // Save to localStorage as backup
-        localStorage.setItem('pending_payment', JSON.stringify(paymentData));
-
-        navigate('/payment', { state: paymentData });
+        navigate('/payment');
     };
 
-    if (cartItems.length === 0) {
+    if (cart.length === 0) {
         return (
-            <Container theme={theme}>
-                <EmptyState>
-                    <IoCartOutline size={80} color={theme.textTertiary} />
-                    <EmptyTitle theme={theme}>Your cart is empty</EmptyTitle>
-                    <EmptySubtitle theme={theme}>Add some items to get started</EmptySubtitle>
-                    <BrowseButton theme={theme} onClick={() => navigate('/')}>
-                        Browse Deals
-                    </BrowseButton>
-                </EmptyState>
-            </Container>
+            <EmptyCart>
+                <ShoppingBag size={80} />
+                <h2>Your travel bag is empty</h2>
+                <p>Looks like you haven't added any adventures yet. Start exploring to find your next destination!</p>
+                <button onClick={() => navigate('/')}>Explore Destinations</button>
+            </EmptyCart>
         );
     }
 
     return (
-        <Container theme={theme}>
-            <ContentWrapper>
-                <Title theme={theme}>Shopping Cart</Title>
+        <Container>
+            <ProgressSteps>
+                <Step active><span>1</span> Bag</Step>
+                <div className="line" />
+                <Step><span>2</span> Details</Step>
+                <div className="line" />
+                <Step><span>3</span> Payment</Step>
+            </ProgressSteps>
 
-                <Grid>
-                    <CartList>
-                        {cartItems.map((item) => (
-                            <CartItem key={`${item.type}-${item.id}`} theme={theme}>
-                                <ItemInfo>
-                                    <ItemName theme={theme}>
-                                        {item.type === 'flight' ?
-                                            `${item.airline?.name || item.airline} - ${item.from || (item.origin?.city || item.origin)} to ${item.to || (item.destination?.city || item.destination)}`
-                                            : item.name}
-                                    </ItemName>
-                                    <ItemDetails theme={theme}>
-                                        {item.type === 'flight' && (
-                                            <>
-                                                {item.departure?.time || item.departTime} - {item.arrival?.time || item.arriveTime} • {item.duration}
-                                            </>
-                                        )}
-                                        {item.type === 'hotel' && (item.from || (item.location?.city ? `${item.location.address}, ${item.location.city}` : item.location))}
-                                    </ItemDetails>
-                                    <ItemPrice theme={theme}>
-                                        ₹{(typeof item.price === 'number' ? item.price : (item.price?.economy || item.price?.pricePerNight || item.pricePerNight || 0)).toLocaleString()} × {item.quantity}
-                                    </ItemPrice>
-                                </ItemInfo>
+            <Content>
+                <div className="cart-items">
+                    <header>
+                        <h1>Your Travel Bag</h1>
+                        <span>{cart.length} items selected</span>
+                    </header>
 
-                                <ItemActions>
-                                    <QuantityControls theme={theme}>
-                                        <QuantityButton theme={theme} onClick={() => updateQuantity(item.id, item.type, item.quantity - 1)}>
-                                            <IoRemove size={16} />
-                                        </QuantityButton>
-                                        <Quantity theme={theme}>{item.quantity}</Quantity>
-                                        <QuantityButton theme={theme} onClick={() => updateQuantity(item.id, item.type, item.quantity + 1)}>
-                                            <IoAdd size={16} />
-                                        </QuantityButton>
-                                    </QuantityControls>
+                    {cart.map((item) => (
+                        <CartItem key={item.id || item._id} layout>
+                            <div className="item-thumb">
+                                {item.type === 'flight' ? <div className="icon-box"><Plane size={32} /></div> : <img src={item.image} alt={item.name} />}
+                            </div>
+                            <div className="item-info">
+                                <div className="type-badge">
+                                    {item.type === 'flight' ? <Plane size={12} /> : item.type === 'hotel' ? <Hotel size={12} /> : <Package size={12} />}
+                                    {item.type}
+                                </div>
+                                <h3>{item.name || item.title || `${item.from} to ${item.to}`}</h3>
+                                <div className="meta">
+                                    <span><Calendar size={14} /> Sep 24 - Sep 30</span>
+                                </div>
+                                <div className="controls">
+                                    <div className="qty">
+                                        <button onClick={() => updateQuantity(item.id || item._id, item.type, Math.max(1, (item.quantity || 1) - 1))}><Minus size={14} /></button>
+                                        <span>{item.quantity || 1}</span>
+                                        <button onClick={() => updateQuantity(item.id || item._id, item.type, (item.quantity || 1) + 1)}><Plus size={14} /></button>
+                                    </div>
+                                    <button className="remove" onClick={() => removeFromCart(item.id || item._id, item.type)}>
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="item-price">
+                                ₹{item.price?.toLocaleString()}
+                            </div>
+                        </CartItem>
+                    ))}
+                </div>
 
-                                    <RemoveButton onClick={() => removeFromCart(item.id, item.type)}>
-                                        <IoTrashOutline size={20} />
-                                    </RemoveButton>
-                                </ItemActions>
-                            </CartItem>
-                        ))}
-                    </CartList>
+                <div className="sidebar">
+                    <SummaryCard>
+                        <h3>Order Summary</h3>
 
-                    <SummaryCard theme={theme}>
-                        <SummaryTitle theme={theme}>Order Summary</SummaryTitle>
+                        <div className="promo-box">
+                            <Ticket size={18} />
+                            <input
+                                type="text"
+                                placeholder="Enter promo code"
+                                value={promoCode}
+                                onChange={(e) => setPromoCode(e.target.value)}
+                            />
+                            <button>Apply</button>
+                        </div>
 
-                        <SummaryRow>
-                            <SummaryLabel theme={theme}>Subtotal</SummaryLabel>
-                            <SummaryValue theme={theme}>₹{Number.isFinite(getTotalPrice()) ? getTotalPrice().toLocaleString() : '0'}</SummaryValue>
-                        </SummaryRow>
+                        <div className="details">
+                            <div className="row">
+                                <span>Subtotal</span>
+                                <span>₹{total.toLocaleString()}</span>
+                            </div>
+                            <div className="row">
+                                <span>Taxes & Fees (12%)</span>
+                                <span>₹{taxes.toLocaleString()}</span>
+                            </div>
+                            <div className="row discount">
+                                <span>Discount</span>
+                                <span>-₹0</span>
+                            </div>
+                        </div>
 
-                        <SummaryRow>
-                            <SummaryLabel theme={theme}>Taxes & Fees (18%)</SummaryLabel>
-                            <SummaryValue theme={theme}>₹{Number.isFinite(getTotalPrice()) ? Math.round(getTotalPrice() * 0.18).toLocaleString() : '0'}</SummaryValue>
-                        </SummaryRow>
+                        <div className="total">
+                            <span>Total</span>
+                            <span>₹{finalTotal.toLocaleString()}</span>
+                        </div>
 
-                        <Divider theme={theme} />
+                        <button className="checkout-btn" onClick={handleProceed}>
+                            Proceed to Checkout <ArrowRight size={20} />
+                        </button>
 
-                        <TotalRow>
-                            <TotalLabel theme={theme}>Total</TotalLabel>
-                            <TotalValue theme={theme}>₹{Number.isFinite(getTotalPrice()) ? Math.round(getTotalPrice() * 1.18).toLocaleString() : '0'}</TotalValue>
-                        </TotalRow>
-
-                        <CheckoutButton theme={theme} onClick={handleCheckout}>
-                            Proceed to Payment
-                            <IoArrowForward size={20} />
-                        </CheckoutButton>
+                        <div className="security">
+                            <ShieldCheck size={16} /> 100% Secure Checkout
+                        </div>
                     </SummaryCard>
-                </Grid>
-            </ContentWrapper>
+
+                    <SupportCard onClick={() => navigate('/support')}>
+                        <Info size={20} />
+                        <div>
+                            <h4>Need Help?</h4>
+                            <p>Contact our 24/7 support for any booking queries.</p>
+                        </div>
+                        <ChevronRight size={18} />
+                    </SupportCard>
+                </div>
+            </Content>
         </Container>
     );
-};
+}
 
-// Styled Components
 const Container = styled.div`
-    min-height: 100vh;
-    background-color: ${props => props.theme.backgroundSecondary || '#f8fafc'};
-    padding: 40px 24px;
+    max-width: 1280px;
+    margin: 40px auto;
+    padding: 0 24px;
+    min-height: 80vh;
 `;
 
-const ContentWrapper = styled.div`
-    max-width: 1200px;
-    margin: 0 auto;
-`;
-
-const Title = styled.h1`
-    font-size: 32px;
-    font-weight: 800;
-    color: ${props => props.theme.text};
-    margin-bottom: 32px;
-`;
-
-const Grid = styled.div`
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
-    align-items: start;
-
-    @media (min-width: 968px) {
-        grid-template-columns: 1fr 380px;
-        gap: 32px;
-    }
-`;
-
-
-const CartList = styled.div`
+const ProgressSteps = styled.div`
     display: flex;
-    flex-direction: column;
-    gap: 16px;
-`;
-
-const CartItem = styled.div`
-    background-color: ${props => props.theme.card};
-    padding: 24px;
-    border-radius: 16px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    border: 1px solid ${props => props.theme.border || 'transparent'};
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 60px;
     
-    @media (max-width: 640px) {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
+    .line {
+        width: 100px;
+        height: 2px;
+        background: ${props => props.theme.border};
     }
 `;
 
-const ItemInfo = styled.div`
-    flex: 1;
-`;
-
-const ItemName = styled.h3`
-    font-size: 18px;
-    font-weight: 600;
-    color: ${props => props.theme.text};
-    margin-bottom: 8px;
-`;
-
-const ItemDetails = styled.div`
-    font-size: 14px;
-    color: ${props => props.theme.textSecondary};
-    margin-bottom: 8px;
-`;
-
-const ItemPrice = styled.div`
-    font-size: 18px;
-    font-weight: 700;
-    color: ${props => props.theme.primary};
-`;
-
-const ItemActions = styled.div`
+const Step = styled.div`
     display: flex;
     align-items: center;
-    gap: 24px;
-    
-    @media (max-width: 640px) {
-        width: 100%;
-        justify-content: space-between;
-    }
-`;
-
-const QuantityControls = styled.div`
-    display: flex;
-    align-items: center;
-    background-color: ${props => props.theme.backgroundSecondary};
-    padding: 4px;
-    border-radius: 8px;
     gap: 12px;
-`;
-
-const QuantityButton = styled.button`
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: ${props => props.theme.card};
-    border: 1px solid ${props => props.theme.border || 'transparent'};
-    border-radius: 6px;
-    cursor: pointer;
-    color: ${props => props.theme.text};
+    font-weight: 700;
+    color: ${props => props.active ? props.theme.primary : props.theme.textTertiary};
     
-    &:hover {
-        background-color: ${props => props.theme.backgroundTertiary};
+    span {
+        width: 32px;
+        height: 32px;
+        background: ${props => props.active ? props.theme.primary : props.theme.backgroundTertiary};
+        color: ${props => props.active ? '#fff' : props.theme.textSecondary};
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
     }
 `;
 
-const Quantity = styled.span`
-    font-weight: 600;
-    color: ${props => props.theme.text};
-    min-width: 20px;
-    text-align: center;
+const Content = styled.div`
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 60px;
+    
+    @media (max-width: 1024px) {
+        grid-template-columns: 1fr;
+    }
+
+    .cart-items {
+        header {
+            margin-bottom: 32px;
+            h1 { font-size: 2rem; font-weight: 800; margin-bottom: 4px; }
+            span { color: ${props => props.theme.textSecondary}; font-weight: 600; }
+        }
+    }
 `;
 
-const RemoveButton = styled.button`
-    background: none;
-    border: none;
-    color: #ef4444;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 8px;
+const CartItem = styled(motion.div)`
     display: flex;
-    align-items: center;
-    justify-content: center;
+    gap: 24px;
+    padding: 24px;
+    background: #fff;
+    border-radius: 24px;
+    border: 1px solid ${props => props.theme.border};
+    margin-bottom: 16px;
+    transition: all 0.2s;
     
-    &:hover {
-        background-color: #fee2e2;
+    &:hover { border-color: ${props => props.theme.primary}; box-shadow: ${props => props.theme.shadows.sm}; }
+    
+    .item-thumb {
+        width: 120px;
+        height: 120px;
+        border-radius: 16px;
+        overflow: hidden;
+        flex-shrink: 0;
+        
+        img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .icon-box {
+            width: 100%; height: 100%;
+            background: ${props => props.theme.primary}10;
+            color: ${props => props.theme.primary};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+    
+    .item-info {
+        flex: 1;
+        
+        .type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: ${props => props.theme.backgroundTertiary};
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: ${props => props.theme.textSecondary};
+            margin-bottom: 8px;
+        }
+        
+        h3 { font-size: 1.25rem; font-weight: 800; margin-bottom: 8px; }
+        
+        .meta {
+            display: flex;
+            gap: 16px;
+            font-size: 0.9rem;
+            color: ${props => props.theme.textSecondary};
+            font-weight: 500;
+            margin-bottom: 20px;
+            span { display: flex; align-items: center; gap: 6px; }
+        }
+        
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            
+            .qty {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                background: ${props => props.theme.backgroundTertiary};
+                padding: 4px;
+                border-radius: 50px;
+                
+                button {
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    border: none;
+                    background: #fff;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    color: ${props => props.theme.text};
+                }
+                
+                span { font-weight: 800; font-size: 0.95rem; min-width: 20px; text-align: center; }
+            }
+            
+            .remove {
+                background: none;
+                border: none;
+                color: ${props => props.theme.danger};
+                cursor: pointer;
+                opacity: 0.6;
+                transition: opacity 0.2s;
+                &:hover { opacity: 1; }
+            }
+        }
+    }
+    
+    .item-price {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: ${props => props.theme.primary};
     }
 `;
 
 const SummaryCard = styled.div`
-    background-color: ${props => props.theme.card};
-    padding: 24px;
-    border-radius: 16px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    border: 1px solid ${props => props.theme.border || 'transparent'};
+    background: #fff;
+    border: 1px solid ${props => props.theme.border};
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: ${props => props.theme.shadows.sm};
     position: sticky;
     top: 100px;
-`;
-
-const SummaryTitle = styled.h2`
-    font-size: 20px;
-    font-weight: 700;
-    color: ${props => props.theme.text};
-    margin-bottom: 24px;
-`;
-
-const SummaryRow = styled.div`
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 16px;
-`;
-
-const SummaryLabel = styled.span`
-    color: ${props => props.theme.textSecondary};
-    font-size: 15px;
-`;
-
-const SummaryValue = styled.span`
-    color: ${props => props.theme.text};
-    font-weight: 500;
-    font-size: 15px;
-`;
-
-const Divider = styled.div`
-    height: 1px;
-    background-color: ${props => props.theme.border || '#e2e8f0'};
-    margin: 20px 0;
-`;
-
-const TotalRow = styled(SummaryRow)`
-    margin-bottom: 32px;
-`;
-
-const TotalLabel = styled.span`
-    font-size: 18px;
-    font-weight: 700;
-    color: ${props => props.theme.text};
-`;
-
-const TotalValue = styled.span`
-    font-size: 24px;
-    font-weight: 800;
-    color: ${props => props.theme.primary};
-`;
-
-const CheckoutButton = styled.button`
-    width: 100%;
-    background-color: ${props => props.theme.primary};
-    color: white;
-    padding: 16px;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: background-color 0.2s;
-
-    &:hover {
-        background-color: ${props => props.theme.secondary};
+    
+    h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 24px; }
+    
+    .promo-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: ${props => props.theme.backgroundTertiary};
+        padding: 8px 16px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        
+        input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            outline: none;
+            &::placeholder { color: ${props => props.theme.textTertiary}; }
+        }
+        
+        button {
+            background: ${props => props.theme.text};
+            color: #fff;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+    }
+    
+    .details {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 24px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid ${props => props.theme.border};
+        
+        .row {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            color: ${props => props.theme.textSecondary};
+            
+            &.discount { color: #10B981; }
+        }
+    }
+    
+    .total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        span:first-child { font-size: 1.25rem; font-weight: 800; }
+        span:last-child { font-size: 1.75rem; font-weight: 900; color: ${props => props.theme.primary}; }
+    }
+    
+    .checkout-btn {
+        width: 100%;
+        background: ${props => props.theme.primary};
+        color: #fff;
+        border: none;
+        padding: 18px;
+        border-radius: 16px;
+        font-size: 1.1rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 106, 255, 0.3);
+    }
+    
+    .security {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 20px;
+        font-size: 0.85rem;
+        color: ${props => props.theme.textTertiary};
+        font-weight: 600;
     }
 `;
 
-const EmptyState = styled.div`
+const EmptyCart = styled.div`
+    height: 80vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 60vh;
     text-align: center;
-`;
-
-const EmptyTitle = styled.h2`
-    font-size: 24px;
-    color: ${props => props.theme.text};
-    margin-top: 24px;
-    margin-bottom: 8px;
-`;
-
-const EmptySubtitle = styled.p`
-    color: ${props => props.theme.textSecondary};
-    margin-bottom: 32px;
-`;
-
-const BrowseButton = styled.button`
-    background-color: ${props => props.theme.primary};
-    color: white;
-    padding: 12px 32px;
-    border-radius: 8px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 16px;
+    padding: 40px;
     
-    &:hover {
-        background-color: ${props => props.theme.secondary};
+    svg { color: ${props => props.theme.border}; margin-bottom: 24px; }
+    h2 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; }
+    p { color: ${props => props.theme.textSecondary}; margin-bottom: 32px; max-width: 400px; line-height: 1.6; }
+    button {
+        background: ${props => props.theme.primary};
+        color: #fff;
+        border: none;
+        padding: 14px 32px;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
     }
 `;
 
-export default CheckoutScreen;
+const SupportCard = styled.div`
+    margin-top: 24px;
+    background: #0F172A;
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: #fff;
+    cursor: pointer;
+    
+    svg:first-child { color: ${props => props.theme.primary}; }
+    
+    div {
+        flex: 1;
+        h4 { font-weight: 800; margin-bottom: 4px; }
+        p { font-size: 0.8rem; opacity: 0.7; }
+    }
+`;

@@ -14,6 +14,8 @@ import HotelDetailsScreen from './pages/HotelDetailsScreen';
 import PackageDetailsScreen from './pages/PackageDetailsScreen';
 import PaymentScreen from './pages/PaymentScreen';
 import CheckoutScreen from './pages/CheckoutScreen';
+import { Elements } from '@stripe/react-stripe-js';
+import stripePromise from './config/stripe';
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -50,7 +52,11 @@ function AppContent() {
         <Route path="/flight-details/:id" element={<FlightDetailsScreen />} />
         <Route path="/hotel-details/:id" element={<HotelDetailsScreen />} />
         <Route path="/package-details/:id" element={<PackageDetailsScreen />} />
-        <Route path="/payment" element={<PaymentScreen />} />
+        <Route path="/payment" element={
+          <Elements stripe={stripePromise}>
+            <PaymentScreen />
+          </Elements>
+        } />
       </Routes>
     </>
   );
