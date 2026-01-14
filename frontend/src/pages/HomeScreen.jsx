@@ -110,7 +110,18 @@ export default function HomeScreen() {
           <HeroSubtitle theme={theme}>
             Book smarter, travel better with exclusive deals
           </HeroSubtitle>
-          <HeroButton theme={theme} onClick={() => navigate('/search')}>
+          <HeroButton theme={theme} onClick={() => {
+            // Navigate with default search parameters
+            const defaultParams = {
+              type: 'flights',
+              from: 'Mumbai',
+              to: 'Delhi',
+              departDate: new Date().toISOString().split('T')[0],
+              returnDate: new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0],
+              passengers: 1
+            };
+            navigate('/search', { state: defaultParams });
+          }}>
             <HeroButtonText>Start Exploring</HeroButtonText>
             <IoArrowForwardCircle size={20} color="#fff" />
           </HeroButton>

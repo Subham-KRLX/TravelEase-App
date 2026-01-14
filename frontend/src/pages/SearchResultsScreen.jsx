@@ -201,10 +201,17 @@ export default function SearchResultsScreen() {
           )}
           <EmptyText theme={theme}>{error || `No results found for your search`}</EmptyText>
           <EmptySubtext theme={theme}>
-            {error
-              ? "This usually happens when backend is not reachable. Please check your connection."
-              : "Try adjusting your filters or searching for different dates."}
+            {error && error.includes('select')
+              ? "Please use the search form to select valid origin, destination, or city."
+              : error && error.includes('backend')
+              ? "Make sure your backend server is running on http://localhost:5000"
+              : !error
+              ? "Try adjusting your filters or searching for different dates."
+              : "Try again with different search criteria."}
           </EmptySubtext>
+          <RetryButton theme={theme} onClick={() => navigate('/')}>
+            ← Back to Home
+          </RetryButton>
         </EmptyContainer>
       </Container>
     );
@@ -631,4 +638,21 @@ const IncludeBadge = styled.span`
   padding: 4px 8px;
   border-radius: 12px;
   font-weight: 500;
+`;
+
+const RetryButton = styled.button`
+  margin-top: 24px;
+  padding: 12px 24px;
+  background-color: ${props => props.theme.primary};
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    opacity: 0.9;
+  }
 `;
