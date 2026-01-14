@@ -43,7 +43,8 @@ export const CartProvider = ({ children }) => {
     const addToCart = (item) => {
         const itemToStore = {
             ...item,
-            id: item.id || item._id // Ensure we have a consistent id
+            id: item.id || item._id, // Ensure we have a consistent id
+            quantity: item.quantity || 1 // Ensure quantity defaults to 1
         };
 
         setCartItems(prev => {
@@ -51,7 +52,7 @@ export const CartProvider = ({ children }) => {
             if (existingItem) {
                 return prev.map(cartItem =>
                     cartItem.id === itemToStore.id && cartItem.type === itemToStore.type
-                        ? { ...cartItem, quantity: cartItem.quantity + 1 }
+                        ? { ...cartItem, quantity: (cartItem.quantity || 1) + 1 }
                         : cartItem
                 );
             }
@@ -84,15 +85,52 @@ export const CartProvider = ({ children }) => {
 
     const getTotalPrice = () => {
         return cartItems.reduce((total, item) => {
-            // Handle both direct price and nested price.economy structure
-            const itemPrice = typeof item.price === 'number' ? item.price :
-                (item.price?.economy || item.price?.pricePerNight || item.pricePerNight || 0);
-            return total + (itemPrice * item.quantity);
+            if (!item) return total;
+            
+            // Safely extract price with multiple fallback options
+            let itemPrice = 0;
+            
+            // Try direct price property
+            if (typeof item.price === 'number') {
+                itemPrice = item.price;
+            }
+            // Try nested price.economy
+            else if (item.price && typeof item.price === 'object' && typeof item.price.economy === 'number') {
+                itemPrice = item.price.economy;
+            }
+            // Try price.pricePerNight
+            else if (item.price && typeof item.price === 'object' && typeof item.price.pricePerNight === 'number') {
+                itemPrice = item.price.pricePerNight;
+            }
+            // Try direct pricePerNight
+            else if (typeof item.pricePerNight === 'number') {
+                itemPrice = item.pricePerNight;
+            }
+            // Try other common price properties
+            else if (typeof item.basePrice === 'number') {
+                itemPrice = item.basePrice;
+            }
+            else if (typeof item.amount === 'number') {
+                itemPrice = item.amount;
+            }
+            
+            // Ensure quantity is a valid number
+            const quantity = Number.isInteger(item.quantity) && item.quantity > 0 ? item.quantity : 1;
+            
+            // Calculate line total
+            const lineTotal = itemPrice * quantity;
+            
+            // Only add if it's a valid number
+            return total + (Number.isFinite(lineTotal) ? lineTotal : 0);
         }, 0);
     };
 
     const getTotalItems = () => {
-        return cartItems.reduce((total, item) => total + item.quantity, 0);
+        return cartItems.reduce((total, item) => {
+            if (!item) return total;
+            const quantity = Number.isInteger(item.quantity) && item.quantity > 0 ? item.quantity : 1;
+            return total + quantity;
+        }, 0);
     };
 
     const value = {

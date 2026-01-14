@@ -311,17 +311,17 @@ const PaymentScreen = () => {
                     <SummaryCard theme={theme}>
                         <SummaryTitle theme={theme}>Order Summary</SummaryTitle>
                         <OrderItems>
-                            {items.map((item, idx) => (
+                            {items && items.map((item, idx) => (
                                 <OrderItem key={idx} theme={theme}>
                                     <ItemName>{item.name || item.airline || 'Item'}</ItemName>
-                                    <ItemQuantity>×{item.quantity}</ItemQuantity>
+                                    <ItemQuantity>×{item.quantity || 1}</ItemQuantity>
                                 </OrderItem>
                             ))}
                         </OrderItems>
                         <Divider theme={theme} />
                         <TotalRow>
                             <TotalLabel theme={theme}>Total Amount</TotalLabel>
-                            <TotalValue theme={theme}>₹{amount.toLocaleString()}</TotalValue>
+                            <TotalValue theme={theme}>₹{Number.isFinite(amount) ? amount.toLocaleString() : '0'}</TotalValue>
                         </TotalRow>
                     </SummaryCard>
                 </Grid>

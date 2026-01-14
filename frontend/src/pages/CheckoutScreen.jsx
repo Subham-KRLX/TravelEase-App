@@ -31,10 +31,20 @@ const CheckoutScreen = () => {
         }
 
         // Navigate to Stripe payment screen
-        const amount = Math.round(getTotalPrice() * 1.18);
+        const subtotal = getTotalPrice();
+        
+        // Validate that subtotal is a finite number
+        if (!Number.isFinite(subtotal) || subtotal <= 0) {
+            alert('Error calculating order total. Please check your cart items.');
+            console.error('Invalid subtotal:', subtotal);
+            return;
+        }
+        
+        const amount = Math.round(subtotal * 1.18);
         const paymentData = {
             amount: amount,
-            items: cartItems
+            items: cartItems,
+            subtotal: subtotal
         };
 
         // Save to localStorage as backup
@@ -110,19 +120,19 @@ const CheckoutScreen = () => {
 
                         <SummaryRow>
                             <SummaryLabel theme={theme}>Subtotal</SummaryLabel>
-                            <SummaryValue theme={theme}>₹{getTotalPrice().toLocaleString()}</SummaryValue>
+                            <SummaryValue theme={theme}>₹{Number.isFinite(getTotalPrice()) ? getTotalPrice().toLocaleString() : '0'}</SummaryValue>
                         </SummaryRow>
 
                         <SummaryRow>
                             <SummaryLabel theme={theme}>Taxes & Fees (18%)</SummaryLabel>
-                            <SummaryValue theme={theme}>₹{Math.round(getTotalPrice() * 0.18).toLocaleString()}</SummaryValue>
+                            <SummaryValue theme={theme}>₹{Number.isFinite(getTotalPrice()) ? Math.round(getTotalPrice() * 0.18).toLocaleString() : '0'}</SummaryValue>
                         </SummaryRow>
 
                         <Divider theme={theme} />
 
                         <TotalRow>
                             <TotalLabel theme={theme}>Total</TotalLabel>
-                            <TotalValue theme={theme}>₹{Math.round(getTotalPrice() * 1.18).toLocaleString()}</TotalValue>
+                            <TotalValue theme={theme}>₹{Number.isFinite(getTotalPrice()) ? Math.round(getTotalPrice() * 1.18).toLocaleString() : '0'}</TotalValue>
                         </TotalRow>
 
                         <CheckoutButton theme={theme} onClick={handleCheckout}>
