@@ -64,13 +64,22 @@ const seedDatabase = async () => {
         console.log(`   - Flights: ${flightsCount}`);
         console.log(`   - Hotels: ${hotelsCount}`);
         console.log(`   - Packages: ${packagesCount}`);
-        console.log('\n✨ You can now start the server with: npm start\n');
+        console.log('\n✨ Database is ready!\n');
 
-        process.exit(0);
+        return { flightsCount, hotelsCount, packagesCount };
     } catch (error) {
         console.error('❌ Seeding failed:', error);
-        process.exit(1);
+        throw error;
     }
 };
 
-seedDatabase();
+// Only run as standalone script if called directly
+if (require.main === module) {
+    seedDatabase().then(() => {
+        process.exit(0);
+    }).catch(err => {
+        process.exit(1);
+    });
+} else {
+    module.exports = seedDatabase;
+}

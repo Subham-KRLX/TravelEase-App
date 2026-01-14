@@ -9,31 +9,6 @@ const seedDatabase = require('./seeders');
 // Initialize Express app
 const app = express();
 
-// Connect to MongoDB and seed data if needed
-connectDB().then(async () => {
-    try {
-        // Check if database has data
-        const Flight = require('./models/Flight');
-        const flightCount = await Flight.countDocuments();
-        
-        console.log(`\n📊 Database Status:
-        - Connected: ✅
-        - Flights in DB: ${flightCount}
-        `);
-        
-        // If no flights exist, seed the database
-        if (flightCount === 0) {
-            console.log('📊 No data found in database. Auto-seeding...');
-            await seedDatabase();
-            console.log('✅ Database seeding completed!');
-        } else {
-            console.log(`✅ Database already contains ${flightCount} flights. Skipping seed.`);
-        }
-    } catch (error) {
-        console.error('⚠️  Seeding error:', error.message);
-    }
-});
-
 // Middleware
 app.use(helmet()); // Security headers
 app.use(cors()); // Allow all origins, no credentials (cookies) needed for Bearer auth
@@ -76,12 +51,44 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Start server
+// Start server and connect to MongoDB
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`\n🚀 Server Status:
+
+const startServer = async () => {
+    try {
+        // Connect to MongoDB
+        await connectDB();
+        
+        // Check if database has data and seed if needed
+        const Flight = require('./models/Flight');
+        const flightCount = await Flight.countDocuments();
+        
+        console.log(`\n📊 Database Status:
+        - Connected: ✅
+        - Flights in DB: ${flightCount}
+        `);
+        
+        // If no flights exist, seed the database
+        if (flightCount === 0) {
+            console.log('📊 No data found in database. Auto-seeding...');
+            await seedDatabase();
+            console.log('✅ Database seeding completed!');
+        } else {
+            console.log(`✅ Database already contains ${flightCount} flights. Skipping seed.`);
+        }
+        
+        // Now start listening
+        app.listen(PORT, () => {
+            console.log(`\n🚀 Server Status:
     - Running on: http://localhost:${PORT}
     - Environment: ${process.env.NODE_ENV || 'development'}
     - API Base: http://localhost:${PORT}/api
     `);
-});
+        });
+    } catch (error) {
+        console.error('❌ Server startup error:', error.message);
+        process.exit(1);
+    }
+};
+
+startServer();
