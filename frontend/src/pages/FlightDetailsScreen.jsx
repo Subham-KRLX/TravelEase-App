@@ -2,473 +2,652 @@ import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-    IoAirplane,
-    IoTimeOutline,
-    IoCheckmarkCircle,
-    IoBriefcaseOutline,
-    IoBagHandleOutline,
-    IoArrowBack
-} from 'react-icons/io5';
+    Plane,
+    Clock,
+    MapPin,
+    ArrowLeft,
+    ShieldCheck,
+    Wifi,
+    Coffee,
+    Monitor,
+    Briefcase,
+    ChevronRight,
+    Info,
+    CreditCard,
+    Gift
+} from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import flightService from '../services/flightService';
 
-const FlightDetailsScreen = () => {
+export default function FlightDetailsScreen() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { addToCart } = useCart();
     const { theme } = useTheme();
-
+    const { addToCart } = useCart();
     const [flight, setFlight] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchFlight = async () => {
-            try {
-                const response = await flightService.getFlightDetails(id);
-                if (response.success) {
-                    setFlight(response.flight);
-                } else {
-                    setError('Flight not found');
-                }
-            } catch (err) {
-                setError('Error fetching flight details');
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (id) {
-            fetchFlight();
-        }
+        fetchFlight();
     }, [id]);
 
-    const handleAddToCart = () => {
-        addToCart({
-            ...flight,
-            type: 'flight'
-        });
-        if (window.confirm('Flight added to cart! Go to checkout?')) {
-            navigate('/checkout');
+    const fetchFlight = async () => {
+        try {
+            const data = await flightService.getFlightById(id);
+            setFlight(data);
+        } catch (error) {
+            console.error('Error fetching flight:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    if (loading) {
-        return (
-            <Container theme={theme}>
-                <LoadingText theme={theme}>Loading flight details...</LoadingText>
-            </Container>
-        );
-    }
+    const handleAddToCart = () => {
+        if (flight) {
+            addToCart({
+                ...flight,
+                type: 'flight'
+            });
+            navigate('/cart');
+        }
+    };
 
-    if (error || !flight) {
-        return (
-            <Container theme={theme}>
-                <ErrorText>Error: {error || 'Flight not found'}</ErrorText>
-                <BackButton theme={theme} onClick={() => navigate(-1)}>Go Back</BackButton>
-            </Container>
-        );
-    }
+    if (loading) return <LoadingState><div className="spinner" /></LoadingState>;
+    if (!flight) return <EmptyState>Flight not found</EmptyState>;
 
     return (
-        <Container theme={theme}>
-            <ContentWrapper>
-                <Header>
-                    <BackButton theme={theme} onClick={() => navigate(-1)}>
-                        <IoArrowBack size={24} />
-                        Back
-                    </BackButton>
-                </Header>
-
-                <MainCard theme={theme}>
-                    <CardHeader>
-                        <div>
-                            <AirlineName theme={theme}>{flight.airline?.name || flight.airline}</AirlineName>
-                            <FlightNumber theme={theme}>{flight.flightNumber}</FlightNumber>
+        <Container>
+            <HeroSection>
+                <div className="overlay" />
+                <div className="content">
+                    <button className="back-btn" onClick={() => navigate(-1)}>
+                        <ArrowLeft size={20} /> Back to Search
+                    </button>
+                    <div className="main-info">
+                        <div className="airline">
+                            <div className="logo">{flight.airline?.[0]}</div>
+                            <div>
+                                <h1>{flight.airline || 'SkyHigh Airways'}</h1>
+                                <span>Flight {flight.flightNumber || 'FL-101'} • Boeing 737 MAX</span>
+                            </div>
                         </div>
-                        <PriceTag theme={theme}>₹{flight.price?.economy?.toLocaleString() || flight.price?.toLocaleString()}</PriceTag>
-                    </CardHeader>
+                        <div className="status">
+                            <span className="badge">On Time</span>
+                        </div>
+                    </div>
+                </div>
+            </HeroSection>
 
-                    <RouteInfo>
-                        <LocationInfo>
-                            <Time theme={theme}>{flight.departure?.time || flight.departTime}</Time>
-                            <City theme={theme}>{flight.origin?.city || flight.origin} ({flight.origin?.code || 'BOM'})</City>
-                            <DateText theme={theme}>{new Date(flight.departure?.date).toLocaleDateString()}</DateText>
-                        </LocationInfo>
-
-                        <FlightPath>
-                            <Duration theme={theme}>{flight.duration}</Duration>
-                            <PathLine theme={theme}>
-                                <IoAirplane size={24} color={theme.primary} style={{ transform: 'rotate(90deg)' }} />
-                            </PathLine>
-                            <Stops theme={theme}>{flight.stops === 0 ? 'Non-stop' : `${flight.stops} Stop(s)`}</Stops>
-                        </FlightPath>
-
-                        <LocationInfo>
-                            <Time theme={theme}>{flight.arrival?.time || flight.arriveTime}</Time>
-                            <City theme={theme}>{flight.destination?.city || flight.destination} ({flight.destination?.code || 'DEL'})</City>
-                            <DateText theme={theme}>{new Date(flight.arrival?.date).toLocaleDateString()}</DateText>
-                        </LocationInfo>
-                    </RouteInfo>
-
-                    <InfoGrid>
-                        <InfoItem theme={theme}>
-                            <IoCheckmarkCircle size={20} color="#10b981" />
-                            <span>{flight.stops === 0 ? 'Non-stop' : `${flight.stops} Stop(s)`}</span>
-                        </InfoItem>
-                        <InfoItem theme={theme}>
-                            <IoAirplane size={20} color={theme.textSecondary} />
-                            <span>{flight.aircraft || 'Airbus A320'}</span>
-                        </InfoItem>
-                    </InfoGrid>
-                </MainCard>
-
-                <SectionCard theme={theme}>
-                    <SectionTitle theme={theme}>Baggage Information</SectionTitle>
-                    <BaggageGrid>
-                        <BaggageItem theme={theme}>
-                            <IconBox theme={theme}>
-                                <IoBriefcaseOutline size={24} color={theme.primary} />
-                            </IconBox>
-                            <div>
-                                <BaggageLabel theme={theme}>Check-in Baggage</BaggageLabel>
-                                <BaggageValue theme={theme}>{flight.baggage || '15 KG'}</BaggageValue>
+            <MainLayout>
+                <div className="details-column">
+                    <Section>
+                        <div className="route-viz">
+                            <div className="point">
+                                <span className="time">{flight.departureTime || '10:00'}</span>
+                                <span className="city">{flight.from || 'BOM'}</span>
+                                <span className="airport">Chatrapati Shivaji Int'l</span>
                             </div>
-                        </BaggageItem>
-                        <BaggageItem theme={theme}>
-                            <IconBox theme={theme}>
-                                <IoBagHandleOutline size={24} color={theme.primary} />
-                            </IconBox>
-                            <div>
-                                <BaggageLabel theme={theme}>Cabin Baggage</BaggageLabel>
-                                <BaggageValue theme={theme}>{flight.cabinBaggage || '7 KG'}</BaggageValue>
-                            </div>
-                        </BaggageItem>
-                    </BaggageGrid>
-                </SectionCard>
 
-                <SectionCard theme={theme}>
-                    <SectionTitle theme={theme}>Amenities</SectionTitle>
-                    <AmenitiesGrid>
-                        {(flight.amenities || ['WiFi', 'Meals', 'Entertainment']).map((amenity, index) => (
-                            <AmenityItem key={index} theme={theme}>
-                                <IoCheckmarkCircle size={20} color="#10b981" />
-                                <span>{amenity}</span>
+                            <div className="path">
+                                <div className="duration">
+                                    <Clock size={14} /> {flight.duration || '2h 15m'}
+                                </div>
+                                <div className="line">
+                                    <div className="dot" />
+                                    <Plane size={18} />
+                                    <div className="dot" />
+                                </div>
+                                <div className="type">{flight.stops === 0 ? 'Non-stop' : `${flight.stops} Stop`}</div>
+                            </div>
+
+                            <div className="point align-right">
+                                <span className="time">{flight.arrivalTime || '12:15'}</span>
+                                <span className="city">{flight.to || 'DEL'}</span>
+                                <span className="airport">Indira Gandhi Int'l</span>
+                            </div>
+                        </div>
+                    </Section>
+
+                    <Section title="In-flight Amenities">
+                        <AmenitiesGrid>
+                            <AmenityItem>
+                                <Wifi size={20} />
+                                <div>
+                                    <h4>High Speed WiFi</h4>
+                                    <p>Stay connected throughout your flight</p>
+                                </div>
                             </AmenityItem>
-                        ))}
-                    </AmenitiesGrid>
-                </SectionCard>
+                            <AmenityItem>
+                                <Coffee size={20} />
+                                <div>
+                                    <h4>Choice of Meals</h4>
+                                    <p>Delicious breakfast and beverage options</p>
+                                </div>
+                            </AmenityItem>
+                            <AmenityItem>
+                                <Monitor size={20} />
+                                <div>
+                                    <h4>Entertainment</h4>
+                                    <p>Browse 500+ movies and TV shows</p>
+                                </div>
+                            </AmenityItem>
+                            <AmenityItem>
+                                <ShieldCheck size={20} />
+                                <div>
+                                    <h4>Travel Safety</h4>
+                                    <p>Enhanced cleaning and sanitized cabin</p>
+                                </div>
+                            </AmenityItem>
+                        </AmenitiesGrid>
+                    </Section>
 
-                <BottomBar theme={theme}>
-                    <TotalPrice>
-                        <Label theme={theme}>Total Price</Label>
-                        <Value theme={theme}>₹{flight.price?.economy?.toLocaleString() || flight.price?.toLocaleString()}</Value>
-                    </TotalPrice>
-                    <BookButton theme={theme} onClick={handleAddToCart}>
-                        Add to Cart
-                    </BookButton>
-                </BottomBar>
-            </ContentWrapper>
+                    <Section title="Baggage Information">
+                        <BaggageInfo>
+                            <div className="row">
+                                <Briefcase size={20} />
+                                <div className="text">
+                                    <h4>Cabin Baggage</h4>
+                                    <span>7 KG / Person</span>
+                                </div>
+                                <div className="status included">Included</div>
+                            </div>
+                            <div className="row">
+                                <Briefcase size={20} />
+                                <div className="text">
+                                    <h4>Check-in Baggage</h4>
+                                    <span>15 KG / Person</span>
+                                </div>
+                                <div className="status included">Included</div>
+                            </div>
+                        </BaggageInfo>
+                    </Section>
+                </div>
+
+                <div className="sidebar">
+                    <BookingCard>
+                        <div className="header">
+                            <h3>Pricing Summary</h3>
+                            <div className="price">
+                                ₹{flight.price?.toLocaleString()}
+                                <span>/person</span>
+                            </div>
+                        </div>
+
+                        <div className="breakdown">
+                            <div className="item">
+                                <span>Base Fare</span>
+                                <span>₹{(flight.price * 0.8).toLocaleString()}</span>
+                            </div>
+                            <div className="item">
+                                <span>Taxes & Fees</span>
+                                <span>₹{(flight.price * 0.2).toLocaleString()}</span>
+                            </div>
+                        </div>
+
+                        <div className="total">
+                            <span>Total Price</span>
+                            <span>₹{flight.price?.toLocaleString()}</span>
+                        </div>
+
+                        <button className="book-btn" onClick={handleAddToCart}>
+                            Book Selection <ArrowRight size={20} />
+                        </button>
+
+                        <div className="trust-footer">
+                            <ShieldCheck size={16} /> Best Price Guaranteed
+                        </div>
+                    </BookingCard>
+
+                    <PromoCard>
+                        <Gift size={24} />
+                        <div>
+                            <h4>Unlock Deals</h4>
+                            <p>Sign in to earn 250 TravelPoints on this booking.</p>
+                        </div>
+                        <ChevronRight size={20} />
+                    </PromoCard>
+                </div>
+            </MainLayout>
         </Container>
     );
-};
+}
 
-// Styled Components
+const Section = ({ title, children }) => (
+    <SectionBox>
+        {title && <h3>{title}</h3>}
+        {children}
+    </SectionBox>
+);
+
 const Container = styled.div`
-    min-height: 100vh;
-    background-color: ${props => props.theme.backgroundSecondary || '#f8fafc'};
-    padding: 24px;
-    padding-bottom: 100px;
+  min-height: 100vh;
+  background: ${props => props.theme.backgroundTertiary};
 `;
 
-const ContentWrapper = styled.div`
-    max-width: 800px;
+const HeroSection = styled.div`
+  height: 300px;
+  background: linear-gradient(135deg, ${props => props.theme.primary}, ${props => props.theme.primaryDark});
+  position: relative;
+  overflow: hidden;
+  padding-top: 72px;
+  
+  .overlay {
+    position: absolute;
+    inset: 0;
+    opacity: 0.1;
+    background-image: radial-gradient(#fff 2px, transparent 2px);
+    background-size: 32px 32px;
+  }
+  
+  .content {
+    max-width: 1280px;
     margin: 0 auto;
-`;
-
-const Header = styled.div`
-    margin-bottom: 24px;
-`;
-
-const BackButton = styled.button`
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: none;
-    border: none;
-    color: ${props => props.theme.text};
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 8px 16px;
-    border-radius: 8px;
-    transition: background-color 0.2s;
-
-    &:hover {
-        background-color: ${props => props.theme.card};
-    }
-`;
-
-const MainCard = styled.div`
-    background-color: ${props => props.theme.card};
-    border-radius: 16px;
     padding: 24px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    margin-bottom: 24px;
-`;
-
-const CardHeader = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 32px;
-`;
-
-const AirlineName = styled.h1`
-    font-size: 24px;
-    font-weight: 700;
-    color: ${props => props.theme.text};
-    margin: 0 0 8px 0;
-`;
-
-const FlightNumber = styled.span`
-    background-color: ${props => props.theme.backgroundSecondary};
-    color: ${props => props.theme.textSecondary};
-    padding: 4px 12px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-`;
-
-const PriceTag = styled.div`
-    font-size: 28px;
-    font-weight: 800;
-    color: ${props => props.theme.primary};
-`;
-
-const RouteInfo = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-`;
-
-const LocationInfo = styled.div`
-    text-align: center;
-`;
-
-const Time = styled.div`
-    font-size: 24px;
-    font-weight: 700;
-    color: ${props => props.theme.text};
-    margin-bottom: 4px;
-`;
-
-const City = styled.div`
-    font-size: 16px;
-    color: ${props => props.theme.textSecondary};
-    font-weight: 500;
-`;
-
-const DateText = styled.div`
-    font-size: 14px;
-    color: ${props => props.theme.textTertiary};
-    margin-top: 4px;
-`;
-
-const FlightPath = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex: 1;
-    padding: 0 24px;
-`;
-
-const Duration = styled.span`
-    font-size: 14px;
-    color: ${props => props.theme.textSecondary};
-    margin-bottom: 8px;
-`;
-
-const PathLine = styled.div`
-    width: 100%;
-    height: 2px;
-    background-color: ${props => props.theme.border || '#e2e8f0'};
     position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 8px;
-
-    &::after {
-        content: '';
-        width: 8px;
-        height: 8px;
-        background-color: ${props => props.theme.primary};
-        border-radius: 50%;
-        position: absolute;
-        right: 0;
-        top: -3px;
+    z-index: 10;
+    color: #fff;
+    
+    .back-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 50px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 40px;
+      backdrop-filter: blur(4px);
+      
+      &:hover {
+        background: rgba(255,255,255,0.2);
+      }
     }
     
-    &::before {
-        content: '';
-        width: 8px;
-        height: 8px;
-        background-color: ${props => props.theme.primary};
-        border-radius: 50%;
-        position: absolute;
-        left: 0;
-        top: -3px;
+    .main-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      
+      .airline {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        
+        .logo {
+          width: 64px;
+          height: 64px;
+          background: #fff;
+          border-radius: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 900;
+          font-size: 2rem;
+          color: ${props => props.theme.primary};
+        }
+        
+        h1 {
+          font-size: 2.5rem;
+          font-weight: 800;
+          margin-bottom: 4px;
+        }
+        
+        span {
+          opacity: 0.8;
+          font-weight: 600;
+        }
+      }
+      
+      .badge {
+        background: #10B981;
+        color: #fff;
+        padding: 6px 16px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
     }
+  }
 `;
 
-const Stops = styled.span`
-    font-size: 14px;
-    color: ${props => props.theme.textTertiary};
-`;
+const MainLayout = styled.div`
+  max-width: 1280px;
+  margin: -40px auto 40px;
+  padding: 0 24px;
+  display: flex;
+  gap: 32px;
+  position: relative;
+  z-index: 20;
 
-const InfoGrid = styled.div`
+  .details-column {
+    flex: 1;
+  }
+
+  .sidebar {
+    width: 380px;
     display: flex;
-    gap: 24px;
-    padding-top: 24px;
-    border-top: 1px solid ${props => props.theme.border || '#e2e8f0'};
+    flex-direction: column;
+    gap: 20px;
+  }
 `;
 
-const InfoItem = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: ${props => props.theme.text};
-    font-size: 14px;
-`;
-
-const SectionCard = styled.div`
-    background-color: ${props => props.theme.card};
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+const SectionBox = styled.div`
+  background: #fff;
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: ${props => props.theme.shadows.sm};
+  border: 1px solid ${props => props.theme.border};
+  
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 800;
     margin-bottom: 24px;
-`;
-
-const SectionTitle = styled.h2`
-    font-size: 18px;
-    font-weight: 700;
     color: ${props => props.theme.text};
-    margin: 0 0 20px 0;
-`;
+  }
 
-const BaggageGrid = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 24px;
-`;
-
-const BaggageItem = styled.div`
+  .route-viz {
     display: flex;
     align-items: center;
-    gap: 16px;
-`;
-
-const IconBox = styled.div`
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background-color: ${props => props.theme.backgroundSecondary};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-`;
-
-const BaggageLabel = styled.div`
-    font-size: 14px;
-    color: ${props => props.theme.textSecondary};
-    margin-bottom: 4px;
-`;
-
-const BaggageValue = styled.div`
-    font-size: 16px;
-    font-weight: 600;
-    color: ${props => props.theme.text};
+    gap: 40px;
+    
+    .point {
+      flex: 1;
+      .time {
+        display: block;
+        font-size: 2.25rem;
+        font-weight: 900;
+        line-height: 1;
+        margin-bottom: 8px;
+        color: ${props => props.theme.text};
+      }
+      .city {
+        display: block;
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 4px;
+      }
+      .airport {
+        color: ${props => props.theme.textSecondary};
+        font-size: 0.9rem;
+      }
+      
+      &.align-right {
+        text-align: right;
+      }
+    }
+    
+    .path {
+      text-align: center;
+      flex: 1;
+      
+      .duration {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-weight: 600;
+        color: ${props => props.theme.textSecondary};
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+      }
+      
+      .line {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+        
+        .dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          border: 2px solid ${props => props.theme.primary};
+        }
+        
+        svg {
+          color: ${props => props.theme.primary};
+        }
+        
+        &::before, &::after {
+          content: '';
+          height: 2px;
+          background: ${props => props.theme.border};
+          flex: 1;
+        }
+      }
+      
+      .type {
+        color: #10B981;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+    }
+  }
 `;
 
 const AmenitiesGrid = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
 `;
 
 const AmenityItem = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: ${props => props.theme.text};
-    font-size: 14px;
+  display: flex;
+  gap: 16px;
+  
+  svg {
+    color: ${props => props.theme.primary};
+    flex-shrink: 0;
+  }
+  
+  h4 {
+    font-weight: 700;
+    margin-bottom: 4px;
+    font-size: 1rem;
+  }
+  
+  p {
+    color: ${props => props.theme.textSecondary};
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
 `;
 
-const BottomBar = styled.div`
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: ${props => props.theme.card};
-    padding: 16px 24px;
-    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+const BaggageInfo = styled.div`
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid ${props => props.theme.borderLight};
+    
+    &:last-child {
+      border: none;
+    }
+    
+    svg {
+      color: ${props => props.theme.textSecondary};
+    }
+    
+    .text {
+      flex: 1;
+      h4 {
+        font-weight: 700;
+        font-size: 1rem;
+      }
+      span {
+        color: ${props => props.theme.textSecondary};
+        font-size: 0.85rem;
+      }
+    }
+    
+    .status {
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      
+      &.included {
+        background: #10B98115;
+        color: #10B981;
+      }
+    }
+  }
+`;
+
+const BookingCard = styled.div`
+  background: #fff;
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: ${props => props.theme.shadows.md};
+  border: 1px solid ${props => props.theme.border};
+  position: sticky;
+  top: 100px;
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+    
+    .price {
+      text-align: right;
+      font-size: 1.75rem;
+      font-weight: 900;
+      color: ${props => props.theme.primary};
+      
+      span {
+        display: block;
+        font-size: 0.9rem;
+        color: ${props => props.theme.textSecondary};
+        font-weight: 600;
+      }
+    }
+  }
+  
+  .breakdown {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid ${props => props.theme.border};
+    
+    .item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: ${props => props.theme.textSecondary};
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+  
+  .total {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1200px; /* Optional: limit max width on large screens */
-    margin: 0 auto; /* Center if max-width used */
-    width: 100%;
-    z-index: 100;
-`;
-
-const TotalPrice = styled.div`
-    display: flex;
-    flex-direction: column;
-`;
-
-const Label = styled.span`
-    font-size: 14px;
-    color: ${props => props.theme.textSecondary};
-`;
-
-const Value = styled.span`
-    font-size: 24px;
-    font-weight: 800;
-    color: ${props => props.theme.primary};
-`;
-
-const BookButton = styled.button`
-    background-color: ${props => props.theme.primary};
-    color: white;
-    padding: 16px 48px;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s;
-
-    &:hover {
-        background-color: ${props => props.theme.secondary};
+    margin-bottom: 32px;
+    
+    span {
+      font-weight: 800;
+      font-size: 1.25rem;
     }
+  }
+  
+  .book-btn {
+    width: 100%;
+    background: ${props => props.theme.primary};
+    color: #fff;
+    border: none;
+    padding: 18px;
+    border-radius: 16px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 106, 255, 0.3);
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 106, 255, 0.4);
+    }
+  }
+  
+  .trust-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: ${props => props.theme.textTertiary};
+    font-weight: 600;
+  }
 `;
 
-const LoadingText = styled.div`
-    text-align: center;
-    color: ${props => props.theme.textSecondary};
-    margin-top: 40px;
-    font-size: 18px;
+const PromoCard = styled.div`
+  background: linear-gradient(135deg, #0F172A, #1E293B);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: #fff;
+  cursor: pointer;
+  
+  svg:first-child {
+    color: #FACC15;
+  }
+  
+  h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  
+  p {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    line-height: 1.4;
+  }
 `;
 
-const ErrorText = styled.div`
-    color: #ef4444;
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 18px;
+const LoadingState = styled.div`
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid ${props => props.theme.border};
+    border-top-color: ${props => props.theme.primary};
+    border-radius: 50%;
+    animation: rotate 1s linear infinite;
+  }
+  @keyframes rotate { to { transform: rotate(360deg); } }
 `;
 
-export default FlightDetailsScreen;
+const EmptyState = styled.div`
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+`;

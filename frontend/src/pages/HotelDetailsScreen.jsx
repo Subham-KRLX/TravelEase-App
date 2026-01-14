@@ -2,389 +2,520 @@ import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-    IoBed,
-    IoLocationOutline,
-    IoStar,
-    IoWifi,
-    IoRestaurantOutline,
-    IoFitness,
-    IoArrowBack,
-    IoCheckmarkCircle
-} from 'react-icons/io5';
+    Hotel,
+    MapPin,
+    Star,
+    Wifi,
+    Coffee,
+    Wind,
+    Utensils,
+    CheckCircle2,
+    ArrowLeft,
+    Calendar,
+    Users,
+    Info,
+    ChevronRight,
+    ShieldCheck,
+    Heart
+} from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import hotelService from '../services/hotelService';
 
-const HotelDetailsScreen = () => {
+export default function HotelDetailsScreen() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { addToCart } = useCart();
     const { theme } = useTheme();
-
+    const { addToCart } = useCart();
     const [hotel, setHotel] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchHotel = async () => {
-            try {
-                const response = await hotelService.getHotelDetails(id);
-                if (response.success) {
-                    setHotel(response.hotel);
-                } else {
-                    setError('Hotel not found');
-                }
-            } catch (err) {
-                setError('Error fetching hotel details');
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (id) {
-            fetchHotel();
-        }
+        fetchHotel();
     }, [id]);
 
-    const handleAddToCart = () => {
-        addToCart({
-            ...hotel,
-            type: 'hotel',
-            quantity: 1 // Default quantity
-        });
-        if (window.confirm('Hotel added to cart! Go to checkout?')) {
-            navigate('/checkout');
+    const fetchHotel = async () => {
+        try {
+            const data = await hotelService.getHotelById(id);
+            setHotel(data);
+        } catch (error) {
+            console.error('Error fetching hotel:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    if (loading) {
-        return (
-            <Container theme={theme}>
-                <LoadingText theme={theme}>Loading hotel details...</LoadingText>
-            </Container>
-        );
-    }
+    const handleAddToCart = () => {
+        if (hotel) {
+            addToCart({
+                ...hotel,
+                type: 'hotel'
+            });
+            navigate('/cart');
+        }
+    };
 
-    if (error || !hotel) {
-        return (
-            <Container theme={theme}>
-                <ErrorText>Error: {error || 'Hotel not found'}</ErrorText>
-                <BackButton theme={theme} onClick={() => navigate(-1)}>Go Back</BackButton>
-            </Container>
-        );
-    }
+    if (loading) return <LoadingState><div className="spinner" /></LoadingState>;
+    if (!hotel) return <EmptyState>Hotel not found</EmptyState>;
 
     return (
-        <Container theme={theme}>
-            <ContentWrapper>
-                <Header>
-                    <BackButton theme={theme} onClick={() => navigate(-1)}>
-                        <IoArrowBack size={24} />
-                        Back
-                    </BackButton>
-                </Header>
+        <Container>
+            <GalleryGrid>
+                <div className="main-img">
+                    <img src={hotel.image || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800'} alt={hotel.name} />
+                    <button className="back-btn" onClick={() => navigate(-1)}>
+                        <ArrowLeft size={20} />
+                    </button>
+                    <button className="fav-btn">
+                        <Heart size={20} />
+                    </button>
+                </div>
+                <div className="sub-imgs">
+                    <img src="https://images.unsplash.com/photo-1582719478250-c89cae4df85b?w=400" alt="Room" />
+                    <img src="https://images.unsplash.com/photo-1540541338287-41700207dee6?w=400" alt="Pool" />
+                </div>
+            </GalleryGrid>
 
-                <MainCard theme={theme} hasImage={!!hotel.images?.length}>
-                    {hotel.images?.length > 0 && (
-                        <HeroImage src={hotel.images[0].url} alt={hotel.name} />
-                    )}
-
-                    <CardContent>
-                        <CardHeader>
-                            <div>
-                                <HotelName theme={theme}>{hotel.name}</HotelName>
-                                <LocationRow>
-                                    <IoLocationOutline size={16} color={theme.textSecondary} />
-                                    <LocationText theme={theme}>{hotel.location?.address}, {hotel.location?.city}</LocationText>
-                                </LocationRow>
+            <MainLayout>
+                <div className="info-column">
+                    <Header>
+                        <div className="title-section">
+                            <h1>{hotel.name}</h1>
+                            <div className="location">
+                                <MapPin size={18} />
+                                <span>{hotel.location}</span>
+                                <button className="map-link">Show on Map</button>
                             </div>
-                            <PriceTag theme={theme}>
-                                ₹{hotel.pricePerNight?.toLocaleString()}
-                                <PerNight theme={theme}>/night</PerNight>
-                            </PriceTag>
-                        </CardHeader>
+                        </div>
+                        <div className="rating-badge">
+                            <div className="score">
+                                <Star size={16} fill="currentColor" />
+                                {hotel.rating || '4.5'}
+                            </div>
+                            <span className="reviews">128 Reviews</span>
+                        </div>
+                    </Header>
 
-                        <RatingRow>
-                            <Stars>
-                                {[...Array(Math.floor(hotel.rating?.average || 0))].map((_, i) => (
-                                    <IoStar key={i} size={18} color="#eab308" />
-                                ))}
-                            </Stars>
-                            <RatingValue theme={theme}>{hotel.rating?.average}</RatingValue>
-                            <ReviewsCount theme={theme}>({hotel.rating?.count} reviews)</ReviewsCount>
-                        </RatingRow>
+                    <Section title="About this property">
+                        <p className="description">
+                            Experience luxury and comfort in the heart of {hotel.location}. Our property offers
+                            world-class amenities and personalized service to make your stay unforgettable.
+                            {hotel.description || "Beautifully appointed rooms with stunning views and modern facilities."}
+                        </p>
+                    </Section>
 
-                        <Description theme={theme}>{hotel.description}</Description>
-
-                        <SectionTitle theme={theme}>Amenities</SectionTitle>
+                    <Section title="What this place offers">
                         <AmenitiesGrid>
-                            {(hotel.amenities || ['WiFi', 'Pool', 'Gym', 'Restaurant']).map((amenity, index) => (
-                                <AmenityItem key={index} theme={theme}>
-                                    <AmenityIconWrapper theme={theme}>
-                                        {amenity.toLowerCase().includes('wifi') ? <IoWifi /> :
-                                            amenity.toLowerCase().includes('food') || amenity.toLowerCase().includes('restaurant') ? <IoRestaurantOutline /> :
-                                                amenity.toLowerCase().includes('gym') || amenity.toLowerCase().includes('fitness') ? <IoFitness /> :
-                                                    <IoCheckmarkCircle />}
-                                    </AmenityIconWrapper>
-                                    <span>{amenity}</span>
-                                </AmenityItem>
-                            ))}
+                            <AmenityItem><Wifi size={20} /> Free high-speed WiFi</AmenityItem>
+                            <AmenityItem><Utensils size={20} /> Breakfast included</AmenityItem>
+                            <AmenityItem><Wind size={20} /> Air conditioning</AmenityItem>
+                            <AmenityItem><Coffee size={20} /> Coffee maker</AmenityItem>
+                            <AmenityItem><Utensils size={20} /> 24/7 Room service</AmenityItem>
+                            <AmenityItem><CheckCircle2 size={20} /> Free parking</AmenityItem>
                         </AmenitiesGrid>
-                    </CardContent>
-                </MainCard>
+                    </Section>
 
-                <SectionCard theme={theme}>
-                    <SectionTitle theme={theme}>Room Types</SectionTitle>
-                    <RoomsList>
-                        {(hotel.rooms || []).map((room, index) => (
-                            <RoomItem key={index} theme={theme}>
-                                <RoomInfo>
-                                    <RoomType theme={theme}>{room.type}</RoomType>
-                                    <RoomPrice theme={theme}>₹{room.price?.toLocaleString()}</RoomPrice>
-                                </RoomInfo>
-                                <SelectButton theme={theme} onClick={handleAddToCart}>Select Room</SelectButton>
-                            </RoomItem>
-                        ))}
-                        {(!hotel.rooms || hotel.rooms.length === 0) && (
-                            <RoomItem theme={theme}>
-                                <RoomInfo>
-                                    <RoomType theme={theme}>Standard Room</RoomType>
-                                    <RoomPrice theme={theme}>₹{hotel.pricePerNight?.toLocaleString()}</RoomPrice>
-                                </RoomInfo>
-                                <SelectButton theme={theme} onClick={handleAddToCart}>Select Room</SelectButton>
-                            </RoomItem>
-                        )}
-                    </RoomsList>
-                </SectionCard>
+                    <Section title="Choose your room">
+                        <RoomList>
+                            <RoomCard>
+                                <div className="room-info">
+                                    <h4>Deluxe King Room</h4>
+                                    <p>1 King Bed • City View • 350 sqft</p>
+                                    <span className="tag">Last few left!</span>
+                                </div>
+                                <div className="room-price">
+                                    <div className="amt">₹{hotel.price?.toLocaleString()} <span>/night</span></div>
+                                    <button className="select-btn" onClick={handleAddToCart}>Reserve</button>
+                                </div>
+                            </RoomCard>
 
-            </ContentWrapper>
+                            <RoomCard>
+                                <div className="room-info">
+                                    <h4>Executive Suite</h4>
+                                    <p>1 King Bed • Living Area • Premium View</p>
+                                </div>
+                                <div className="room-price">
+                                    <div className="amt">₹{(hotel.price * 1.5)?.toLocaleString()} <span>/night</span></div>
+                                    <button className="select-btn" onClick={handleAddToCart}>Reserve</button>
+                                </div>
+                            </RoomCard>
+                        </RoomList>
+                    </Section>
+                </div>
+
+                <div className="sidebar">
+                    <BookingWidget>
+                        <div className="price-header">
+                            <span className="from">Starting from</span>
+                            <div className="price">₹{hotel.price?.toLocaleString()} <span>/night</span></div>
+                        </div>
+
+                        <div className="inputs">
+                            <div className="input-group">
+                                <label>Check-in / Check-out</label>
+                                <div className="field">
+                                    <Calendar size={18} />
+                                    <span>Pick Dates</span>
+                                </div>
+                            </div>
+                            <div className="input-group">
+                                <label>Guests</label>
+                                <div className="field">
+                                    <Users size={18} />
+                                    <span>2 Adults, 0 Children</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button className="reserve-btn" onClick={handleAddToCart}>
+                            Check Availability
+                        </button>
+
+                        <p className="hint">You won't be charged yet</p>
+
+                        <div className="guarantee">
+                            <ShieldCheck size={16} />
+                            <span>Price Match Guarantee</span>
+                        </div>
+                    </BookingWidget>
+
+                    <StickyPromo>
+                        <div className="promo-content">
+                            <h3>Member Exclusive</h3>
+                            <p>Save 10% or more with Member Prices at thousands of properties.</p>
+                            <button>Sign in to save</button>
+                        </div>
+                    </StickyPromo>
+                </div>
+            </MainLayout>
         </Container>
     );
-};
+}
 
-// Styled Components
+const Section = ({ title, children }) => (
+    <SectionBox>
+        <h3>{title}</h3>
+        {children}
+    </SectionBox>
+);
+
 const Container = styled.div`
     min-height: 100vh;
-    background-color: ${props => props.theme.backgroundSecondary || '#f8fafc'};
-    padding: 24px;
+    background: #fff;
 `;
 
-const ContentWrapper = styled.div`
-    max-width: 900px;
-    margin: 0 auto;
+const GalleryGrid = styled.div`
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 12px;
+    height: 500px;
+    padding: 12px;
+    
+    .main-img {
+       position: relative;
+       img {
+         width: 100%;
+         height: 100%;
+         object-fit: cover;
+         border-radius: 20px 0 0 20px;
+       }
+       .back-btn, .fav-btn {
+          position: absolute;
+          top: 20px;
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          border: none;
+          background: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          color: ${props => props.theme.text};
+       }
+       .back-btn { left: 20px; }
+       .fav-btn { right: 20px; }
+    }
+    
+    .sub-imgs {
+       display: flex;
+       flex-direction: column;
+       gap: 12px;
+       img {
+         flex: 1;
+         object-fit: cover;
+         width: 100%;
+         height: 50%;
+         &:first-child { border-radius: 0 20px 0 0; }
+         &:last-child { border-radius: 0 0 20px 0; }
+       }
+    }
+`;
+
+const MainLayout = styled.div`
+    max-width: 1280px;
+    margin: 40px auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 60px;
+    
+    @media (max-width: 1024px) {
+       grid-template-columns: 1fr;
+    }
 `;
 
 const Header = styled.div`
-    margin-bottom: 24px;
-`;
-
-const BackButton = styled.button`
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: none;
-    border: none;
-    color: ${props => props.theme.text};
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 8px 16px;
-    border-radius: 8px;
-    transition: background-color 0.2s;
-
-    &:hover {
-        background-color: ${props => props.theme.card};
-    }
-`;
-
-const MainCard = styled.div`
-    background-color: ${props => props.theme.card};
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    margin-bottom: 24px;
-`;
-
-const HeroImage = styled.img`
-    width: 100%;
-    height: 300px;
-    object-fit: cover;
-`;
-
-const CardContent = styled.div`
-    padding: 24px;
-`;
-
-const CardHeader = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 16px;
+    margin-bottom: 40px;
+    
+    .title-section {
+       h1 {
+         font-size: 2.25rem;
+         font-weight: 800;
+         margin-bottom: 12px;
+       }
+       .location {
+         display: flex;
+         align-items: center;
+         gap: 8px;
+         color: ${props => props.theme.textSecondary};
+         font-weight: 500;
+         
+         .map-link {
+           border: none;
+           background: transparent;
+           color: ${props => props.theme.primary};
+           font-weight: 700;
+           cursor: pointer;
+           text-decoration: underline;
+           margin-left: 8px;
+         }
+       }
+    }
+    
+    .rating-badge {
+       text-align: right;
+       .score {
+         background: ${props => props.theme.primary};
+         color: #fff;
+         padding: 8px 16px;
+         border-radius: 12px;
+         font-weight: 800;
+         font-size: 1.25rem;
+         display: flex;
+         align-items: center;
+         gap: 8px;
+         margin-bottom: 4px;
+       }
+       .reviews {
+         font-size: 0.9rem;
+         color: ${props => props.theme.textSecondary};
+         font-weight: 600;
+       }
+    }
 `;
 
-const HotelName = styled.h1`
-    font-size: 28px;
-    font-weight: 700;
-    color: ${props => props.theme.text};
-    margin: 0 0 8px 0;
-`;
-
-const LocationRow = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 4px;
-`;
-
-const LocationText = styled.span`
-    font-size: 14px;
-    color: ${props => props.theme.textSecondary};
-`;
-
-const PriceTag = styled.div`
-    font-size: 24px;
-    font-weight: 800;
-    color: ${props => props.theme.primary};
-    text-align: right;
-`;
-
-const PerNight = styled.span`
-    font-size: 14px;
-    font-weight: 400;
-    color: ${props => props.theme.textSecondary};
-`;
-
-const RatingRow = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 24px;
-`;
-
-const Stars = styled.div`
-    display: flex;
-    gap: 2px;
-`;
-
-const RatingValue = styled.span`
-    font-weight: 700;
-    color: ${props => props.theme.text};
-`;
-
-const ReviewsCount = styled.span`
-    color: ${props => props.theme.textSecondary};
-    font-size: 14px;
-`;
-
-const Description = styled.p`
-    color: ${props => props.theme.textSecondary};
-    line-height: 1.6;
-    margin-bottom: 32px;
-`;
-
-const SectionTitle = styled.h2`
-    font-size: 18px;
-    font-weight: 700;
-    color: ${props => props.theme.text};
-    margin: 0 0 16px 0;
+const SectionBox = styled.div`
+    margin-bottom: 48px;
+    h3 {
+       font-size: 1.5rem;
+       font-weight: 800;
+       margin-bottom: 24px;
+    }
+    .description {
+       color: ${props => props.theme.textSecondary};
+       line-height: 1.7;
+       font-size: 1.1rem;
+    }
 `;
 
 const AmenitiesGrid = styled.div`
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
 `;
 
 const AmenityItem = styled.div`
     display: flex;
     align-items: center;
     gap: 12px;
+    font-weight: 600;
     color: ${props => props.theme.text};
-    font-size: 14px;
-    background-color: ${props => props.theme.backgroundSecondary};
-    padding: 12px;
-    border-radius: 8px;
+    svg { color: ${props => props.theme.primary}; }
 `;
 
-const AmenityIconWrapper = styled.div`
-    color: ${props => props.theme.primary};
-    display: flex;
-    align-items: center;
-`;
-
-const SectionCard = styled.div`
-    background-color: ${props => props.theme.card};
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
-    margin-bottom: 24px;
-`;
-
-const RoomsList = styled.div`
+const RoomList = styled.div`
     display: flex;
     flex-direction: column;
     gap: 16px;
 `;
 
-const RoomItem = styled.div`
+const RoomCard = styled.div`
+    border: 1px solid ${props => props.theme.border};
+    border-radius: 20px;
+    padding: 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px;
-    border: 1px solid ${props => props.theme.border || '#e2e8f0'};
-    border-radius: 12px;
+    transition: all 0.2s;
     
-    @media (max-width: 600px) {
-        flex-direction: column;
-        gap: 16px;
-        align-items: stretch;
-    }
-`;
-
-const RoomInfo = styled.div`
-    display: flex;
-    flex-direction: column;
-`;
-
-const RoomType = styled.span`
-    font-weight: 600;
-    color: ${props => props.theme.text};
-    font-size: 16px;
-`;
-
-const RoomPrice = styled.span`
-    color: ${props => props.theme.primary};
-    font-weight: 700;
-    font-size: 16px;
-`;
-
-const SelectButton = styled.button`
-    background-color: ${props => props.theme.primary};
-    color: white;
-    padding: 10px 24px;
-    border-radius: 8px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-
     &:hover {
-        background-color: ${props => props.theme.secondary};
+       border-color: ${props => props.theme.primary};
+       background: ${props => props.theme.primary}05;
+    }
+    
+    .room-info {
+       h4 { font-size: 1.25rem; font-weight: 800; margin-bottom: 8px; }
+       p { color: ${props => props.theme.textSecondary}; font-size: 0.95rem; }
+       .tag {
+         display: inline-block;
+         background: #FFF7ED;
+         color: #EA580C;
+         font-size: 0.8rem;
+         font-weight: 700;
+         padding: 4px 10px;
+         border-radius: 50px;
+         margin-top: 12px;
+       }
+    }
+    
+    .room-price {
+       text-align: right;
+       .amt {
+         font-size: 1.5rem;
+         font-weight: 800;
+         margin-bottom: 12px;
+         span { font-size: 0.9rem; color: ${props => props.theme.textSecondary}; }
+       }
+       .select-btn {
+         background: ${props => props.theme.primary};
+         color: #fff;
+         border: none;
+         padding: 10px 24px;
+         border-radius: 50px;
+         font-weight: 700;
+         cursor: pointer;
+       }
     }
 `;
 
-const LoadingText = styled.div`
-    text-align: center;
-    color: ${props => props.theme.textSecondary};
-    margin-top: 40px;
-    font-size: 18px;
+const BookingWidget = styled.div`
+    border: 1px solid ${props => props.theme.border};
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: ${props => props.theme.shadows.md};
+    position: sticky;
+    top: 100px;
+    
+    .price-header {
+      margin-bottom: 32px;
+      .from { font-weight: 600; color: ${props => props.theme.textSecondary}; font-size: 0.9rem; }
+      .price {
+        font-size: 2rem;
+        font-weight: 900;
+        color: ${props => props.theme.primary};
+        span { font-size: 1.1rem; color: ${props => props.theme.textSecondary}; font-weight: 600; }
+      }
+    }
+    
+    .inputs {
+       display: flex;
+       flex-direction: column;
+       gap: 16px;
+       margin-bottom: 24px;
+       
+       .input-group {
+          label { display: block; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; color: ${props => props.theme.textTertiary}; }
+          .field {
+             border: 1px solid ${props => props.theme.border};
+             padding: 14px;
+             border-radius: 12px;
+             display: flex;
+             align-items: center;
+             gap: 12px;
+             font-weight: 600;
+             color: ${props => props.theme.text};
+             svg { color: ${props => props.theme.primary}; }
+          }
+       }
+    }
+    
+    .reserve-btn {
+       width: 100%;
+       background: ${props => props.theme.primary};
+       color: #fff;
+       border: none;
+       padding: 18px;
+       border-radius: 16px;
+       font-size: 1.1rem;
+       font-weight: 800;
+       cursor: pointer;
+       margin-bottom: 16px;
+       transition: all 0.2s;
+       
+       &:hover { opacity: 0.9; transform: translateY(-2px); }
+    }
+    
+    .hint { text-align: center; font-size: 0.85rem; color: ${props => props.theme.textSecondary}; margin-bottom: 24px; }
+    
+    .guarantee {
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       gap: 8px;
+       font-size: 0.9rem;
+       color: ${props => props.theme.textSecondary};
+       font-weight: 600;
+       svg { color: #10B981; }
+    }
 `;
 
-const ErrorText = styled.div`
-    color: #ef4444;
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 18px;
+const StickyPromo = styled.div`
+   margin-top: 24px;
+   background: #0F172A;
+   border-radius: 20px;
+   padding: 24px;
+   color: #fff;
+   
+   h3 { font-size: 1.25rem; font-weight: 800; margin-bottom: 8px; }
+   p { font-size: 0.9rem; opacity: 0.8; line-height: 1.5; margin-bottom: 20px; }
+   button {
+      background: #fff;
+      color: #0F172A;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-weight: 700;
+      width: 100%;
+      cursor: pointer;
+   }
 `;
 
-export default HotelDetailsScreen;
+const LoadingState = styled.div`
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid ${props => props.theme.border};
+    border-top-color: ${props => props.theme.primary};
+    border-radius: 50%;
+    animation: rotate 1s linear infinite;
+  }
+  @keyframes rotate { to { transform: rotate(360deg); } }
+`;
+
+const EmptyState = styled.div`
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+`;
