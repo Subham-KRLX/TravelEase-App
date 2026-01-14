@@ -4,23 +4,35 @@ const hotelService = {
     // Search hotels
     searchHotels: async (params) => {
         try {
-            console.log('Searching hotels with params:', params);
+            console.log('🔍 Searching hotels with params:', params);
+            
+            // Validate params
+            if (!params.city) {
+                return {
+                    success: false,
+                    error: 'Please provide a city name'
+                };
+            }
+
             const response = await api.get('/hotels/search', { params });
-            console.log('Raw response:', response.data);
+            
+            console.log('✅ Hotel search response:', response.data);
 
-            const hotels = response.data.data.hotels;
-            console.log('Extracted hotels count:', hotels?.length || 0);
-
+            const hotels = response.data.data?.hotels || [];
+            
             return {
                 success: true,
-                hotels: hotels || [],
-                results: response.data.results
+                hotels: hotels,
+                results: response.data.results || 0,
+                message: response.data.message
             };
         } catch (error) {
-            console.error('Hotel service error:', error);
+            console.error('❌ Hotel search failed:', error);
+            const errorMsg = error.response?.data?.message || error.message || 'Hotel search failed';
             return {
                 success: false,
-                error: error.response?.data?.message || error.message || 'Hotel search failed'
+                hotels: [],
+                error: errorMsg
             };
         }
     },
@@ -63,6 +75,19 @@ const hotelService = {
             return {
                 success: true,
                 destinations: response.data.data.destinations
+            };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Debug: Get all hotels
+    getAllHotels: async () => {
+        try {
+            const response = await api.get('/hotels/debug/all');
+            return {
+                success: true,
+                hotels: response.data.data?.hotels || []
             };
         } catch (error) {
             return { success: false, error: error.message };

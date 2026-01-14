@@ -4,12 +4,30 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const connectDB = require('./config/database');
+const seedDatabase = require('./seeders');
 
 // Initialize Express app
 const app = express();
 
-// Connect to MongoDB
-connectDB();
+// Connect to MongoDB and seed data if needed
+connectDB().then(async () => {
+    try {
+        // Check if database has data
+        const Flight = require('./models/Flight');
+        const flightCount = await Flight.countDocuments();
+        
+        // If no flights exist, seed the database
+        if (flightCount === 0) {
+            console.log('📊 No data found in database. Auto-seeding...');
+            await seedDatabase();
+            console.log('✅ Database seeding completed!');
+        } else {
+            console.log(`✅ Database already contains ${flightCount} flights. Skipping seed.`);
+        }
+    } catch (error) {
+        console.error('⚠️  Seeding error:', error.message);
+    }
+});
 
 // Middleware
 app.use(helmet()); // Security headers

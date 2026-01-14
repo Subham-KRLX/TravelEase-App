@@ -18,38 +18,69 @@ exports.searchFlights = async (req, res) => {
             sortBy = 'price'
         } = req.query;
 
+        console.log('🔍 Flight Search Params:', { origin, destination, departureDate, passengers });
+
         // Build query
         let query = {};
 
-        if (origin) {
-            query['origin.city'] = new RegExp(origin, 'i');
+        // More flexible origin matching
+        if (origin && origin.trim()) {
+            const originTrim = origin.trim();
+            // Match either city name or airport code
+            query.$or = [
+                { 'origin.city': new RegExp(originTrim, 'i') },
+                { 'origin.airportCode': new RegExp(originTrim, 'i') }
+            ];
         }
 
-        if (destination) {
-            query['destination.city'] = new RegExp(destination, 'i');
+        // More flexible destination matching
+        if (destination && destination.trim()) {
+            const destTrim = destination.trim();
+            const destQuery = {
+                $or: [
+                    { 'destination.city': new RegExp(destTrim, 'i') },
+                    { 'destination.airportCode': new RegExp(destTrim, 'i') }
+                ]
+            };
+            
+            // Combine with existing OR condition or create new one
+            if (query.$or) {
+                query.$and = [
+                    { $or: query.$or },
+                    destQuery
+                ];
+                delete query.$or;
+            } else {
+                query.$or = destQuery.$or;
+            }
         }
 
-        if (departureDate) {
-            const date = new Date(departureDate);
-            const nextDay = new Date(date);
-            nextDay.setDate(date.getDate() + 1);
-            query['departure.date'] = { $gte: date, $lt: nextDay };
+        if (departureDate && departureDate.trim()) {
+            try {
+                const date = new Date(departureDate.trim());
+                const nextDay = new Date(date);
+                nextDay.setDate(date.getDate() + 1);
+                query['departure.date'] = { $gte: date, $lt: nextDay };
+            } catch (e) {
+                console.warn('Invalid departure date format:', departureDate);
+            }
         }
 
-        if (airline) {
-            query['airline.name'] = new RegExp(airline, 'i');
+        if (airline && airline.trim()) {
+            query['airline.name'] = new RegExp(airline.trim(), 'i');
         }
 
-        if (stops !== undefined) {
+        if (stops !== undefined && stops !== null && stops !== '') {
             query.stops = parseInt(stops);
         }
 
-        if (maxPrice) {
+        if (maxPrice && !isNaN(parseFloat(maxPrice))) {
             query[`price.${travelClass}`] = { $lte: parseFloat(maxPrice) };
         }
 
-        // Ensure enough seats available
-        query[`availableSeats.${travelClass}`] = { $gte: parseInt(passengers) };
+        // Ensure enough seats available (more lenient)
+        const passengersInt = parseInt(passengers) || 1;
+        query[`availableSeats.${travelClass}`] = { $gte: passengersInt };
 
         // Execute query with sorting
         let sortOption = {};
@@ -70,16 +101,22 @@ exports.searchFlights = async (req, res) => {
                 sortOption[`price.${travelClass}`] = 1;
         }
 
-        const flights = await Flight.find(query).sort(sortOption);
+        console.log('📋 Query object:', JSON.stringify(query, null, 2));
+        
+        const flights = await Flight.find(query).sort(sortOption).limit(50);
+        
+        console.log(`✅ Found ${flights.length} flights`);
 
         res.status(200).json({
             status: 'success',
             results: flights.length,
+            message: flights.length === 0 ? 'No flights found for your search criteria' : `Found ${flights.length} flights`,
             data: {
                 flights
             }
         });
     } catch (error) {
+        console.error('❌ Flight search error:', error);
         res.status(500).json({
             status: 'error',
             message: error.message
@@ -105,6 +142,35 @@ exports.getFlightById = async (req, res) => {
             status: 'success',
             data: {
                 flight
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'error',
+            message: error.message
+        });
+    }
+};
+
+// @desc    Get all flights (debug endpoint)
+// @route   GET /api/flights/debug/all
+// @access  Public
+exports.getAllFlights = async (req, res) => {
+    try {
+        const flights = await Flight.find().limit(10);
+        
+        res.status(200).json({
+            status: 'success',
+            count: flights.length,
+            data: {
+                flights: flights.map(f => ({
+                    id: f._id,
+                    origin: f.origin?.city,
+                    destination: f.destination?.city,
+                    airline: f.airline?.name,
+                    price: f.price?.economy,
+                    departure: f.departure?.date
+                }))
             }
         });
     } catch (error) {

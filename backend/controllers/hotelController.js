@@ -18,28 +18,36 @@ exports.searchHotels = async (req, res) => {
             sortBy = 'rating'
         } = req.query;
 
+        console.log('🔍 Hotel Search Params:', { city, checkIn, checkOut, guests });
+
         // Build query
         let query = {};
 
-        if (city) {
-            query['location.city'] = new RegExp(city, 'i');
+        // More flexible city matching
+        if (city && city.trim()) {
+            const cityTrim = city.trim();
+            query['location.city'] = new RegExp(cityTrim, 'i');
         }
 
         // Price filter
         if (minPrice || maxPrice) {
             query.pricePerNight = {};
-            if (minPrice) query.pricePerNight.$gte = parseFloat(minPrice);
-            if (maxPrice) query.pricePerNight.$lte = parseFloat(maxPrice);
+            if (minPrice && !isNaN(parseFloat(minPrice))) {
+                query.pricePerNight.$gte = parseFloat(minPrice);
+            }
+            if (maxPrice && !isNaN(parseFloat(maxPrice))) {
+                query.pricePerNight.$lte = parseFloat(maxPrice);
+            }
         }
 
         // Rating filter
-        if (minRating) {
+        if (minRating && !isNaN(parseFloat(minRating))) {
             query['rating.average'] = { $gte: parseFloat(minRating) };
         }
 
         // Amenities filter
-        if (amenities) {
-            const amenitiesList = amenities.split(',');
+        if (amenities && amenities.trim()) {
+            const amenitiesList = amenities.split(',').map(a => a.trim());
             query.amenities = { $all: amenitiesList };
         }
 
@@ -62,16 +70,22 @@ exports.searchHotels = async (req, res) => {
                 sortOption['rating.average'] = -1;
         }
 
-        const hotels = await Hotel.find(query).sort(sortOption);
+        console.log('📋 Hotel Query:', JSON.stringify(query, null, 2));
+
+        const hotels = await Hotel.find(query).sort(sortOption).limit(50);
+
+        console.log(`✅ Found ${hotels.length} hotels`);
 
         res.status(200).json({
             status: 'success',
             results: hotels.length,
+            message: hotels.length === 0 ? 'No hotels found for your search criteria' : `Found ${hotels.length} hotels`,
             data: {
                 hotels
             }
         });
     } catch (error) {
+        console.error('❌ Hotel search error:', error);
         res.status(500).json({
             status: 'error',
             message: error.message
@@ -97,6 +111,34 @@ exports.getHotelById = async (req, res) => {
             status: 'success',
             data: {
                 hotel
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'error',
+            message: error.message
+        });
+    }
+};
+
+// @desc    Get all hotels (debug endpoint)
+// @route   GET /api/hotels/debug/all
+// @access  Public
+exports.getAllHotels = async (req, res) => {
+    try {
+        const hotels = await Hotel.find().limit(10);
+        
+        res.status(200).json({
+            status: 'success',
+            count: hotels.length,
+            data: {
+                hotels: hotels.map(h => ({
+                    id: h._id,
+                    name: h.name,
+                    city: h.location?.city,
+                    price: h.pricePerNight,
+                    rating: h.rating?.average
+                }))
             }
         });
     } catch (error) {

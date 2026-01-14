@@ -4,16 +4,33 @@ const flightService = {
     // Search flights
     searchFlights: async (params) => {
         try {
+            console.log('🔍 Searching flights with params:', params);
+            
+            // Validate params
+            if (!params.origin || !params.destination) {
+                return {
+                    success: false,
+                    error: 'Please provide origin and destination cities'
+                };
+            }
+
             const response = await api.get('/flights/search', { params });
+            
+            console.log('✅ Flight search response:', response.data);
+            
             return {
                 success: true,
-                flights: response.data.data.flights,
-                results: response.data.results
+                flights: response.data.data?.flights || [],
+                results: response.data.results || 0,
+                message: response.data.message
             };
         } catch (error) {
+            console.error('❌ Flight search failed:', error);
+            const errorMsg = error.response?.data?.message || error.message || 'Flight search failed';
             return {
                 success: false,
-                error: error.response?.data?.message || 'Flight search failed'
+                flights: [],
+                error: errorMsg
             };
         }
     },
@@ -41,6 +58,19 @@ const flightService = {
             return {
                 success: true,
                 routes: response.data.data.routes
+            };
+        } catch (error) { 
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Debug: Get all flights
+    getAllFlights: async () => {
+        try {
+            const response = await api.get('/flights/debug/all');
+            return {
+                success: true,
+                flights: response.data.data?.flights || []
             };
         } catch (error) {
             return { success: false, error: error.message };
