@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
@@ -256,18 +256,21 @@ const PaymentScreen = () => {
 
     const { amount, items } = paymentData || { amount: 0, items: [] };
 
+    // Automatically redirect if no valid payment data - PERMANENT FIX
+    useEffect(() => {
+        if (!amount || amount === 0 || !items || items.length === 0) {
+            console.log('No valid payment data, redirecting to checkout...');
+            setTimeout(() => {
+                navigate('/checkout', { replace: true });
+            }, 100);
+        }
+    }, [amount, items, navigate]);
+
     if (!amount || amount === 0) {
         return (
             <Container theme={theme}>
                 <ContentWrapper>
-                    <ErrorCard theme={theme}>
-                        <ErrorTitle theme={theme}>Invalid Payment</ErrorTitle>
-                        <ErrorText theme={theme}>No payment amount found. Please go back to checkout.</ErrorText>
-                        <BackButton theme={theme} onClick={() => navigate('/checkout')}>
-                            <IoArrowBack size={20} />
-                            Back to Checkout
-                        </BackButton>
-                    </ErrorCard>
+                    <p style={{ textAlign: 'center', padding: '40px' }}>Redirecting to checkout...</p>
                 </ContentWrapper>
             </Container>
         );
