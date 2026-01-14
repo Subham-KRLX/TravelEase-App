@@ -112,6 +112,9 @@ const CheckoutForm = ({ amount, items }) => {
                     setSucceeded(true);
                     clearCart();
 
+                    // Clear the pending payment from localStorage
+                    localStorage.removeItem('pending_payment');
+
                     setTimeout(() => {
                         navigate('/dashboard', {
                             state: { paymentSuccess: true, amount: amount }
@@ -236,7 +239,22 @@ const PaymentScreen = () => {
     const navigate = useNavigate();
     const { theme } = useTheme();
 
-    const { amount, items } = location.state || { amount: 0, items: [] };
+    // Try to get payment data from route state or localStorage
+    let paymentData = location.state;
+
+    if (!paymentData || !paymentData.amount) {
+        // Try localStorage fallback
+        const savedPaymentData = localStorage.getItem('pending_payment');
+        if (savedPaymentData) {
+            try {
+                paymentData = JSON.parse(savedPaymentData);
+            } catch (e) {
+                console.error('Error parsing payment data:', e);
+            }
+        }
+    }
+
+    const { amount, items } = paymentData || { amount: 0, items: [] };
 
     if (!amount || amount === 0) {
         return (

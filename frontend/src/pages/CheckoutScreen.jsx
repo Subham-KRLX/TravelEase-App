@@ -32,12 +32,15 @@ const CheckoutScreen = () => {
 
         // Navigate to Stripe payment screen
         const amount = Math.round(getTotalPrice() * 1.18);
-        navigate('/payment', {
-            state: {
-                amount: amount,
-                items: cartItems
-            }
-        });
+        const paymentData = {
+            amount: amount,
+            items: cartItems
+        };
+
+        // Save to localStorage as backup
+        localStorage.setItem('pending_payment', JSON.stringify(paymentData));
+
+        navigate('/payment', { state: paymentData });
     };
 
     if (cartItems.length === 0) {

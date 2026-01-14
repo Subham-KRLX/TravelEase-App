@@ -37,11 +37,15 @@ const DashboardScreen = () => {
     try {
       const response = await api.get('/bookings');
       if (response.data.status === 'success') {
-        setBookings(response.data.data.bookings);
+        setBookings(response.data.data.bookings || []);
+      } else {
+        setBookings([]);
       }
     } catch (err) {
       console.error('Error fetching bookings:', err);
-      setError('Failed to fetch bookings');
+      // If it's a network error or backend is down, show empty state gracefully
+      setBookings([]);
+      setError(null); // Don't show error if user just hasn't made bookings yet
     } finally {
       setLoading(false);
     }
