@@ -5,19 +5,20 @@ const flightService = {
     searchFlights: async (params) => {
         try {
             console.log('🔍 Searching flights with params:', params);
-            
+
             // Validate params
-            if (!params.origin || !params.destination) {
-                return {
-                    success: false,
-                    error: 'Please provide origin and destination cities'
-                };
-            }
+            // Removed client-side validation to allow "explore all" functionality
+            // if (!params.origin || !params.destination) {
+            //     return {
+            //         success: false,
+            //         error: 'Please provide origin and destination cities'
+            //     };
+            // }
 
             const response = await api.get('/flights/search', { params });
-            
+
             console.log('✅ Flight search response:', response.data);
-            
+
             return {
                 success: true,
                 flights: response.data.data?.flights || [],
@@ -59,7 +60,7 @@ const flightService = {
                 success: true,
                 routes: response.data.data.routes
             };
-        } catch (error) { 
+        } catch (error) {
             return { success: false, error: error.message };
         }
     },

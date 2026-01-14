@@ -50,14 +50,14 @@ export default function SearchResultsScreen() {
               passengers: 1,
               class: 'economy'
             });
-            
+
             console.log('📊 All flights response:', response);
-            
+
             if (response.success && response.flights && response.flights.length > 0) {
               setResults(processFlightResults(response.flights));
               setError(null);
             } else {
-              const errorMsg = 'No flights available. Please check if backend is running on http://localhost:5000';
+              const errorMsg = 'No flights available. Please check if backend is running on http://localhost:8000';
               setError(errorMsg);
               setResults([]);
             }
@@ -75,9 +75,9 @@ export default function SearchResultsScreen() {
             console.log('📍 Flight search params from UI:', searchParams);
 
             const response = await flightService.searchFlights(searchParams);
-            
+
             console.log('📊 Flight search response:', response);
-            
+
             if (response.success && response.flights && response.flights.length > 0) {
               setResults(processFlightResults(response.flights));
               setError(null);
@@ -106,7 +106,7 @@ export default function SearchResultsScreen() {
               setResults(processHotelResults(response.hotels));
               setError(null);
             } else {
-              const errorMsg = 'No hotels available. Please check if backend is running on http://localhost:5000';
+              const errorMsg = 'No hotels available. Please check if backend is running on http://localhost:8000';
               setError(errorMsg);
               setResults([]);
             }
@@ -135,7 +135,7 @@ export default function SearchResultsScreen() {
           }
         } else if (searchType === 'packages') {
           const destination = params.destination?.trim?.() || '';
-          
+
           const searchParams = {
             destination: destination,
           };
@@ -152,7 +152,7 @@ export default function SearchResultsScreen() {
         }
       } catch (error) {
         console.error('❌ Search error:', error);
-        setError('Network error. Please make sure the backend server is running on http://localhost:5000');
+        setError('Network error. Please make sure the backend server is running on http://localhost:8000');
         setResults([]);
       } finally {
         setLoading(false);
@@ -240,12 +240,12 @@ export default function SearchResultsScreen() {
           <EmptyText theme={theme}>{error || `No results found for your search`}</EmptyText>
           <EmptySubtext theme={theme}>
             {error && error.toLowerCase().includes('backend')
-              ? "💡 Make sure MongoDB is running and the backend server is started on http://localhost:5000"
+              ? "💡 Make sure MongoDB is running and the backend server is started on http://localhost:8000"
               : error
-              ? "Please use the search form to select valid origin, destination, or city."
-              : !error
-              ? "Try adjusting your filters or searching for different dates."
-              : "Try again with different search criteria."}
+                ? "Please use the search form to select valid origin, destination, or city."
+                : !error
+                  ? "Try adjusting your filters or searching for different dates."
+                  : "Try again with different search criteria."}
           </EmptySubtext>
           <RetryButton theme={theme} onClick={() => navigate('/')}>
             ← Back to Home

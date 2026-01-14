@@ -5,21 +5,22 @@ const hotelService = {
     searchHotels: async (params) => {
         try {
             console.log('🔍 Searching hotels with params:', params);
-            
+
             // Validate params
-            if (!params.city) {
-                return {
-                    success: false,
-                    error: 'Please provide a city name'
-                };
-            }
+            // Removed client-side validation to allow "explore all" functionality
+            // if (!params.city) {
+            //     return {
+            //         success: false,
+            //         error: 'Please provide a city name'
+            //     };
+            // }
 
             const response = await api.get('/hotels/search', { params });
-            
+
             console.log('✅ Hotel search response:', response.data);
 
             const hotels = response.data.data?.hotels || [];
-            
+
             return {
                 success: true,
                 hotels: hotels,
