@@ -1,250 +1,137 @@
 # 🌍 TravelEase - Your Ultimate Travel Companion ✈️
 
-[![React](https://img.shields.io/badge/React-18.x-blue.svg)](https://reactjs.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-18.x-green.svg)](https://nodejs.org/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-6.x-brightgreen.svg)](https://www.mongodb.com/)
+[![React](https://img.shields.io/badge/React-19.x-blue.svg)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20.x-green.svg)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Cloud-brightgreen.svg)](https://www.mongodb.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://subham-travel.vercel.app)
 
-A modern, full-stack travel booking application with flight, hotel, and package search capabilities. Built with React, Node.js, Express, and MongoDB.
+**TravelEase** is a premium, full-stack travel booking platform designed to provide a seamless experience for finding flights, luxury hotels, and curated vacation packages. Built with a modern aesthetic and robust performance in mind.
 
-![TravelEase Hero](https://images.unsplash.com/photo-1488085061387-422e29b40080?w=1200&h=400&fit=crop)
+---
 
-## ✨ Features
+## 📸 Project Gallery
 
-### 🎯 Core Functionality
-- **Flight Booking** - Search and book flights with real-time availability
-- **Hotel Reservations** - Browse and book hotels worldwide
-- **Travel Packages** - Complete vacation packages with flights + hotels
-- **User Authentication** - Secure login/signup with JWT
-- **Shopping Cart** - Add multiple items and checkout seamlessly
-- **Payment Integration** - Stripe payment gateway (test mode)
-- **User Dashboard** - Track bookings and manage profile
+### 🏠 Immersive Landing Page
+A high-converting hero section with an intelligent search interface and dynamic background.
 
-### 📱 User Experience
-- **Responsive Design** - Optimized for mobile, tablet, and desktop
-- **Dark/Light Mode** - Toggle between themes
-- **Real-time Search** - Instant search suggestions
-- **Touch-Friendly** - 44px minimum touch targets
-- **No Dead Buttons** - Every button leads somewhere useful
+![TravelEase Home Hero](screenshots/home_hero.png)
 
-### 🎨 Design Highlights
-- Modern, premium UI with glassmorphism effects
-- Smooth animations and transitions
-- Mobile-first responsive approach
-- Professional Stripe payment interface
-- Clean, intuitive navigation
+### ✨ Core Services
+A minimalist grid showcasing 24/7 support, secure booking, and best price guarantees, followed by our core offerings.
 
-## 🚀 Tech Stack
+![TravelEase Features](screenshots/home_features.png)
 
-### Frontend
-- **React 18** - UI framework
-- **Vite** - Build tool and dev server
-- **Styled Components** - CSS-in-JS styling
-- **React Router DOM** - Client-side routing
-- **Stripe.js** - Payment processing
-- **Axios** - HTTP client
-- **React Icons** - Icon library
+### 🗺️ Popular Destinations
+Curated travel recommendations with real-time pricing and beautiful imagery.
 
-### Backend
-- **Node.js** - Runtime environment
-- **Express.js** - Web framework
-- **MongoDB** - Database
-- **Mongoose** - ODM
-- **JWT** - Authentication
-- **Bcrypt** - Password hashing
-- **Helmet** - Security middleware
-- **Morgan** - HTTP logging
+![Popular Destinations](screenshots/popular_destinations.png)
 
-## 📁 Project Structure
+### 👤 User Dashboard
+A dedicated space for users to track their bookings, view status updates, and manage their profile.
 
+![User Dashboard](screenshots/user_dashboard.png)
+
+---
+
+## 🚀 Technical Deep Dive
+
+### **Frontend Architecture**
+Our frontend is built for speed and responsiveness using **React 19** and **Vite**.
+
+- **Styled Components**: We use CSS-in-JS for truly modular styling, enabling complex glassmorphism effects and consistent theming across the app.
+- **React Context API**: Manages global state for Authentication, Cart, and Theme without the boilerplate of Redux.
+- **Stripe Integration**: Secure, PCI-compliant payment processing via `@stripe/react-stripe-js`.
+- **Axios Interceptors**: Handles base URL configuration and automated token injection for authorized requests.
+
+### **Backend Architecture**
+A scalable **Node.js/Express** REST API designed with security and clean code in mind.
+
+- **MongoDB & Mongoose**: Flexible document storage with strictly defined schemas for Flights, Hotels, and Users.
+- **JWT Authentication**: Stateless authentication using JSON Web Tokens, secured with **bcryptjs** for password hashing.
+- **Security Middleware**: 
+  - **Helmet**: Sets various HTTP headers for app security.
+  - **CORS**: Configured for secure cross-origin resource sharing between frontend and backend.
+  - **Express Validator**: Server-side validation to ensure data integrity.
+
+### **System Workflow**
+```mermaid
+graph LR
+    A[React Frontend] -- API Requests --> B[Express Server]
+    B -- Auth --> C[JWT / Bcrypt]
+    B -- Data --> D[MongoDB Atlas]
+    A -- Payments --> E[Stripe API]
+    B -- Verify --> E
 ```
-# TravelEase App 🚀
+
+---
+
+## 📂 Project Structure
+
+```bash
 TravelEase-App/
-├── frontend/                # React frontend
+├── frontend/                # React / Vite Application
 │   ├── src/
-│   │   ├── components/     # Reusable components
-│   │   │   ├── Header.jsx
-│   │   │   └── SearchBar.jsx
-│   │   ├── pages/          # Page components
-│   │   │   ├── HomeScreen.jsx
-│   │   │   ├── SearchResultsScreen.jsx
-│   │   │   ├── CheckoutScreen.jsx
-│   │   │   ├── PaymentScreen.jsx
-│   │   │   └── DashboardScreen.jsx
-│   │   ├── context/        # React Context
-│   │   │   ├── AuthContext.jsx
-│   │   │   ├── CartContext.jsx
-│   │   │   └── ThemeContext.jsx
-│   │   ├── services/       # API services
-│   │   └── config/         # Configuration
+│   │   ├── components/     # Atomic UI components
+│   │   ├── pages/          # Navigation-level components
+│   │   ├── context/        # Global state management
+│   │   └── services/       # API communication layer
 │   └── package.json
-├── backend/                 # Node.js backend
-│   ├── controllers/        # Route controllers
-│   ├── models/             # Mongoose models
-│   ├── routes/             # API routes
-│   ├── middleware/         # Custom middleware
-│   ├── config/             # Server config
-│   └── server.js
+├── backend/                 # Node.js / Express API
+│   ├── controllers/        # Business logic
+│   ├── models/             # Database schemas
+│   ├── routes/             # API endpoints
+│   ├── middleware/         # Auth & Security
+│   └── server.js           # Entry point
+├── screenshots/             # Visual documentation
 └── README.md
 ```
 
-## 🛠️ Installation & Setup
+---
 
-### Prerequisites
-- Node.js 18.x or higher
-- MongoDB 6.x or higher
-- npm or yarn
+## 🛠️ Getting Started
 
-### 1. Clone the Repository
+### 1. Clone & Prep
 ```bash
 git clone https://github.com/Subham-KRLX/TravelEase-App.git
 cd TravelEase-App
 ```
 
-### 2. Backend Setup
+### 2. Configure Environment
+Create `.env` files in both `backend` and `frontend` directories using `.env.example` as a template.
+
+> [!IMPORTANT]
+> Never share your `.env` files. Both directories' secret files are ignored by Git for your security.
+
+### 3. Installation
 ```bash
-cd backend
-npm install
+# Install all dependencies (Monorepo helper)
+npm run install:all
 
-# Create .env file
-cat > .env << EOF
-PORT=5001
-MONGODB_URI=mongodb://localhost:27017/travelease
-JWT_SECRET=your_jwt_secret_key_here
-NODE_ENV=development
-EOF
+# Run Backend
+cd backend && npm run dev
 
-# Start backend server
-npm run dev
+# Run Frontend
+cd frontend && npm run dev
 ```
-
-### 3. Frontend Setup
-```bash
-cd ../frontend
-npm install
-
-# Create .env file (optional)
-cat > .env << EOF
-VITE_API_URL=http://localhost:5001/api
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_key
-EOF
-
-# Start frontend dev server
-npm run dev
-```
-
-### 4. Access the Application
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:5001/api
-
-## 🔑 Environment Variables
-
-### Backend (.env)
-```env
-PORT=5001
-MONGODB_URI=mongodb://localhost:27017/travelease
-JWT_SECRET=your_super_secret_jwt_key
-NODE_ENV=development
-```
-
-### Frontend (.env)
-```env
-VITE_API_URL=http://localhost:5001/api
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
-```
-
-## 📱 Responsive Breakpoints
-
-```css
-/* Mobile First */
-Default: < 640px (Mobile phones)
-@media (min-width: 640px): Tablets
-@media (min-width: 1024px): Desktops
-```
-
-**Tested Devices:**
-- ✅ iPhone SE (375px)
-- ✅ iPhone 12/13 (390px)
-- ✅ iPhone Pro Max (428px)
-- ✅ Standard Android (360-412px)
-- ✅ iPad (768px)
-- ✅ Desktop (1280px+)
-
-## 🧪 Testing
-
-### Stripe Test Cards
-Use these card numbers for testing payments:
-
-```
-Success: 4242 4242 4242 4242
-Decline: 4000 0000 0000 0002
-```
-- **Expiry**: Any future date
-- **CVC**: Any 3 digits
-- **ZIP**: Any 5 digits
-
-## 🎯 Key Features Implementation
-
-### ✅ Completed Features
-- [x] User authentication (Login/Signup)
-- [x] Flight search with filters
-- [x] Hotel search with date selection
-- [x] Package browsing
-- [x] Shopping cart functionality
-- [x] Checkout system with price calculation
-- [x] Stripe payment integration
-- [x] User dashboard
-- [x] Mobile responsive design
-- [x] Dark/Light theme toggle
-- [x] Search suggestions
-
-### 🔄 Upcoming Features
-- [ ] Booking confirmation emails
-- [ ] User booking history
-- [ ] Advanced filters (price range, ratings)
-- [ ] Reviews and ratings
-- [ ] Admin panel
-- [ ] Multi-language support
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👤 Author
-
-**Subham Sangwan**
-- GitHub: [@Subham-KRLX](https://github.com/Subham-KRLX)
-- Repository: [TravelEase-App](https://github.com/Subham-KRLX/TravelEase-App)
-
-## 🙏 Acknowledgments
-
-- React team for the amazing framework
-- MongoDB team for the robust database
-- Stripe for payment processing
-- All open-source contributors
-
-## 📸 Screenshots
-
-### 🏠 Home Page
-Beautiful landing page with hero section and intelligent search bar.
-
-![TravelEase Home Page](screenshots/home_page.png)
-
-### ✈️ Flight Search Results
-Professional grid layout with real-time flight cards and smart filters.
-
-![Flight Search Results](screenshots/flight_results.png)
 
 ---
 
- [Live Demo](https://subham-travel.vercel.app) | [Report Bug](https://github.com/Subham-KRLX/TravelEase-App/issues)
+## 🎯 Key Features
+
+- [x] **Smart Search**: Intelligent filtering for flights and hotels.
+- [x] **Secure Auth**: Persistent login with JWT and local storage.
+- [x] **Fluid UI**: Glassmorphism design system that feels premium.
+- [x] **Dark Mode**: Native support for late-night planning.
+- [x] **Stripe Checkout**: Real-world payment flow simulation.
+- [x] **Responsive**: Seamless experience from iPhone 12 to Ultra-wide monitors.
+
+---
+
+## 🤝 Contact & Contributing
+
+Created by **Subham Sangwan** - [GitHub](https://github.com/Subham-KRLX)
+
+Feel free to open an issue or submit a pull request if you'd like to contribute!
+
+[Live Demo](https://subham-travel.vercel.app) | [Report Bug](https://github.com/Subham-KRLX/TravelEase-App/issues)
