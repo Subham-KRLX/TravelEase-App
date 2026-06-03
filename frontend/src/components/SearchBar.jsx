@@ -97,10 +97,26 @@ const SearchBar = ({ type = 'flights' }) => {
     };
 
     const handleSearch = () => {
-        navigate('/search', {
+        const destination = searchType === 'packages' ? (searchData.location || 'Goa') : searchData.location;
+        const nextState = {
+            type: searchType,
+            ...searchData,
+            destination
+        };
+        const query = new URLSearchParams();
+        query.set('type', searchType);
+
+        if (searchType === 'flights') {
+            if (searchData.from) query.set('from', searchData.from);
+            if (searchData.to) query.set('to', searchData.to);
+            if (searchData.departDate) query.set('departDate', searchData.departDate);
+        } else {
+            query.set('destination', destination || 'Goa');
+        }
+
+        navigate(`/search?${query.toString()}`, {
             state: {
-                type: searchType,
-                ...searchData
+                ...nextState
             }
         });
     };
@@ -314,57 +330,81 @@ const SearchBar = ({ type = 'flights' }) => {
 
 // Styled Components
 const Container = styled.div`
-  background-color: ${props => props.theme.card};
-  border-radius: 12px;
-  padding: 12px;
-  margin: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 8px;
+  padding: 14px;
+  margin: 0;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.18);
   position: relative;
   z-index: 100;
+  backdrop-filter: blur(18px);
+  width: 100%;
+  overflow: hidden;
   
   @media (min-width: 640px) {
-    padding: 16px;
-    margin: 16px;
+    padding: 18px;
+  }
+
+  @media (max-width: 420px) {
+    max-width: 354px;
   }
 `;
 
 const TabContainer = styled.div`
   display: flex;
   flex-direction: row;
-  margin-bottom: 20px;
-  background-color: ${props => props.theme.backgroundTertiary || '#f1f5f9'};
+  margin-bottom: 16px;
+  background: #eef2f7;
   border-radius: 8px;
   padding: 4px;
+  gap: 4px;
+  width: 100%;
 `;
 
 const Tab = styled.button`
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 8px 6px;
+  padding: 10px 8px;
   border-radius: 6px;
   gap: 4px;
-  background-color: ${props => props.active ? props.theme.primary : 'transparent'};
+  background: ${props => props.active ? 'linear-gradient(135deg, #f97316 0%, #f59e0b 100%)' : 'transparent'};
   border: none;
   cursor: pointer;
-  transition: all 0.2s;
-  min-height: 44px; /* Touch-friendly */
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  min-height: 46px;
+  box-shadow: ${props => props.active ? '0 10px 22px rgba(249, 115, 22, 0.24)' : 'none'};
+
+  &:hover {
+    transform: translateY(-1px);
+  }
   
   @media (min-width: 640px) {
     padding: 10px;
     gap: 6px;
   }
+
+  @media (max-width: 420px) {
+    padding: 9px 4px;
+    gap: 3px;
+  }
 `;
 
 const TabText = styled.span`
   font-size: 13px;
-  font-weight: 600;
-  color: ${props => props.active ? '#fff' : props.theme.textSecondary};
+  font-weight: 800;
+  color: ${props => props.active ? '#fff' : '#475569'};
   
   @media (min-width: 640px) {
     font-size: 14px;
+  }
+
+  @media (max-width: 420px) {
+    font-size: 10px;
   }
 `;
 
@@ -372,6 +412,11 @@ const SearchForm = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
+
+  @media (min-width: 900px) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 `;
 
 const SearchFieldWrapper = styled.div`
@@ -383,11 +428,17 @@ const SearchField = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  border: 1px solid ${props => props.theme.border || '#e2e8f0'};
-  background-color: ${props => props.theme.backgroundSecondary || 'transparent'};
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
   border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 0px; /* managed by gap in parent */
+  padding: 13px 14px;
+  min-height: 66px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus-within {
+    border-color: #f97316;
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.12);
+  }
 `;
 
 const FieldContent = styled.div`
@@ -399,25 +450,26 @@ const FieldContent = styled.div`
 
 const Label = styled.div`
   font-size: 12px;
-  color: ${props => props.theme.textSecondary};
+  color: #64748b;
   margin-bottom: 4px;
+  font-weight: 700;
 `;
 
 const Input = styled.input`
   font-size: 14px;
-  color: ${props => props.theme.text};
+  color: #0f172a;
   border: none;
   background: transparent;
   width: 100%;
   outline: none;
   
   &::placeholder {
-    color: ${props => props.theme.textTertiary || '#94a3b8'};
+    color: #94a3b8;
   }
 `;
 
 const SearchButton = styled.button`
-  background-color: ${props => props.theme.primary || '#1e40af'};
+  background: linear-gradient(135deg, #0f172a 0%, #2563eb 100%);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -429,12 +481,13 @@ const SearchButton = styled.button`
   border: none;
   cursor: pointer;
   width: 100%;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-  transition: opacity 0.2s;
-  min-height: 48px; /* Touch-friendly */
+  box-shadow: 0 16px 32px rgba(37, 99, 235, 0.22);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 52px;
 
   &:hover {
-    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 20px 38px rgba(37, 99, 235, 0.3);
   }
 `;
 
