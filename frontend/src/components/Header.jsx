@@ -58,14 +58,14 @@ export default function Header() {
 
 // Styled Components
 const HeaderContainer = styled.header`
-  background: linear-gradient(135deg, ${props => props.theme.headerBackground || '#1e40af'} 0%, ${props => props.theme.headerBackground || '#1e40af'}dd 100%);
-  padding: 12px 16px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 58%, #f97316 140%);
+  padding: 14px 16px;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.18);
   position: sticky;
   top: 0;
   z-index: 1000;
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   
   @media (min-width: 640px) {
     padding: 16px 24px;
@@ -76,7 +76,7 @@ const HeaderContent = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
+  max-width: 1180px;
   margin: 0 auto;
   gap: 8px;
   
@@ -90,14 +90,14 @@ const Logo = styled(NavLink)`
   flex-direction: row;
   align-items: center;
   text-decoration: none;
-  gap: 8px;
+  gap: 10px;
 `;
 
 const LogoText = styled.span`
   color: ${props => props.theme.headerText || '#fff'};
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
-  letter-spacing: -0.5px;
+  letter-spacing: 0;
   
   @media (min-width: 640px) {
     font-size: 20px;
@@ -120,8 +120,8 @@ const Actions = styled.div`
 `;
 
 const IconButton = styled.button`
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   cursor: pointer;
   padding: 6px;
   display: flex;
@@ -134,8 +134,8 @@ const IconButton = styled.button`
   position: relative;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    transform: scale(1.05);
+    background-color: rgba(255, 255, 255, 0.16);
+    transform: translateY(-1px);
   }
 
   &:active {
@@ -164,8 +164,8 @@ const BadgeText = styled.span`
 `;
 
 const LoginButton = styled(NavLink)`
-  background: linear-gradient(135deg, ${props => props.theme.headerText || '#fff'} 0%, ${props => props.theme.headerText || '#fff'}dd 100%);
-  color: ${props => props.theme.headerBackground || '#1e40af'};
+  background: #ffffff;
+  color: #ea580c;
   padding: 10px 20px;
   border-radius: 8px;
   font-weight: 700;
@@ -173,8 +173,8 @@ const LoginButton = styled(NavLink)`
   font-size: 14px;
   transition: all 0.3s ease;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
-  letter-spacing: 0.3px;
+  box-shadow: 0 10px 24px rgba(255, 255, 255, 0.16);
+  letter-spacing: 0;
 
   &:hover {
     transform: translateY(-2px);

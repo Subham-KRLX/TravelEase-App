@@ -11,26 +11,22 @@ export const useTheme = () => {
 };
 
 export const lightTheme = {
-    // TROPICAL BEACH THEME - Bright, sunny, vacation vibes
-    background: '#fffbeb',
-    backgroundSecondary: '#fef3c7',
-    backgroundTertiary: '#fde68a',
-    backgroundGradient: ['#fef3c7', '#fed7aa', '#fecaca'],
+    background: '#f8fafc',
+    backgroundSecondary: '#eef6ff',
+    backgroundTertiary: '#e2e8f0',
+    backgroundGradient: ['#f8fafc', '#eef6ff', '#fff7ed'],
 
-    // Text colors - Warm and inviting
-    text: '#78350f',
-    textSecondary: '#92400e',
-    textTertiary: '#d97706',
+    text: '#0f172a',
+    textSecondary: '#475569',
+    textTertiary: '#94a3b8',
 
-    // Primary - Tropical sunset
-    primary: '#f59e0b',
-    primaryDark: '#d97706',
-    primaryLight: '#fbbf24',
-    primaryGradient: ['#fbbf24', '#f97316', '#ec4899'],
+    primary: '#f97316',
+    primaryDark: '#ea580c',
+    primaryLight: '#fb923c',
+    primaryGradient: ['#f97316', '#f59e0b', '#2563eb'],
 
-    // Accent - Ocean breeze
-    accent: '#06b6d4',
-    accentGradient: ['#22d3ee', '#06b6d4', '#0284c7'],
+    accent: '#2563eb',
+    accentGradient: ['#38bdf8', '#2563eb', '#0f172a'],
 
     // Status colors - Tropical
     success: '#10b981',
@@ -40,34 +36,29 @@ export const lightTheme = {
     danger: '#dc2626',
     dangerGradient: ['#ef4444', '#dc2626', '#b91c1c'],
 
-    // Borders - Warm gold
-    border: '#fed7aa',
-    borderLight: '#fef3c7',
-    borderDark: '#fbbf24',
+    border: '#dbe3ef',
+    borderLight: '#eef2f7',
+    borderDark: '#cbd5e1',
 
-    // Cards - Sunny
     card: '#ffffff',
-    cardSecondary: '#fffbeb',
-    cardShadow: 'rgba(251, 191, 36, 0.3)',
-    cardShadowLarge: 'rgba(251, 191, 36, 0.5)',
+    cardSecondary: '#f8fafc',
+    cardShadow: 'rgba(15, 23, 42, 0.1)',
+    cardShadowLarge: 'rgba(15, 23, 42, 0.16)',
 
-    // Header - Sunset gradient
-    headerBackground: '#f97316',
-    headerGradient: ['#fbbf24', '#f97316', '#ec4899'],
+    headerBackground: '#0f172a',
+    headerGradient: ['#0f172a', '#1e293b', '#f97316'],
     headerText: '#ffffff',
 
-    // Special - Beach paradise
-    heroGradient: ['#fbbf24', '#f97316', '#ec4899', '#a855f7'],
-    featureGradient: ['#fef3c7', '#fed7aa', '#fbbf24'],
+    heroGradient: ['#0f172a', '#2563eb', '#f97316', '#f59e0b'],
+    featureGradient: ['#ffffff', '#eef6ff', '#fff7ed'],
 
     // Icons - Filled style for light mode
     iconStyle: 'default', // use default filled icons
 
-    // Other
-    overlay: 'rgba(251, 146, 60, 0.6)',
-    overlayLight: 'rgba(251, 146, 60, 0.3)',
-    gold: '#fbbf24',
-    shimmer: '#fde68a',
+    overlay: 'rgba(15, 23, 42, 0.58)',
+    overlayLight: 'rgba(37, 99, 235, 0.12)',
+    gold: '#f59e0b',
+    shimmer: '#bfdbfe',
 };
 
 export const darkTheme = {
