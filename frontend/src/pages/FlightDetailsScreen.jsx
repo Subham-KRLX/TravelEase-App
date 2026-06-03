@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
     IoAirplane,
     IoTimeOutline,
@@ -12,10 +12,12 @@ import {
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import flightService from '../services/flightService';
+import { getDemoItemById } from '../data/demoTravel';
 
 const FlightDetailsScreen = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const { addToCart } = useCart();
     const { theme } = useTheme();
 
@@ -25,6 +27,13 @@ const FlightDetailsScreen = () => {
 
     useEffect(() => {
         const fetchFlight = async () => {
+            const routeFlight = location.state?.item || getDemoItemById('flight', id);
+            if (routeFlight) {
+                setFlight(routeFlight);
+                setLoading(false);
+                return;
+            }
+
             try {
                 const response = await flightService.getFlightDetails(id);
                 if (response.success) {
@@ -43,7 +52,7 @@ const FlightDetailsScreen = () => {
         if (id) {
             fetchFlight();
         }
-    }, [id]);
+    }, [id, location.state]);
 
     const handleAddToCart = () => {
         addToCart({
@@ -95,7 +104,7 @@ const FlightDetailsScreen = () => {
                         <LocationInfo>
                             <Time theme={theme}>{flight.departure?.time || flight.departTime}</Time>
                             <City theme={theme}>{flight.origin?.city || flight.origin} ({flight.origin?.code || 'BOM'})</City>
-                            <DateText theme={theme}>{new Date(flight.departure?.date).toLocaleDateString()}</DateText>
+                            <DateText theme={theme}>{flight.departure?.date ? new Date(flight.departure.date).toLocaleDateString() : 'Flexible date'}</DateText>
                         </LocationInfo>
 
                         <FlightPath>
@@ -109,7 +118,7 @@ const FlightDetailsScreen = () => {
                         <LocationInfo>
                             <Time theme={theme}>{flight.arrival?.time || flight.arriveTime}</Time>
                             <City theme={theme}>{flight.destination?.city || flight.destination} ({flight.destination?.code || 'DEL'})</City>
-                            <DateText theme={theme}>{new Date(flight.arrival?.date).toLocaleDateString()}</DateText>
+                            <DateText theme={theme}>{flight.arrival?.date ? new Date(flight.arrival.date).toLocaleDateString() : 'Same day'}</DateText>
                         </LocationInfo>
                     </RouteInfo>
 

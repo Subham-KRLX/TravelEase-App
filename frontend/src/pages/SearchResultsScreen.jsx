@@ -18,6 +18,7 @@ import { useTheme } from '../context/ThemeContext';
 import flightService from '../services/flightService';
 import hotelService from '../services/hotelService';
 import packageService from '../services/packageService';
+import { getDemoResults } from '../data/demoTravel';
 
 export default function SearchResultsScreen() {
   const [results, setResults] = useState([]);
@@ -29,8 +30,14 @@ export default function SearchResultsScreen() {
   const { addToCart } = useCart();
   const { theme } = useTheme();
 
-  const params = location.state || {}; // Get params from router state
+  const queryParams = Object.fromEntries(new URLSearchParams(location.search));
+  const params = { ...queryParams, ...(location.state || {}) }; // Supports route state and direct URLs
   const searchType = params.type || 'flights';
+
+  const useDemoResults = (type, message = null) => {
+    setResults(getDemoResults(type));
+    setError(message);
+  };
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -57,9 +64,7 @@ export default function SearchResultsScreen() {
               setResults(processFlightResults(response.flights));
               setError(null);
             } else {
-              const errorMsg = 'No flights available. Please check if backend is running on http://localhost:8000';
-              setError(errorMsg);
-              setResults([]);
+              useDemoResults('flights');
             }
           } else {
             // Regular search with specific route
@@ -82,9 +87,7 @@ export default function SearchResultsScreen() {
               setResults(processFlightResults(response.flights));
               setError(null);
             } else {
-              const errorMsg = response.error || 'No flights found for this route. Try different cities or dates.';
-              setError(errorMsg);
-              setResults([]);
+              useDemoResults('flights');
             }
           }
         } else if (searchType === 'hotels') {
@@ -106,9 +109,7 @@ export default function SearchResultsScreen() {
               setResults(processHotelResults(response.hotels));
               setError(null);
             } else {
-              const errorMsg = 'No hotels available. Please check if backend is running on http://localhost:8000';
-              setError(errorMsg);
-              setResults([]);
+              useDemoResults('hotels');
             }
           } else {
             const searchParams = {
@@ -128,9 +129,7 @@ export default function SearchResultsScreen() {
               setResults(processHotelResults(response.hotels));
               setError(null);
             } else {
-              const errorMsg = response.error || 'No hotels found in this city. Try a different destination.';
-              setError(errorMsg);
-              setResults([]);
+              useDemoResults('hotels');
             }
           }
         } else if (searchType === 'packages') {
@@ -145,15 +144,12 @@ export default function SearchResultsScreen() {
             setResults(processPackageResults(response.packages));
             setError(null);
           } else {
-            const errorMsg = response.error || 'No packages found for this destination.';
-            setError(errorMsg);
-            setResults([]);
+            useDemoResults('packages');
           }
         }
       } catch (error) {
         console.error('❌ Search error:', error);
-        setError('Network error. Please make sure the backend server is running on http://localhost:8000');
-        setResults([]);
+        useDemoResults(searchType);
       } finally {
         setLoading(false);
       }
@@ -264,7 +260,7 @@ export default function SearchResultsScreen() {
       <ResultsGrid>
         {results.map(result => {
           if (result.type === 'flight') return (
-            <Card key={result.id} theme={theme} onClick={() => navigate(`/flight-details/${result.id}`)}>
+            <Card key={result.id} theme={theme} onClick={() => navigate(`/flight-details/${result.id}`, { state: { item: result } })}>
               <CardHeader>
                 <Airline theme={theme}>{result.airline}</Airline>
                 <Price theme={theme}>₹{result.price.toLocaleString()}</Price>
@@ -301,7 +297,7 @@ export default function SearchResultsScreen() {
                 </AddButton>
                 <DetailsButton theme={theme} onClick={(e) => {
                   e.stopPropagation();
-                  navigate(`/flight-details/${result.id}`);
+                  navigate(`/flight-details/${result.id}`, { state: { item: result } });
                 }}>
                   <span>View Details</span>
                   <IoArrowForward size={16} />
@@ -311,7 +307,7 @@ export default function SearchResultsScreen() {
           );
 
           if (result.type === 'hotel' || result.type === 'package') return (
-            <Card key={result.id} theme={theme} onClick={() => navigate(`/${result.type}-details/${result.id}`)}>
+            <Card key={result.id} theme={theme} onClick={() => navigate(`/${result.type}-details/${result.id}`, { state: { item: result } })}>
               <CardImage src={result.image} alt={result.name} />
               <CardContent>
                 <CardHeader>
@@ -354,7 +350,7 @@ export default function SearchResultsScreen() {
                   </AddButton>
                   <DetailsButton theme={theme} onClick={(e) => {
                     e.stopPropagation();
-                    navigate(`/${result.type}-details/${result.id}`);
+                    navigate(`/${result.type}-details/${result.id}`, { state: { item: result } });
                   }}>
                     <span>View Details</span>
                     <IoArrowForward size={16} />

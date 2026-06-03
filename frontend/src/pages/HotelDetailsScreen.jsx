@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
     IoBed,
     IoLocationOutline,
@@ -14,10 +14,12 @@ import {
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import hotelService from '../services/hotelService';
+import { getDemoItemById } from '../data/demoTravel';
 
 const HotelDetailsScreen = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const { addToCart } = useCart();
     const { theme } = useTheme();
 
@@ -27,6 +29,13 @@ const HotelDetailsScreen = () => {
 
     useEffect(() => {
         const fetchHotel = async () => {
+            const routeHotel = location.state?.item || getDemoItemById('hotel', id);
+            if (routeHotel) {
+                setHotel(routeHotel);
+                setLoading(false);
+                return;
+            }
+
             try {
                 const response = await hotelService.getHotelDetails(id);
                 if (response.success) {
@@ -45,7 +54,7 @@ const HotelDetailsScreen = () => {
         if (id) {
             fetchHotel();
         }
-    }, [id]);
+    }, [id, location.state]);
 
     const handleAddToCart = () => {
         addToCart({
@@ -96,23 +105,27 @@ const HotelDetailsScreen = () => {
                                 <HotelName theme={theme}>{hotel.name}</HotelName>
                                 <LocationRow>
                                     <IoLocationOutline size={16} color={theme.textSecondary} />
-                                    <LocationText theme={theme}>{hotel.location?.address}, {hotel.location?.city}</LocationText>
+                                <LocationText theme={theme}>
+                                    {typeof hotel.location === 'string'
+                                        ? hotel.location
+                                        : `${hotel.location?.address || ''}${hotel.location?.address ? ', ' : ''}${hotel.location?.city || 'India'}`}
+                                </LocationText>
                                 </LocationRow>
                             </div>
                             <PriceTag theme={theme}>
-                                ₹{hotel.pricePerNight?.toLocaleString()}
+                                ₹{(hotel.pricePerNight || hotel.price)?.toLocaleString()}
                                 <PerNight theme={theme}>/night</PerNight>
                             </PriceTag>
                         </CardHeader>
 
                         <RatingRow>
                             <Stars>
-                                {[...Array(Math.floor(hotel.rating?.average || 0))].map((_, i) => (
+                                {[...Array(Math.floor(hotel.rating?.average || hotel.rating || 0))].map((_, i) => (
                                     <IoStar key={i} size={18} color="#eab308" />
                                 ))}
                             </Stars>
-                            <RatingValue theme={theme}>{hotel.rating?.average}</RatingValue>
-                            <ReviewsCount theme={theme}>({hotel.rating?.count} reviews)</ReviewsCount>
+                            <RatingValue theme={theme}>{hotel.rating?.average || hotel.rating}</RatingValue>
+                            <ReviewsCount theme={theme}>({hotel.rating?.count || hotel.reviews || 0} reviews)</ReviewsCount>
                         </RatingRow>
 
                         <Description theme={theme}>{hotel.description}</Description>
@@ -150,7 +163,7 @@ const HotelDetailsScreen = () => {
                             <RoomItem theme={theme}>
                                 <RoomInfo>
                                     <RoomType theme={theme}>Standard Room</RoomType>
-                                    <RoomPrice theme={theme}>₹{hotel.pricePerNight?.toLocaleString()}</RoomPrice>
+                                    <RoomPrice theme={theme}>₹{(hotel.pricePerNight || hotel.price)?.toLocaleString()}</RoomPrice>
                                 </RoomInfo>
                                 <SelectButton theme={theme} onClick={handleAddToCart}>Select Room</SelectButton>
                             </RoomItem>

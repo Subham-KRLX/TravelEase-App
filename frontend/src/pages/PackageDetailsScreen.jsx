@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
     IoTimeOutline,
     IoLocationOutline,
@@ -15,10 +15,12 @@ import {
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import packageService from '../services/packageService';
+import { getDemoItemById } from '../data/demoTravel';
 
 const PackageDetailsScreen = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const { addToCart } = useCart();
     const { theme } = useTheme();
 
@@ -28,6 +30,13 @@ const PackageDetailsScreen = () => {
 
     useEffect(() => {
         const fetchPackage = async () => {
+            const routePackage = location.state?.item || getDemoItemById('package', id);
+            if (routePackage) {
+                setPackage(routePackage);
+                setLoading(false);
+                return;
+            }
+
             try {
                 // Check if service has getPackageDetails, otherwise mock or use search
                 const response = await packageService.getPackageById(id);
@@ -47,7 +56,7 @@ const PackageDetailsScreen = () => {
         if (id) {
             fetchPackage();
         }
-    }, [id]);
+    }, [id, location.state]);
 
     const handleAddToCart = () => {
         addToCart({
