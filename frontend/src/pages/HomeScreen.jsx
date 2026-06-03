@@ -70,21 +70,27 @@ const services = [
   {
     icon: IoAirplane,
     title: 'Flights',
-    description: 'Find the best flight deals worldwide',
-    color: '#1e40af'
+    description: 'Smart routes, flexible fares, and quick comparisons',
+    color: '#2563eb'
   },
   {
     icon: IoBed,
     title: 'Hotels',
-    description: 'Book comfortable accommodations',
+    description: 'Comfort-first stays near the places you actually visit',
     color: '#f97316'
   },
   {
     icon: IoGift,
     title: 'Packages',
-    description: 'Complete vacation packages',
-    color: '#16a34a'
+    description: 'Curated escapes with flights, stays, and plans bundled',
+    color: '#14b8a6'
   }
+];
+
+const heroStats = [
+  { value: '2M+', label: 'happy travelers' },
+  { value: '120+', label: 'destinations' },
+  { value: '4.8', label: 'average rating' }
 ];
 
 export default function HomeScreen() {
@@ -101,30 +107,39 @@ export default function HomeScreen() {
         <HeroContent>
           <HeroBadge>
             <IoCheckmarkCircle size={16} color={theme.primary} />
-            <HeroBadgeText theme={theme}>#1 Travel App in India</HeroBadgeText>
+            <HeroBadgeText theme={theme}>Trusted by modern Indian travelers</HeroBadgeText>
           </HeroBadge>
-          <HeroTitle>
-            Explore the<br />
-            <HeroHighlight theme={theme}>World 🌍</HeroHighlight>
-          </HeroTitle>
+          <HeroTitle>Plan your next escape without the travel chaos</HeroTitle>
           <HeroSubtitle theme={theme}>
-            Book smarter, travel better with exclusive deals
+            Compare flights, hotels, and curated packages in one polished place, with better deals and a calmer booking flow.
           </HeroSubtitle>
-          <HeroButton theme={theme} onClick={() => {
-            // Navigate with default search parameters
-            const defaultParams = {
-              type: 'flights',
-              from: 'Mumbai',
-              to: 'Delhi',
-              departDate: new Date().toISOString().split('T')[0],
-              returnDate: new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0],
-              passengers: 1
-            };
-            navigate('/search', { state: defaultParams });
-          }}>
-            <HeroButtonText>Start Exploring</HeroButtonText>
-            <IoArrowForwardCircle size={20} color="#fff" />
-          </HeroButton>
+          <HeroActions>
+            <HeroButton theme={theme} onClick={() => {
+              const defaultParams = {
+                type: 'flights',
+                from: 'Mumbai',
+                to: 'Delhi',
+                departDate: new Date().toISOString().split('T')[0],
+                returnDate: new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0],
+                passengers: 1
+              };
+              navigate(`/search?type=flights&from=${defaultParams.from}&to=${defaultParams.to}&departDate=${defaultParams.departDate}`, { state: defaultParams });
+            }}>
+              <HeroButtonText>Start exploring</HeroButtonText>
+              <IoArrowForwardCircle size={20} color="#fff" />
+            </HeroButton>
+            <HeroGhostButton onClick={() => navigate('/search?type=packages&destination=Goa', { state: { type: 'packages', destination: 'Goa' } })}>
+              View packages
+            </HeroGhostButton>
+          </HeroActions>
+          <HeroStats>
+            {heroStats.map((stat) => (
+              <HeroStat key={stat.label}>
+                <HeroStatValue>{stat.value}</HeroStatValue>
+                <HeroStatLabel>{stat.label}</HeroStatLabel>
+              </HeroStat>
+            ))}
+          </HeroStats>
         </HeroContent>
       </HeroContainer>
 
@@ -135,6 +150,7 @@ export default function HomeScreen() {
 
       {/* Features Section */}
       <Section>
+        <SectionEyebrow theme={theme}>Why TravelEase</SectionEyebrow>
         <FeaturesGrid>
           {features.map((feature, index) => (
             <FeatureCard key={index} theme={theme} onClick={() => { }}>
@@ -151,6 +167,7 @@ export default function HomeScreen() {
       {/* Services Section */}
       <Section>
         <SectionHeader>
+          <SectionEyebrow theme={theme}>Book your way</SectionEyebrow>
           <SectionTitle theme={theme}>What We Offer</SectionTitle>
           <SectionSubtitle theme={theme}>Everything you need for your perfect trip</SectionSubtitle>
         </SectionHeader>
@@ -160,7 +177,13 @@ export default function HomeScreen() {
             <ServiceCard
               key={index}
               theme={theme}
-              onClick={() => navigate('/search', { state: { type: service.title.toLowerCase() } })}
+              onClick={() => {
+                const type = service.title.toLowerCase();
+                const destination = service.title === 'Packages' ? 'Goa' : '';
+                navigate(`/search?type=${type}${destination ? `&destination=${destination}` : ''}`, {
+                  state: { type, destination: destination || undefined }
+                });
+              }}
             >
               <ServiceIcon bg={service.color}>
                 <service.icon size={32} color="#fff" />
@@ -178,7 +201,8 @@ export default function HomeScreen() {
       {/* Destinations Section */}
       <Section>
         <SectionHeader>
-          <SectionTitle theme={theme} style={{ color: '#1e293b' }}>Popular Destinations</SectionTitle>
+          <SectionEyebrow theme={theme}>Trending now</SectionEyebrow>
+          <SectionTitle theme={theme} style={{ color: theme.text }}>Popular Destinations</SectionTitle>
           <SectionSubtitle theme={theme}>Explore the world's most amazing places</SectionSubtitle>
         </SectionHeader>
 
@@ -230,454 +254,369 @@ export default function HomeScreen() {
 // Styled Components
 const PageContainer = styled.div`
   min-height: 100vh;
-  background-color: ${props => props.theme.background || '#fff'};
+  background:
+    linear-gradient(180deg, ${props => props.theme.background || '#f8fafc'} 0%, ${props => props.theme.card || '#ffffff'} 42%, ${props => props.theme.backgroundSecondary || '#f1f5f9'} 100%);
+  color: ${props => props.theme.text || '#111827'};
+  overflow-x: hidden;
 `;
 
 const HeroContainer = styled.div`
-  height: 320px;
+  min-height: 620px;
   position: relative;
   width: 100%;
   overflow: hidden;
-  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
-  
-  @media (min-width: 640px) {
-    height: 420px;
-  }
-  
-  @media (min-width: 1024px) {
-    height: 500px;
-  }
+  background: #0f172a;
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-      radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(30, 64, 175, 0.1) 0%, transparent 50%);
-    animation: float 8s ease-in-out infinite;
-    z-index: 1;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translate(0px, 0px); }
-    50% { transform: translate(15px, -15px); }
+  @media (max-width: 760px) {
+    min-height: 680px;
   }
 `;
 
 const HeroImage = styled.img`
   width: 100%;
   height: 100%;
+  min-height: inherit;
   object-fit: cover;
   object-position: center;
+  display: block;
+  transform: scale(1.03);
 `;
 
 const HeroOverlay = styled.div`
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: ${props => props.theme.isDarkMode ? 'rgba(12, 10, 9, 0.5)' : 'rgba(0, 0, 0, 0.2)'};
-  backdrop-filter: blur(2px);
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(8, 13, 27, 0.88) 0%, rgba(8, 13, 27, 0.62) 42%, rgba(8, 13, 27, 0.24) 100%),
+    linear-gradient(180deg, rgba(8, 13, 27, 0.2) 0%, rgba(8, 13, 27, 0.78) 100%);
   z-index: 2;
 `;
 
 const HeroContent = styled.div`
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
+  z-index: 3;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  padding: 16px;
-  z-index: 3;
-  animation: fadeInContent 0.8s ease-out;
-  
-  @media (min-width: 640px) {
-    padding: 24px;
-  }
+  align-items: flex-start;
+  max-width: 1180px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 88px 24px 140px;
 
-  @keyframes fadeInContent {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  @media (max-width: 760px) {
+    justify-content: flex-start;
+    padding: 84px 18px 180px;
+    max-width: 100vw;
+    overflow: hidden;
   }
 `;
 
 const HeroBadge = styled.div`
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background-color: rgba(255, 255, 255, 0.98);
-  padding: 10px 18px;
-  border-radius: 30px;
-  margin-bottom: 20px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  backdrop-filter: blur(10px);
-  animation: slideInDown 0.6s ease-out;
-
-  @keyframes slideInDown {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.28);
+  margin-bottom: 22px;
 `;
 
 const HeroBadgeText = styled.span`
-  color: ${props => props.theme.primary};
-  font-size: 14px;
-  font-weight: 700;
+  color: #312e81;
+  font-size: 13px;
+  font-weight: 800;
 `;
 
 const HeroTitle = styled.h1`
-  font-size: 28px;
+  width: min(100%, 760px);
+  color: #ffffff;
+  font-size: 64px;
+  line-height: 1.02;
   font-weight: 800;
-  color: #fff;
-  text-align: center;
-  margin-bottom: 12px;
-  text-shadow: 0 3px 20px rgba(0, 0, 0, 0.4);
-  line-height: 1.2;
-  animation: slideInUp 0.7s ease-out 0.1s both;
-  letter-spacing: -0.5px;
-  
-  @media (min-width: 640px) {
-    font-size: 36px;
-    margin-bottom: 16px;
-  }
-  
-  @media (min-width: 1024px) {
-    font-size: 52px;
+  letter-spacing: 0;
+  text-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  margin: 0 0 20px;
+  overflow-wrap: anywhere;
+
+  @media (max-width: 900px) {
+    font-size: 48px;
+    max-width: 680px;
   }
 
-  @keyframes slideInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  @media (max-width: 560px) {
+    width: min(100%, 354px);
+    max-width: 354px;
+    font-size: 29px;
+    line-height: 1.08;
   }
 `;
 
 const HeroHighlight = styled.span`
   color: #fbbf24;
-  font-size: 32px;
-  font-weight: 800;
-  background: linear-gradient(120deg, #fbbf24, #f59e0b);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  
-  @media (min-width: 640px) {
-    font-size: 42px;
-  }
-  
-  @media (min-width: 1024px) {
-    font-size: 56px;
-  }
 `;
 
 const HeroSubtitle = styled.p`
-  font-size: 14px;
-  color: #f1f5f9;
-  text-align: center;
-  margin-bottom: 20px;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  max-width: 90%;
-  animation: slideInUp 0.7s ease-out 0.2s both;
-  
-  @media (min-width: 640px) {
-    font-size: 16px;
-    margin-bottom: 28px;
-    max-width: 500px;
-  }
-  
-  @media (min-width: 1024px) {
-    font-size: 18px;
-    margin-bottom: 32px;
-    max-width: 600px;
-  }
+  width: min(100%, 620px);
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 18px;
+  line-height: 1.7;
+  margin: 0 0 30px;
 
-  @keyframes slideInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  @media (max-width: 560px) {
+    width: min(100%, 354px);
+    max-width: 354px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+`;
+
+const HeroActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+
+  @media (max-width: 560px) {
+    width: min(100%, 354px);
+    max-width: 354px;
+    gap: 10px;
   }
 `;
 
 const HeroButton = styled.button`
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  display: flex;
+  background: linear-gradient(135deg, #f97316 0%, #facc15 100%);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 14px 32px;
-  border-radius: 50px;
-  border: none;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 24px;
+  border-radius: 14px;
+  border: 0;
   cursor: pointer;
-  box-shadow: 0 10px 30px rgba(251, 191, 36, 0.4);
-  transition: all 0.3s ease;
-  animation: slideInUp 0.7s ease-out 0.3s both;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  color: #1e40af;
+  box-shadow: 0 22px 45px rgba(249, 115, 22, 0.34);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 15px 40px rgba(251, 191, 36, 0.6);
-  }
-
-  &:active {
-    transform: translateY(-1px);
-  }
-  
-  @media (min-width: 640px) {
-    gap: 10px;
-    padding: 16px 40px;
-  }
-
-  @keyframes slideInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    transform: translateY(-2px);
+    box-shadow: 0 28px 55px rgba(249, 115, 22, 0.44);
   }
 `;
 
 const HeroButtonText = styled.span`
-  color: #1e40af;
-  font-size: 14px;
-  font-weight: 700;
-  
-  @media (min-width: 640px) {
-    font-size: 16px;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 800;
+`;
+
+const HeroGhostButton = styled.button`
+  min-height: 52px;
+  padding: 0 22px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  backdrop-filter: blur(14px);
+  transition: background 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
   }
 `;
 
-const SearchBarContainer = styled.div`
-  max-width: 800px;
-  margin: -40px auto 24px;
-  padding: 0 16px;
-  
-  @media (min-width: 640px) {
-    margin: -50px auto 32px;
+const HeroStats = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(110px, 1fr));
+  gap: 12px;
+  max-width: 520px;
+  width: 100%;
+  margin-top: 34px;
+
+  @media (max-width: 560px) {
+    display: none;
   }
-  
-  @media (min-width: 1024px) {
-    margin: -60px auto 40px;
+`;
+
+const HeroStat = styled.div`
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(16px);
+`;
+
+const HeroStatValue = styled.div`
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 800;
+`;
+
+const HeroStatLabel = styled.div`
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+`;
+
+const SearchBarContainer = styled.div`
+  max-width: 980px;
+  width: 100%;
+  margin: -116px auto 34px;
+  padding: 0 18px;
+  position: relative;
+  z-index: 20;
+
+  @media (max-width: 760px) {
+    margin-top: -108px;
+    margin-left: 18px;
+    margin-right: 18px;
+    max-width: 354px;
+    padding: 0;
   }
 `;
 
 const Section = styled.section`
-  padding: 24px 16px;
-  max-width: 1200px;
+  padding: 34px 24px;
+  max-width: 1180px;
   margin: 0 auto;
-  
-  @media (min-width: 640px) {
-    padding: 32px 20px;
-  }
-  
-  @media (min-width: 1024px) {
-    padding: 40px 24px;
+
+  @media (max-width: 640px) {
+    padding: 28px 18px;
   }
 `;
 
 const SectionHeader = styled.div`
-  margin-bottom: 30px;
+  margin-bottom: 26px;
+  text-align: center;
+`;
+
+const SectionEyebrow = styled.div`
+  color: ${props => props.theme.primaryDark || '#ea580c'};
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 10px;
   text-align: center;
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 22px;
-  font-weight: bold;
-  color: ${props => props.theme.text};
+  font-size: 34px;
+  line-height: 1.15;
+  font-weight: 800;
+  color: ${props => props.theme.text || '#111827'};
   margin-bottom: 8px;
-  
-  @media (min-width: 640px) {
+
+  @media (max-width: 640px) {
     font-size: 26px;
-  }
-  
-  @media (min-width: 1024px) {
-    font-size: 28px;
   }
 `;
 
 const SectionSubtitle = styled.p`
   font-size: 16px;
-  color: ${props => props.theme.textSecondary};
+  color: ${props => props.theme.textSecondary || '#64748b'};
 `;
 
 const FeaturesGrid = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const FeatureCard = styled.div`
-  flex: 1;
-  min-width: 250px;
-  background: linear-gradient(135deg, ${props => props.theme.card} 0%, ${props => props.theme.card}dd 100%);
-  padding: 28px;
-  border-radius: 20px;
-  border: 2px solid ${props => props.theme.primary}25;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  background: ${props => props.theme.card || '#ffffff'};
+  padding: 26px;
+  border-radius: 8px;
+  border: 1px solid ${props => props.theme.border || '#e5e7eb'};
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
   cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
 
   &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-    border-color: ${props => props.theme.primary}40;
-
-    &::before {
-      opacity: 1;
-    }
+    transform: translateY(-5px);
+    border-color: ${props => props.theme.primary || '#f97316'};
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.13);
   }
 `;
 
 const FeatureIconContainer = styled.div`
-  width: 60px;
-  height: 60px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, ${props => props.theme.primary}25 0%, ${props => props.theme.primary}10 100%);
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, ${props => props.theme.primary || '#f97316'}22, ${props => props.theme.accent || '#06b6d4'}22);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
-  transition: all 0.3s ease;
-
-  ${FeatureCard}:hover & {
-    background: linear-gradient(135deg, ${props => props.theme.primary}35 0%, ${props => props.theme.primary}20 100%);
-    transform: scale(1.1) rotate(5deg);
-  }
+  margin-bottom: 18px;
 `;
 
 const FeatureTitle = styled.h3`
   font-size: 18px;
-  font-weight: 700;
-  color: ${props => props.theme.text};
+  font-weight: 800;
+  color: ${props => props.theme.text || '#111827'};
   margin-bottom: 8px;
 `;
 
 const FeatureDescription = styled.p`
   font-size: 14px;
-  color: ${props => props.theme.textSecondary};
-  line-height: 1.5;
+  color: ${props => props.theme.textSecondary || '#64748b'};
+  line-height: 1.6;
 `;
 
 const ServicesGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  @media (min-width: 1024px) {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
   }
 `;
 
 const ServiceCard = styled.div`
-  background: linear-gradient(135deg, ${props => props.theme.card} 0%, ${props => props.theme.card}dd 100%);
+  background: ${props => props.theme.card || '#ffffff'};
   padding: 24px;
-  border-radius: 16px;
-  border: 2px solid ${props => props.theme.border || '#e2e8f0'};
+  border-radius: 8px;
+  border: 1px solid ${props => props.theme.border || '#e5e7eb'};
   display: flex;
   align-items: center;
   gap: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: -100px;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(255,255,255,0.1), transparent);
-    transition: right 0.3s ease;
-  }
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  box-shadow: 0 16px 42px rgba(15, 23, 42, 0.07);
 
   &:hover {
-    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
-    border-color: #cbd5e1;
     transform: translateY(-4px);
-
-    &::before {
-      right: 0;
-    }
+    border-color: ${props => props.theme.primary || '#f97316'};
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
   }
 `;
 
 const ServiceIcon = styled.div`
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, ${props => props.bg} 0%, ${props => props.bg}dd 100%);
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  background: ${props => props.bg};
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 15px ${props => props.bg}40;
-  transition: all 0.3s ease;
-
-  ${ServiceCard}:hover & {
-    transform: scale(1.15) rotate(-5deg);
-    box-shadow: 0 8px 25px ${props => props.bg}60;
-  }
+  box-shadow: 0 14px 28px ${props => props.bg}38;
 `;
 
 const ServiceContent = styled.div`
@@ -686,54 +625,53 @@ const ServiceContent = styled.div`
 
 const ServiceTitle = styled.h3`
   font-size: 18px;
-  font-weight: 600;
-  color: ${props => props.theme.text};
+  font-weight: 800;
+  color: ${props => props.theme.text || '#111827'};
   margin-bottom: 4px;
 `;
 
 const ServiceDescription = styled.p`
   font-size: 14px;
-  color: ${props => props.theme.textSecondary};
+  color: ${props => props.theme.textSecondary || '#64748b'};
+  line-height: 1.45;
 `;
 
 const DestinationsScroll = styled.div`
-  display: flex;
-  overflow-x: auto;
-  gap: 20px;
-  padding-bottom: 20px; /* Space for scrollbar or shadow */
-  scrollbar-width: thin;
-  
-  &::-webkit-scrollbar {
-    height: 8px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+
+  @media (max-width: 1050px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  &::-webkit-scrollbar-thumb {
-    background-color: #cbd5e1;
-    border-radius: 4px;
+
+  @media (max-width: 620px) {
+    grid-template-columns: 1fr;
   }
 `;
 
 const DestinationCard = styled.div`
-  min-width: 280px;
-  width: 280px;
-  border-radius: 16px;
+  min-width: 0;
+  border-radius: 8px;
   overflow: hidden;
-  background-color: #fff;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  background: ${props => props.theme?.card || '#ffffff'};
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.1);
   cursor: pointer;
-  flex-shrink: 0;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   position: relative;
-  
+  border: 1px solid rgba(148, 163, 184, 0.18);
+
   &:hover {
-    transform: translateY(-12px) scale(1.02);
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    transform: translateY(-8px);
+    box-shadow: 0 28px 68px rgba(15, 23, 42, 0.16);
   }
 `;
 
 const DestinationImage = styled.img`
   width: 100%;
-  height: 200px;
+  height: 230px;
   object-fit: cover;
+  display: block;
 `;
 
 const DestinationOverlay = styled.div`
@@ -743,18 +681,19 @@ const DestinationOverlay = styled.div`
 
 const PriceTag = styled.div`
   position: absolute;
-  top: -190px;
+  top: -216px;
   right: 12px;
-  background-color: #1e40af;
-  padding: 6px 12px;
-  border-radius: 20px;
+  background: rgba(17, 24, 39, 0.82);
+  padding: 7px 11px;
+  border-radius: 999px;
   z-index: 10;
+  backdrop-filter: blur(12px);
 `;
 
 const PriceText = styled.span`
   color: #fff;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 800;
 `;
 
 const DestinationContent = styled.div`
@@ -769,134 +708,95 @@ const DestinationNameContainer = styled.div`
 `;
 
 const DestinationName = styled.h3`
-  font-size: 18px;
-  font-weight: 600;
-  color: #1e293b;
+  font-size: 17px;
+  font-weight: 800;
+  color: #111827;
 `;
 
 const DestinationDescription = styled.p`
   font-size: 14px;
   color: #64748b;
-  line-height: 1.4;
+  line-height: 1.45;
 `;
 
 const CtaSection = styled.div`
-  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
-  margin: 24px 16px 40px;
-  padding: 24px 16px;
-  border-radius: 20px;
+  background:
+    linear-gradient(135deg, rgba(15, 23, 42, 0.94), rgba(49, 46, 129, 0.92)),
+    url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1600') center/cover;
+  margin: 34px auto 64px;
+  padding: 46px 28px;
+  border-radius: 8px;
   text-align: center;
-  max-width: 1000px;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 1120px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 15px 40px rgba(30, 64, 175, 0.3);
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(255,255,255,0.1), transparent);
-    border-radius: 50%;
-  }
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.22);
 
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -50%;
-    left: -50%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.1), transparent);
-    border-radius: 50%;
-  }
-  
-  @media (min-width: 640px) {
-    margin: 32px 20px 50px;
-    padding: 32px 24px;
-  }
-  
-  @media (min-width: 1024px) {
-    margin: 40px auto 60px;
-    padding: 40px;
+  @media (max-width: 640px) {
+    margin: 24px 18px 48px;
+    padding: 34px 20px;
   }
 `;
 
 const CtaTitle = styled.h2`
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 34px;
+  line-height: 1.15;
+  font-weight: 800;
   color: #fff;
   margin-bottom: 10px;
-  
-  @media (min-width: 640px) {
-    font-size: 24px;
-    margin-bottom: 12px;
-  }
-  
-  @media (min-width: 1024px) {
-    font-size: 28px;
+
+  @media (max-width: 640px) {
+    font-size: 26px;
   }
 `;
 
 const CtaSubtitle = styled.p`
   font-size: 16px;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 24px;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0 auto 24px;
+  max-width: 620px;
 `;
 
 const CtaButtons = styled.div`
   display: flex;
-  flex-direction: column;
   gap: 12px;
   justify-content: center;
-  align-items: stretch;
-  
-  @media (min-width: 640px) {
-    flex-direction: row;
-    align-items: center;
-    gap: 16px;
-  }
+  align-items: center;
+  flex-wrap: wrap;
 `;
 
 const CtaButton = styled.button`
-  background-color: #fff;
-  color: #1e40af;
-  padding: 14px 32px;
-  border-radius: 12px;
-  font-weight: 700;
+  background: #ffffff;
+  color: #111827;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 8px;
+  font-weight: 800;
   border: none;
   cursor: pointer;
-  font-size: 16px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255,255,255,0.3);
-  letter-spacing: 0.3px;
+  font-size: 15px;
+  transition: transform 0.2s ease, background 0.2s ease;
 
   &:hover {
-    background-color: #f1f5f9;
+    background: #f8fafc;
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255,255,255,0.4);
   }
 `;
 
 const CtaButtonSecondary = styled.button`
   background-color: transparent;
   color: #fff;
-  padding: 14px 32px;
-  border-radius: 12px;
-  font-weight: 700;
-  border: 2px solid #fff;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 8px;
+  font-weight: 800;
+  border: 1px solid rgba(255, 255, 255, 0.44);
   cursor: pointer;
-  font-size: 16px;
-  transition: all 0.3s ease;
-  letter-spacing: 0.3px;
+  font-size: 15px;
+  transition: transform 0.2s ease, background 0.2s ease;
 
   &:hover {
-    background-color: rgba(255,255,255,0.15);
+    background-color: rgba(255,255,255,0.14);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
   }
 `;
