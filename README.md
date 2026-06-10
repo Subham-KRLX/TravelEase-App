@@ -7,8 +7,7 @@
 [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://subham-travel.vercel.app)
 
 **TravelEase** is a premium, full-stack travel booking platform designed to provide a seamless experience for finding flights, luxury hotels, and curated vacation packages. Built with a modern aesthetic and robust performance in mind.
----
-
+--
 ## 📸 Project Gallery
 
 ### 🏠 Immersive Landing Page
