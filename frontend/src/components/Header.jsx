@@ -4,7 +4,6 @@ import { IoAirplane, IoSunny, IoMoon, IoCart, IoPerson, IoLogOutOutline } from '
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
-
 export default function Header() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
