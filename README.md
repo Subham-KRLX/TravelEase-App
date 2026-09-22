@@ -90,6 +90,12 @@ TravelEase-App/
 
 ## 🛠️ Getting Started
 
+### Prerequisites
+
+- Node.js 20 or newer
+- npm
+- A MongoDB connection string
+
 ### 1. Clone & Prep
 ```bash
 git clone https://github.com/Subham-KRLX/TravelEase-App.git
