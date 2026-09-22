@@ -112,11 +112,17 @@ Create `.env` files in both `backend` and `frontend` directories using `.env.exa
 ```bash
 # Install all dependencies (Monorepo helper)
 npm run install:all
+```
 
-# Run Backend
+Start the backend in one terminal:
+
+```bash
 cd backend && npm run dev
+```
 
-# Run Frontend
+Start the frontend from the project root in a second terminal:
+
+```bash
 cd frontend && npm run dev
 ```
 
