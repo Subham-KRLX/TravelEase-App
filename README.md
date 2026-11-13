@@ -1,4 +1,4 @@
-# 🌍 TravelEase - Your Ultimate Travel Companion ✈️
+# 🌍 TravelEase - Your Ultimate Travel Companion 
 
 [![React](https://img.shields.io/badge/React-19.x-blue.svg)](https://react.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-20.x-green.svg)](https://nodejs.org/)
